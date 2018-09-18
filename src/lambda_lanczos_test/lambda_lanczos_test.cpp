@@ -13,10 +13,10 @@ using vector = std::vector<T>;
 
 void test1() {
   const int n = 3;
-  double matrix[n][n] = { {-2.0, -1.0, -1.0},
-                          {-1.0, -2.0, -1.0},
-			  {-1.0, -1.0, -2.0} };
-  /* Its eigenvalues are {-4, -1, -1} */  
+  double matrix[n][n] = { {2.0, 1.0, 1.0},
+                          {1.0, 2.0, 1.0},
+			  {1.0, 1.0, 2.0} };
+  /* Its eigenvalues are {4, 1, 1} */
 
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(int i = 0;i < n;i++) {
@@ -26,7 +26,7 @@ void test1() {
     } 
   };
 
-  LambdaLanczos engine(matmul, n);
+  LambdaLanczos engine(matmul, n, true);
   double eigvalue;
   vector<double> eigvec(n);
   int itern  = engine.run(eigvalue, eigvec);
@@ -78,7 +78,7 @@ void test2() {
   engine.eps = 1e-14;
   double eigvalue;
   vector<double> eigvec(n);
-  int itern  = engine.run(eigvalue, eigvec);  
+  int itern = engine.run(eigvalue, eigvec);  
   eigvalue -= offset;
 
   cout << "Iteration count: " << itern << endl;

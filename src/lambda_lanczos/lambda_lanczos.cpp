@@ -19,11 +19,12 @@ using std::begin;
 using std::end;
 using namespace lambda_lanczos_util;
 
-LambdaLanczos::LambdaLanczos(std::function<void(const std::vector<double>&,
-						std::vector<double>&)> matmul, int matsize) {
+LambdaLanczos::LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> matmul,
+			     int matsize, bool find_maximum) {
   this->matmul = matmul;
   this->matsize = matsize;
   this->max_iteration = matsize;
+  this->find_maximum = find_maximum;
 }
 
 int LambdaLanczos::run(double& eigvalue, vector<double>& eigvec) {
@@ -72,7 +73,11 @@ int LambdaLanczos::run(double& eigvalue, vector<double>& eigvec) {
     betak = norm(uk);
     beta.push_back(betak);
 
-    ev = compute_eigenvalue(alpha, beta);
+    if(this->find_maximum) {
+      ev = find_maximum_eigenvalue(alpha, beta);
+    } else {
+      ev = find_minimum_eigenvalue(alpha, beta);
+    }
 
     const double zero_threshold = 1e-16;
     if(betak < zero_threshold) {
@@ -145,34 +150,68 @@ void LambdaLanczos::schmidt_orth(vector<double>& uorth, const vector<vector<doub
   }
 }
 
-double LambdaLanczos::compute_eigenvalue(const vector<double>& alpha,
-			  const vector<double>& beta) {
-  double r = tridiagonal_eigen_limit(alpha, beta);
+double LambdaLanczos::find_minimum_eigenvalue(const vector<double>& alpha,
+					      const vector<double>& beta) {
   double eps = this->eps * this->tridiag_eps_ratio;
-
-  double a,b,mid;
-  double bmid = std::numeric_limits<double>::max();
-  a = -r;
-  b = r;
-
-  int nmid;
-  while(b-a > std::min(abs(a), abs(b))*eps) {
-    mid = (a+b)/2.0;
+  double pmid = std::numeric_limits<double>::max();
+  double r = tridiagonal_eigen_limit(alpha, beta);
+  double lower = -r;
+  double upper = r;
+  double mid;
+  int nmid; // Number of eigenvalues smaller than the "mid"
+  
+  while(upper-lower > std::min(abs(lower), abs(upper))*eps) {
+    mid = (lower+upper)/2.0;
     nmid = num_of_eigs_smaller_than(mid, alpha, beta);
-    if(nmid >= 1){
-      b = mid;
-    }else{
-      a = mid;
+    if(nmid >= 1) {
+      upper = mid;
+    } else {
+      lower = mid;
     }
-    if(mid == bmid) {
+    
+    if(mid == pmid) {
       /* This avoids an infinite loop due to zero matrix */
       break;
     }
-    bmid = mid;
+    pmid = mid;
   }
 
-  return a;
+  return lower; // The "lower" almost equals the "upper" here.
 }
+
+double LambdaLanczos::find_maximum_eigenvalue(const vector<double>& alpha,
+					      const vector<double>& beta) {
+  double eps = this->eps * this->tridiag_eps_ratio;
+  double pmid = std::numeric_limits<double>::max();
+  double r = tridiagonal_eigen_limit(alpha, beta);
+  double lower = -r;
+  double upper = r;
+  double mid;
+  int nmid; // Number of eigenvalues smaller than the "mid"
+
+  int m = alpha.size() - 1;  /* Number of eigenvalues of the approximated triangular matrix,
+				which equals the rank of it */
+  
+  
+  while(upper-lower > std::min(abs(lower), abs(upper))*eps) {
+    mid = (lower+upper)/2.0;
+    nmid = num_of_eigs_smaller_than(mid, alpha, beta);
+    
+    if(nmid < m) {
+      lower = mid;
+    } else {
+      upper = mid;
+    }
+    
+    if(mid == pmid) {
+      /* This avoids an infinite loop due to zero matrix */
+      break;
+    }
+    pmid = mid;
+  }
+
+  return lower; // The "lower" almost equals the "upper" here.
+}  
 
 
 /* Compute the eigenvalue limit by Gerschgorin theorem */
@@ -187,7 +226,8 @@ double LambdaLanczos::tridiagonal_eigen_limit(const vector<double>& alpha,
 
 /*
  Algorithm from
- Peter Arbenz et al., "High Performance Algorithms for Structured Matrix Problems"
+ Peter Arbenz et al. / "High Performance Algorithms for Structured Matrix Problems" /
+ Nova Science Publishers, Inc.
  */
 int LambdaLanczos::num_of_eigs_smaller_than(double c,
 			     const vector<double>& alpha,
@@ -202,7 +242,7 @@ int LambdaLanczos::num_of_eigs_smaller_than(double c,
       count++;
     }
     if(q_i == 0){
-      q_i = 1e-12;
+      q_i = 1e-14;
     }
   }
 
