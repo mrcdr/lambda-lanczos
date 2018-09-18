@@ -4,6 +4,7 @@
 #include <iostream>
 #include <random>
 #include <functional>
+#include <cassert>
 #include "lambda_lanczos.hpp"
 #include "lambda_lanczos_util.hpp"
 
@@ -18,20 +19,25 @@ using std::begin;
 using std::end;
 using namespace lambda_lanczos_util;
 
-double lanczos(std::function<void(double*, double*)> matmul,
-		   int n, double eps, double* result_vector, int& itern) {
-  const size_t INITIAL_ARRAY_SIZE = 200;
-  const int MAX_COUNT = 1000;
-  const double EPS = 1e-10;
-  const double TRIDIAG_RATIO = 1e-2;
+LambdaLanczos::LambdaLanczos(std::function<void(const std::vector<double>&,
+						std::vector<double>&)> matmul, int matsize) {
+  this->matmul = matmul;
+  this->matsize = matsize;
+  this->max_iteration = matsize;
+}
+
+int LambdaLanczos::run(double& eigvalue, vector<double>& eigvec) {
+  assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
   
   vector<vector<double>> u; // Lanczos vectors
   vector<double> alpha; // Diagonal elements of an approximated tridiagonal matrix
   vector<double> beta;  // Subdiagonal elements of an approximated tridiagonal matrix
 
-  u.reserve(INITIAL_ARRAY_SIZE);
-  alpha.reserve(INITIAL_ARRAY_SIZE);
-  beta.reserve(INITIAL_ARRAY_SIZE);
+  const int n = this->matsize;
+
+  u.reserve(this->initial_vector_size);
+  alpha.reserve(this->initial_vector_size);
+  beta.reserve(this->initial_vector_size);
 
   u.emplace_back(n, 0.0); // Same as u.push_back(vector<double>(n, 0.0))
   
@@ -49,10 +55,10 @@ double lanczos(std::function<void(double*, double*)> matmul,
   double ev, pev; // Calculated eigen value and previous one
   pev = std::numeric_limits<double>::max();
 
-  itern = MAX_COUNT;
-  for(int k = 1;k < MAX_COUNT;k++) {
+  int itern = this->max_iteration;
+  for(int k = 1;k <= this->max_iteration;k++) {
     fill(vk.begin(), vk.end(), 0.0);
-    matmul(u.back().data(), vk.data());
+    this->matmul(u.back(), vk);
     alphak = std::inner_product(begin(u.back()), end(u.back()),
 				begin(vk), 0.0);
     alpha.push_back(alphak);
@@ -66,9 +72,10 @@ double lanczos(std::function<void(double*, double*)> matmul,
     betak = norm(uk);
     beta.push_back(betak);
 
-    ev = compute_eigenvalue(alpha, beta, eps*TRIDIAG_RATIO);
-    
-    if(betak < 1e-16) {
+    ev = compute_eigenvalue(alpha, beta);
+
+    const double zero_threshold = 1e-16;
+    if(betak < zero_threshold) {
       u.push_back(uk);
       /* This element will never be accessed,
 	 but this "push" guarantees u to always have one more element than 
@@ -80,13 +87,15 @@ double lanczos(std::function<void(double*, double*)> matmul,
     normalize(uk);
     u.push_back(uk);
 
-    if(abs(ev-pev) < std::min(abs(ev), abs(pev))*EPS) {
+    if(abs(ev-pev) < std::min(abs(ev), abs(pev))*this->eps) {
       itern = k;
       break;
     } else {
       pev = ev;
     }
   }
+
+  eigvalue = ev;
 
   int m = alpha.size();
   vector<double> cv(m+1);
@@ -96,7 +105,9 @@ double lanczos(std::function<void(double*, double*)> matmul,
   
   beta[m-1] = 0.0;
 
-  vector<double> eigvec(n);
+  if(eigvec.size() < n) {
+    eigvec.resize(n);
+  }
   
   for(int i = 0;i < n;i++) {
     eigvec[i] = cv[m-1]*u[m-1][i];
@@ -113,13 +124,13 @@ double lanczos(std::function<void(double*, double*)> matmul,
   // Normalize the eigenvector
   double nrm2 = norm(eigvec);
   for(int i = 0;i < n;i++) {
-    result_vector[i] = eigvec[i]/nrm2;
+    eigvec[i] = eigvec[i]/nrm2;
   }
 
-  return ev;
+  return itern;
 }
 
-void schmidt_orth(vector<double>& uorth, const vector<vector<double>>& u) {
+void LambdaLanczos::schmidt_orth(vector<double>& uorth, const vector<vector<double>>& u) {
   /* Vectors in u must be normalized, but uorth doesn't have to be. */
   
   int n = uorth.size();
@@ -134,10 +145,10 @@ void schmidt_orth(vector<double>& uorth, const vector<vector<double>>& u) {
   }
 }
 
-double compute_eigenvalue(const vector<double>& alpha,
-			  const vector<double>& beta,
-			  double eps) {
+double LambdaLanczos::compute_eigenvalue(const vector<double>& alpha,
+			  const vector<double>& beta) {
   double r = tridiagonal_eigen_limit(alpha, beta);
+  double eps = this->eps * this->tridiag_eps_ratio;
 
   double a,b,mid;
   double bmid = std::numeric_limits<double>::max();
@@ -165,7 +176,7 @@ double compute_eigenvalue(const vector<double>& alpha,
 
 
 /* Compute the eigenvalue limit by Gerschgorin theorem */
-double tridiagonal_eigen_limit(const vector<double>& alpha,
+double LambdaLanczos::tridiagonal_eigen_limit(const vector<double>& alpha,
 			       const vector<double>& beta) {
   double r2 = std::inner_product(begin(alpha), end(alpha), begin(alpha), 0.0);
   r2 += 2*std::inner_product(begin(beta), end(beta), begin(beta), 0.0);
@@ -178,7 +189,7 @@ double tridiagonal_eigen_limit(const vector<double>& alpha,
  Algorithm from
  Peter Arbenz et al., "High Performance Algorithms for Structured Matrix Problems"
  */
-int num_of_eigs_smaller_than(double c,
+int LambdaLanczos::num_of_eigs_smaller_than(double c,
 			     const vector<double>& alpha,
 			     const vector<double>& beta) {
   double q_i = 1.0;
@@ -207,14 +218,14 @@ void mul_compressed_mat(double* ca, int* ci, int* cj,
   }
   for(int index = 0;index < ca_size;index++) {
     vk[ci[index]] += ca[index]*uk[cj[index]];
-    if(ci[index] != cj[index]){
+    if(ci[index] != cj[index]) {
       // Multiply corresponding upper triangular element
       vk[cj[index]] += ca[index]*uk[ci[index]];
     }
   }
 }
 
-void init_random(vector<double>& v) {
+void LambdaLanczos::init_random(vector<double>& v) {
   std::random_device dev;
   std::mt19937 mt(dev());
   std::uniform_real_distribution<> rand(-1.0, 1.0);
