@@ -8,8 +8,8 @@ namespace lambda_lanczos {
 
 class LambdaLanczos {
 public:
-  LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> matmul, int matsize, bool find_maximum);
-  LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> matmul, int matsize) : LambdaLanczos(matmul, matsize, false) {}
+  LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul, int matsize, bool find_maximum);
+  LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul, int matsize) : LambdaLanczos(mv_mul, matsize, false) {}
   
   int matsize;
   int max_iteration;
@@ -18,7 +18,7 @@ public:
   int initial_vector_size = 200;
   bool find_maximum = false;
 
-  std::function<void(const std::vector<double>&, std::vector<double>&)> matmul;
+  std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul;
   std::function<void(std::vector<double>&)> init_vector = init_random;
 
   int run(double&, std::vector<double>&);

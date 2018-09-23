@@ -19,9 +19,9 @@ using std::begin;
 using std::end;
 using namespace lambda_lanczos_util;
 
-LambdaLanczos::LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> matmul,
+LambdaLanczos::LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul,
 			     int matsize, bool find_maximum) {
-  this->matmul = matmul;
+  this->mv_mul = mv_mul;
   this->matsize = matsize;
   this->max_iteration = matsize;
   this->find_maximum = find_maximum;
@@ -59,7 +59,7 @@ int LambdaLanczos::run(double& eigvalue, vector<double>& eigvec) {
   int itern = this->max_iteration;
   for(int k = 1;k <= this->max_iteration;k++) {
     fill(vk.begin(), vk.end(), 0.0);
-    this->matmul(u.back(), vk);
+    this->mv_mul(u.back(), vk);
     alphak = std::inner_product(begin(u.back()), end(u.back()),
 				begin(vk), 0.0);
     alpha.push_back(alphak);
