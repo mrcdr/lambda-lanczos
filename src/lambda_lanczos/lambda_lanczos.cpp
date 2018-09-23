@@ -5,7 +5,7 @@
 #include <random>
 #include <functional>
 #include <cassert>
-#include "lambda_lanczos.hpp"
+#include <lambda_lanczos/lambda_lanczos.hpp>
 #include "lambda_lanczos_util.hpp"
 
 namespace lambda_lanczos {
