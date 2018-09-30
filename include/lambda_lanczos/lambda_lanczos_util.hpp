@@ -12,9 +12,9 @@ using std::begin;
 using std::end;
 }
 
-double norm(const std::vector<double>&);
-void scalar_mul(double, std::vector<double>&);
-void normalize(std::vector<double>&);
+double norm(const vector<double>&);
+void scalar_mul(double, vector<double>&);
+void normalize(vector<double>&);
 
 
 /* Implementation */

@@ -26,8 +26,8 @@ using namespace lambda_lanczos_util;
 
 class LambdaLanczos {
 public:
-  LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul, int matsize, bool find_maximum);
-  LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul, int matsize) : LambdaLanczos(mv_mul, matsize, false) {}
+  LambdaLanczos(std::function<void(const vector<double>&, vector<double>&)> mv_mul, int matsize, bool find_maximum);
+  LambdaLanczos(std::function<void(const vector<double>&, vector<double>&)> mv_mul, int matsize) : LambdaLanczos(mv_mul, matsize, false) {}
   
   int matsize;
   int max_iteration;
@@ -36,24 +36,24 @@ public:
   int initial_vector_size = 200;
   bool find_maximum = false;
 
-  std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul;
-  std::function<void(std::vector<double>&)> init_vector = init_random;
+  std::function<void(const vector<double>&, vector<double>&)> mv_mul;
+  std::function<void(vector<double>&)> init_vector = init_random;
 
-  int run(double&, std::vector<double>&);
+  int run(double&, vector<double>&);
 
 private:  
-  static void schmidt_orth(std::vector<double>&, const std::vector<std::vector<double>>&);
-  double find_minimum_eigenvalue(const std::vector<double>&,
-				 const std::vector<double>&);
-  double find_maximum_eigenvalue(const std::vector<double>&,
-				 const std::vector<double>&);
-  static double tridiagonal_eigen_limit(const std::vector<double>&,
-				 const std::vector<double>&);
+  static void schmidt_orth(vector<double>&, const vector<vector<double>>&);
+  double find_minimum_eigenvalue(const vector<double>&,
+				 const vector<double>&);
+  double find_maximum_eigenvalue(const vector<double>&,
+				 const vector<double>&);
+  static double tridiagonal_eigen_limit(const vector<double>&,
+				 const vector<double>&);
   static int num_of_eigs_smaller_than(double,
-			     const std::vector<double>&,
-			     const std::vector<double>&);
+			     const vector<double>&,
+			     const vector<double>&);
 
-  static void init_random(std::vector<double>&);
+  static void init_random(vector<double>&);
 };
 
 void mul_compressed_mat(double*, int*, int*, int, int, double*, double*);
@@ -61,7 +61,7 @@ void mul_compressed_mat(double*, int*, int*, int, int, double*, double*);
 
 
 /* Implementation */
-LambdaLanczos::LambdaLanczos(std::function<void(const std::vector<double>&, std::vector<double>&)> mv_mul,
+LambdaLanczos::LambdaLanczos(std::function<void(const vector<double>&, vector<double>&)> mv_mul,
 			     int matsize, bool find_maximum) {
   this->mv_mul = mv_mul;
   this->matsize = matsize;
