@@ -60,6 +60,16 @@ For detailed specs, see *Details*
 
 C++11 compatible environment
 
+
+## Installation
+
+**Lambda Lanczos** is a header-only library.
+So the installation step is as follows:
+
+1. Clone or download the latest version from [Github](https://github.com/mrcdr/lambda-lanczos/).
+2. Place the `include` directory anywhere your project can find.
+
+
 ## Details
 ### Constructors
 1. `LambdaLanczos(function<void(const vector<double>&, vector<double>&)> mv_mul, int matrix_size)`
@@ -80,6 +90,11 @@ is the convergence threshold of Lanczos iteration.
 
 - **Default value** : 1e-12
 
+#### `std::function<void(vector<double>&)> init_vector`
+is the function used to initialize the first Lanczos vector.
+
+- **Default value** : a function to initialize a vector randomly in the range of [-1, 1].
+
 #### (Not necessary to change) `double tridiag_eps_ratio`
 controls the the convergence threshold of the "bisection routine" in
 Lanczos algorithm, 
@@ -88,17 +103,10 @@ which finds the eigenvalue of an approximated tridiagonal matrix.
 - **Default value** : 1e-1
 
 #### (Not necessary to change)  `int initial_vector_size`
-controls initial size of Lanczos vectors.
+controls the initial size of Lanczos vectors.
 
 - **Default value** : 200
 
-## Installation
-
-**Lambda Lanczos** is a header-only library.
-So the installation step is as follows:
-
-1. Clone or download the latest version from [Github](https://github.com/mrcdr/lambda-lanczos/).
-2. Place the `include` directory anywhere your project can find.
 
 ## Author
 

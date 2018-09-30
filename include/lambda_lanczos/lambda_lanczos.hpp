@@ -92,7 +92,7 @@ int LambdaLanczos::run(double& eigvalue, vector<double>& eigvec) {
   beta.push_back(betak);
   
   vector<double> uk(n);
-  init_random(uk);
+  this->init_vector(uk);
   u.push_back(uk);
 
   double ev, pev; // Calculated eigen value and previous one
