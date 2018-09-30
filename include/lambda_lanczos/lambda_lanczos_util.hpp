@@ -1,15 +1,23 @@
+#ifndef LAMBDA_LANCZOS_UTIL_H_
+#define LAMBDA_LANCZOS_UTIL_H_
+
 #include <vector>
-#include <numeric>
-#include <cmath>
-#include "lambda_lanczos_util.hpp"
 
 namespace lambda_lanczos_util {
-
+namespace {
 template<typename T>
 using vector = std::vector<T>;
 
 using std::begin;
 using std::end;
+}
+
+double norm(const std::vector<double>&);
+void scalar_mul(double, std::vector<double>&);
+void normalize(std::vector<double>&);
+
+
+/* Implementation */
 
 double norm(const vector<double>& vec) {
   return std::sqrt(std::inner_product(begin(vec), end(vec), begin(vec), 0.0));
@@ -27,3 +35,5 @@ void normalize(vector<double>& vec) {
 }
 
 } /* namespace lambda_lanczos_util */
+
+#endif /* LAMBDA_LANCZOS_UTIL_H_ */
