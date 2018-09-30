@@ -52,7 +52,7 @@ void sample1() {
 This feature allows to use a matrix whose elements are partially given,
 e.g. a sparse matrix whose non-zero elements are stored
 as a list of {row-index, column-index, value} tuples.
-For detailed specs, see *Details*
+For detailed specs, see [Details](https://github.com/mrcdr/lambda-lanczos#details)
 
 ## Requirement
 
