@@ -6,6 +6,7 @@ Adaptive Lanczos algorithm library
 
 **Lambda Lanczos** calculates the smallest or largest eigenvalue and
 corresponding eigenvector of a matrix.
+
 The characteristic feature is the matrix-vector multiplication routine used in
 Lanczos algorithm is adaptive:
 
@@ -48,9 +49,48 @@ void sample1() {
 
 ```
 
+This feature allows to use a matrix whose elements are partially given,
+
+e.g. a sparse matrix whose non-zero elements are stored
+as a list of {row-index, column-index, value} tuples.
+
+For detailed specs, see *Details*
+
 ## Requirement
 
 C++11 compatible environment
+
+## Details
+### Constructors
+1. `LambdaLanczos(function<void(const vector<double>&, vector<double>&)> mv_mul, int matrix_size)`
+2. `LambdaLanczos(function<void(const vector<double>&, vector<double>&)> mv_mul, int matrix_size, bool find_maximum)`
+
+The first one is equivalent to `LambdaLanczos(mv_mul, matrix_size, false)`, means to calculate the smallest eigenvalue.
+
+### Member variables of LambdaLanzcos
+#### `int max_iteration`
+controls the limit of Lanczos iteration count.
+
+- **Default value** : matrix_size
+
+#### `double eps`
+is the convergence threshold of Lanczos iteration.
+"`eps` = 1e-12" means the eigenvalue will be calculated with
+12 digits of precision.
+
+- **Default value** : 1e-12
+
+#### (Not necessary to change) `double tridiag_eps_ratio`
+controls the the convergence threshold of the "bisection routine" in
+Lanczos algorithm, 
+which finds the eigenvalue of an approximated tridiagonal matrix.
+
+- **Default value** : 1e-1
+
+#### (Not necessary to change)  `int initial_vector_size`
+controls initial size of Lanczos vectors.
+
+- **Default value** : 200
 
 ## Installation
 
@@ -59,8 +99,6 @@ So the installation step is as follows:
 
 1. Clone or download the latest version from [Github](https://github.com/mrcdr/lambda-lanczos/).
 2. Place the `include` directory anywhere your project can find.
-
-## Options
 
 ## Author
 
