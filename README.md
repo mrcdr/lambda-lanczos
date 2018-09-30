@@ -8,7 +8,7 @@ Adaptive Lanczos algorithm library
 corresponding eigenvector of a matrix.
 
 The characteristic feature is the matrix-vector multiplication routine used in
-Lanczos algorithm is adaptive:
+the Lanczos algorithm is adaptive:
 
 ```c++
 #include <lambda_lanczos/lambda_lanczos.hpp>
@@ -50,10 +50,8 @@ void sample1() {
 ```
 
 This feature allows to use a matrix whose elements are partially given,
-
 e.g. a sparse matrix whose non-zero elements are stored
 as a list of {row-index, column-index, value} tuples.
-
 For detailed specs, see *Details*
 
 ## Requirement
@@ -97,7 +95,7 @@ is the function used to initialize the first Lanczos vector.
 
 #### (Not necessary to change) `double tridiag_eps_ratio`
 controls the the convergence threshold of the "bisection routine" in
-Lanczos algorithm, 
+the Lanczos algorithm, 
 which finds the eigenvalue of an approximated tridiagonal matrix.
 
 - **Default value** : 1e-1
