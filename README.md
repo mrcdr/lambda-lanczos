@@ -105,6 +105,9 @@ controls the initial size of Lanczos vectors.
 
 - **Default value** : 200
 
+## Licence
+
+[MIT](https://github.com/mrcdr/lambda-lanczos/blob/master/LICENSE)
 
 ## Author
 
