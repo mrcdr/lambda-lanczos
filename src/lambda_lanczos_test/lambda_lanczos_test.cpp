@@ -26,7 +26,7 @@ void test1() {
     } 
   };
 
-  LambdaLanczos engine(matmul, n, true);
+  LambdaLanczos<double> engine(matmul, n, true);
   double eigvalue;
   vector<double> eigvec(n);
   int itern  = engine.run(eigvalue, eigvec);
@@ -74,7 +74,7 @@ void test2() {
       the smallest eigenvalue maximum.
    */
 
-  LambdaLanczos engine(matmul, n);
+  LambdaLanczos<double> engine(matmul, n);
   engine.eps = 1e-14;
   double eigvalue;
   vector<double> eigvec(n);
