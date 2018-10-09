@@ -11,6 +11,19 @@ using lambda_lanczos::LambdaLanczos;
 template<typename T>
 using vector = std::vector<T>;
 
+template<typename T>
+using complex = std::complex<T>;
+
+void sig_digit_test() {
+  cout << "-- Significant decimal digit test --" << endl;
+  cout << "float " << lambda_lanczos_util::sig_decimal_digit<float>() << " "
+       << lambda_lanczos_util::minimum_effective_decimal<float>() << endl;
+  cout << "double " << lambda_lanczos_util::sig_decimal_digit<double>() << " "
+       << lambda_lanczos_util::minimum_effective_decimal<double>() << endl;
+  cout << "long double " << lambda_lanczos_util::sig_decimal_digit<long double>() << " "
+       << lambda_lanczos_util::minimum_effective_decimal<long double>() << endl;
+}
+
 void test1() {
   const int n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},
@@ -90,7 +103,37 @@ void test2() {
   cout << endl;
 }
 
+// void test3() {
+//   const int n = 3;
+//   complex<double> matrix[n][n] = { {2.0, 1.0, 1.0},
+// 				   {1.0, 2.0, 1.0},
+// 				   {1.0, 1.0, 2.0} };
+//   /* Its eigenvalues are {4, 1, 1} */
+
+//   auto matmul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
+//     for(int i = 0;i < n;i++) {
+//       for(int j = 0;j < n;j++) {
+// 	out[i] += matrix[i][j]*in[j];
+//       }
+//     } 
+//   };
+
+//   LambdaLanczos<complex<double>> engine(matmul, n, true);
+//   double eigvalue;
+//   vector<complex<double>> eigvec(n);
+//   int itern  = engine.run(eigvalue, eigvec);
+
+//   cout << "Iteration count: " << itern << endl;
+//   cout << "Eigen value: " << setprecision(16) << eigvalue << endl;
+//   cout << "Eigen vector:";
+//   for(int i = 0;i < n;i++) {
+//     cout << eigvec[i] << " ";
+//   }
+//   cout << endl;
+// }
+
 int main() {
+  sig_digit_test();
   test1();
   test2();
 

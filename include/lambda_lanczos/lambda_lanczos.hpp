@@ -17,12 +17,33 @@ namespace {
 template<typename T>
 using vector = std::vector<T>;
 
+template<typename T>
+using complex = std::complex<T>;
+
 using std::fill;
 using std::abs;
 using std::begin;
 using std::end;
 using namespace lambda_lanczos_util;
 }
+
+
+
+/*
+ * "Partially specialization of function" is not allowed, 
+ * so here it is mimicked by wrapping the "init" function with a class template.
+ */
+template <typename T>
+struct VectorRandomInitializer {
+public:
+  static void init(vector<T>&);
+};
+
+template <typename T>
+struct VectorRandomInitializer<complex<T>> {
+public:
+  static void init(vector<complex<T>>&);
+};
 
 template <typename T>
 class LambdaLanczos {
@@ -32,15 +53,15 @@ public:
   
   int matsize;
   int max_iteration;
-  double eps = 1e-12;
-  double tridiag_eps_ratio = 1e-1;
+  real_t<T> eps = minimum_effective_decimal<real_t<T>>() * 1e3;
+  real_t<T> tridiag_eps_ratio = 1e-1;
   int initial_vector_size = 200;
   bool find_maximum = false;
 
   std::function<void(const vector<T>&, vector<T>&)> mv_mul;
-  std::function<void(vector<T>&)> init_vector = init_random<T>;
+  std::function<void(vector<T>&)> init_vector = VectorRandomInitializer<T>::init;
 
-  int run(double&, vector<T>&);
+  int run(real_t<T>&, vector<T>&);
 
 private:
   static void schmidt_orth(vector<T>&, const vector<vector<T>>&);
@@ -54,12 +75,11 @@ private:
 				      const vector<real_t<T>>&,
 				      const vector<real_t<T>>&);
 
-  template<typename vec_type>
-  static void init_random(vector<vec_type>&);
+  void init_random(vector<T>&);
 };
 
-void mul_compressed_mat(double*, int*, int*, int, int, double*, double*);
 
+void mul_compressed_mat(double*, int*, int*, int, int, double*, double*);
 
 
 /* Implementation */
@@ -74,12 +94,12 @@ LambdaLanczos<T>::LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)
 }
 
 template <typename T>
-int LambdaLanczos<T>::run(double& eigvalue, vector<T>& eigvec) {
+int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) {
   assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
   
   vector<vector<T>> u;  // Lanczos vectors
-  vector<double> alpha; // Diagonal elements of an approximated tridiagonal matrix
-  vector<double> beta;  // Subdiagonal elements of an approximated tridiagonal matrix
+  vector<real_t<T>> alpha; // Diagonal elements of an approximated tridiagonal matrix
+  vector<real_t<T>> beta;  // Subdiagonal elements of an approximated tridiagonal matrix
 
   const int n = this->matsize;
 
@@ -87,21 +107,21 @@ int LambdaLanczos<T>::run(double& eigvalue, vector<T>& eigvec) {
   alpha.reserve(this->initial_vector_size);
   beta.reserve(this->initial_vector_size);
 
-  u.emplace_back(n, 0.0); // Same as u.push_back(vector<double>(n, 0.0))
+  u.emplace_back(n, 0.0); // Same as u.push_back(vector<T>(n, 0.0))
   
   vector<T> vk(n, 0.0);
   
-  double alphak = 0.0;
+  real_t<T> alphak = 0.0;
   alpha.push_back(alphak);
-  double betak = 0.0;
+  real_t<T> betak = 0.0;
   beta.push_back(betak);
   
   vector<T> uk(n);
   this->init_vector(uk);
   u.push_back(uk);
 
-  double ev, pev; // Calculated eigen value and previous one
-  pev = std::numeric_limits<double>::max();
+  real_t<T> ev, pev; // Calculated eigen value and previous one
+  pev = std::numeric_limits<real_t<T>>::max();
 
   int itern = this->max_iteration;
   for(int k = 1;k <= this->max_iteration;k++) {
@@ -126,7 +146,7 @@ int LambdaLanczos<T>::run(double& eigvalue, vector<T>& eigvec) {
       ev = find_minimum_eigenvalue(alpha, beta);
     }
 
-    const double zero_threshold = 1e-16;
+    const real_t<T> zero_threshold = minimum_effective_decimal<real_t<T>>()*1e-1;
     if(betak < zero_threshold) {
       u.push_back(uk);
       /* This element will never be accessed,
@@ -150,7 +170,7 @@ int LambdaLanczos<T>::run(double& eigvalue, vector<T>& eigvec) {
   eigvalue = ev;
 
   int m = alpha.size();
-  vector<double> cv(m+1);
+  vector<T> cv(m+1);
   cv[0] = 0.0;
   cv[m] = 0.0;
   cv[m-1] = 1.0;
@@ -174,7 +194,7 @@ int LambdaLanczos<T>::run(double& eigvalue, vector<T>& eigvec) {
   }
 
   // Normalize the eigenvector
-  double nrm2 = norm(eigvec);
+  real_t<T> nrm2 = norm(eigvec);
   for(int i = 0;i < n;i++) {
     eigvec[i] = eigvec[i]/nrm2;
   }
@@ -189,8 +209,8 @@ void LambdaLanczos<T>::schmidt_orth(vector<T>& uorth, const vector<vector<T>>& u
   int n = uorth.size();
   
   for(int k = 0;k < u.size();k++) {
-    double innprod = inner_product(begin(uorth), end(uorth),
-				   begin(u[k]), T()); // T() means zero value of type T
+    T innprod = inner_product(begin(uorth), end(uorth),
+			      begin(u[k]), T()); // T() means zero value of type T
     
     for(int i = 0;i < n;i++) {
       uorth[i] -= innprod * u[k][i];
@@ -202,7 +222,7 @@ template <typename T>
 real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T>>& alpha,
 						    const vector<real_t<T>>& beta) {
   real_t<T> eps = this->eps * this->tridiag_eps_ratio;
-  real_t<T> pmid = std::numeric_limits<double>::max();
+  real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
   real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
   real_t<T> lower = -r;
   real_t<T> upper = r;
@@ -232,7 +252,7 @@ template <typename T>
 real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T>>& alpha,
 						    const vector<real_t<T>>& beta) {
   real_t<T> eps = this->eps * this->tridiag_eps_ratio;
-  real_t<T> pmid = std::numeric_limits<double>::max();
+  real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
   real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
   real_t<T> lower = -r;
   real_t<T> upper = r;
@@ -294,7 +314,7 @@ int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
       count++;
     }
     if(q_i == 0){
-      q_i = 1e-14;
+      q_i = minimum_effective_decimal<real_t<T>>();
     }
   }
 
@@ -318,42 +338,10 @@ void mul_compressed_mat(double* ca, int* ci, int* cj,
 }
 
 template <typename T>
-struct realTypeSet;
-
-template <>
-struct realTypeSet<double> {
-  typedef double type;
-};
-
-template <>
-struct realTypeSet<float> {
-  typedef float type;
-};
-
-template <>
-struct realTypeSet<long double> {
-  typedef long double type;
-};
-
-template <typename T>
-using real_set = typename realTypeSet<T>::type;
-
-template <typename T>
-struct complexTypeSet;
-
-template <typename real_t>
-struct complexTypeSet<std::complex<real_t>> {
-  typedef std::complex<real_t> type;
-};
-
-template <typename T>
-using complex_set = typename complexTypeSet<T>::type;
-
-template <typename T> template<typename vec_type>
-void LambdaLanczos<T>::init_random(vector<vec_type>& v) {
+void VectorRandomInitializer<T>::init(vector<T>& v) {
   std::random_device dev;
   std::mt19937 mt(dev());
-  std::uniform_real_distribution<T> rand((real_set<T>)(-1.0), (real_set<T>)(1.0));
+  std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
   int n = v.size();
   for(int i = 0;i < n;i++) {
@@ -363,20 +351,20 @@ void LambdaLanczos<T>::init_random(vector<vec_type>& v) {
   normalize(v);
 }
 
-/*template <typename T> template<typename vec_type>
-void LambdaLanczos<T>::init_random(vector<complex_set<vec_type>>& v) {
+
+template <typename T>
+void VectorRandomInitializer<complex<T>>::init(vector<complex<T>>& v) {
   std::random_device dev;
   std::mt19937 mt(dev());
-  std::uniform_real_distribution<real_t> rand((real_t)(-1.0), (real_t)(1.0));
+  std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
   int n = v.size();
   for(int i = 0;i < n;i++) {
-    v[i].real = rand(mt);
-    v[i].imag = rand(mt);
+    v[i] = complex<T>(rand(mt), rand(mt));
   }
 
   normalize(v);
-}*/
+}
 
 } /* namespace lambda_lanczos */
 

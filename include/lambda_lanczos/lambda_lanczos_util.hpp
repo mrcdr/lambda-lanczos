@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <complex>
+#include <limits>
+#include <cmath>
 
 namespace lambda_lanczos_util {
 namespace {
@@ -15,7 +17,7 @@ using std::end;
 
 
 /*
- * Type to corresponding type map, 
+ * Type to corresponding real type map,
  * used as realType<double>::type
  */
 template <typename T>
@@ -54,6 +56,13 @@ template <typename T>
 void normalize(vector<T>&);
 
 
+template <typename T>
+constexpr int sig_decimal_digit();
+
+template <typename T>
+constexpr T minimum_effective_decimal();
+
+
 /* Implementation */
 
 template <typename T>
@@ -73,6 +82,22 @@ void scalar_mul(T1 a, vector<T2>& vec) {
 template <typename T>
 void normalize(vector<T>& vec) {
   scalar_mul(1.0/norm(vec), vec);
+}
+
+
+/*
+ * This returns the significant decimal digits of type T.
+ * 
+ */
+template <typename T>
+constexpr int sig_decimal_digit() {
+  return (int)(std::numeric_limits<T>::digits *
+	       log10(std::numeric_limits<T>::radix));
+}
+
+template <typename T>
+constexpr T minimum_effective_decimal() {
+  return pow(10, -sig_decimal_digit<T>());
 }
 
 } /* namespace lambda_lanczos_util */
