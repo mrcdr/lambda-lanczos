@@ -38,6 +38,8 @@ void inner_prod_test() {
 }
 
 void test1() {
+  cout << endl << "-- Diagonalization test (real symmetric)  --" << endl;
+  
   const int n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},
                           {1.0, 2.0, 1.0},
@@ -76,6 +78,8 @@ void test1() {
 }
 
 void test2() {
+  cout << endl << "-- Diagonalization test (real symmetric, large)  --" << endl;
+  
   const int n = 100;
 
   double offset = -10.0;
@@ -126,6 +130,8 @@ void test2() {
 }
 
 void test3() {
+  cout << endl << "-- Diagonalization test (real symmetric, but using complex type)  --" << endl;
+  
   const int n = 3;
   complex<double> matrix[n][n] = { {2.0, 1.0, 1.0},
 				   {1.0, 2.0, 1.0},
@@ -164,6 +170,8 @@ void test3() {
 }
 
 void test4() {
+  cout << endl << "-- Diagonalization test (complex Hermitian)  --" << endl;
+  
   using namespace std::complex_literals;
   
   const int n = 3;
