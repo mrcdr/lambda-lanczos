@@ -11,6 +11,9 @@ namespace {
 template<typename T>
 using vector = std::vector<T>;
 
+template<typename T>
+using complex = std::complex<T>;
+
 using std::begin;
 using std::end;
 }
@@ -39,12 +42,30 @@ struct realTypeMap<long double> {
 };
 
 template <typename real_t>
-struct realTypeMap<std::complex<real_t>> {
+struct realTypeMap<complex<real_t>> {
   typedef real_t type;
 };
 
 template <typename T>
 using real_t = typename realTypeMap<T>::type;
+
+
+template <typename T>
+struct ConjugateProduct {
+public:
+  static T prod(T, T);
+};
+
+template <typename T>
+struct ConjugateProduct<complex<T>> {
+public:
+  static complex<T> prod(complex<T>, complex<T>);
+};
+
+
+
+template <typename T>
+T inner_prod(const vector<T>&, const vector<T>&);
 
 template <typename T>
 double norm(const vector<double>&);
@@ -63,12 +84,39 @@ template <typename T>
 constexpr T minimum_effective_decimal();
 
 
+
+
+
+
 /* Implementation */
 
 template <typename T>
-real_t<T> norm(const vector<T>& vec) {
-  return std::sqrt(std::inner_product(begin(vec), end(vec), begin(vec), T()));
+T ConjugateProduct<T>::prod(T a, T b) {
+  return a*b;
+}
+
+template <typename T>
+complex<T> ConjugateProduct<complex<T>>::prod(complex<T> a, complex<T> b) {
+  return conj(a)*b;
+}
+
+
+template <typename T>
+T inner_prod(const vector<T>& v1, const vector<T>& v2) {
+  return std::inner_product(begin(v1), end(v1),
+			    begin(v2), T(),
+			    [](T a, T b) -> T { return a+b; },
+			    ConjugateProduct<T>::prod);
   // T() means zero value of type T
+  // This spec is required because std::inner_product calculates
+  // v1*v2 not conj(v1)*v2
+}
+
+
+template <typename T>
+real_t<T> norm(const vector<T>& vec) {
+  return std::sqrt(std::real(inner_prod(vec, vec)));
+  // The norm of any complex vector <v|v> is real by definition.
 }
 
 template <typename T1, typename T2>

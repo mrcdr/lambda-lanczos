@@ -20,6 +20,8 @@ using vector = std::vector<T>;
 template<typename T>
 using complex = std::complex<T>;
 
+using std::cout;
+using std::endl;
 using std::fill;
 using std::abs;
 using std::begin;
@@ -118,17 +120,31 @@ int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) {
   
   vector<T> uk(n);
   this->init_vector(uk);
+  normalize(uk);
   u.push_back(uk);
 
   real_t<T> ev, pev; // Calculated eigen value and previous one
   pev = std::numeric_limits<real_t<T>>::max();
 
   int itern = this->max_iteration;
-  for(int k = 1;k <= this->max_iteration;k++) {
+  for(int k = 1;k <= this->max_iteration;k++) {      
+    cout << "alphak: " << alphak << endl;
+    cout << "betak: " << betak << endl;
+
     fill(vk.begin(), vk.end(), 0.0);
     this->mv_mul(u.back(), vk);
-    alphak = std::inner_product(begin(u.back()), end(u.back()),
-				begin(vk), 0.0);
+    alphak = std::real(inner_prod(u.back(), vk));
+    
+    /* The inner product <u|v> is real, because
+     *   <u|v> = <u|A|u>
+     * On the other hand its complex conjugate is
+     *   <u|v>^* = <v|u> = <u|A^*|u> = <u|A|u>
+     * here the condition A is a symmetric (Hermitian) matrix is used.
+     * Therefore
+     * <u|v> = <v|u>^*
+     * => <u|v> is real.
+     */
+    
     alpha.push_back(alphak);
     
     for(int i = 0;i < n; i++) {
@@ -209,8 +225,7 @@ void LambdaLanczos<T>::schmidt_orth(vector<T>& uorth, const vector<vector<T>>& u
   int n = uorth.size();
   
   for(int k = 0;k < u.size();k++) {
-    T innprod = inner_product(begin(uorth), end(uorth),
-			      begin(u[k]), T()); // T() means zero value of type T
+    T innprod = inner_prod(uorth, u[k]);
     
     for(int i = 0;i < n;i++) {
       uorth[i] -= innprod * u[k][i];
@@ -288,8 +303,8 @@ real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T>>& alp
 template <typename T>
 real_t<T> LambdaLanczos<T>::tridiagonal_eigen_limit(const vector<real_t<T>>& alpha,
 						    const vector<real_t<T>>& beta) {
-  real_t<T> r2 = std::inner_product(begin(alpha), end(alpha), begin(alpha), 0.0);
-  r2 += 2*std::inner_product(begin(beta), end(beta), begin(beta), 0.0);
+  real_t<T> r2 = std::pow(norm(alpha), 2);
+  r2 += 2*std::pow(norm(beta), 2);
   
   return r2;
 }
