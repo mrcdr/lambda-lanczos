@@ -68,39 +68,38 @@ So the installation step is as follows:
 2. Place the `include` directory anywhere your project can find.
 
 
-## Details
+## Details of LambdaLanzcos class
 ### Constructors
-1. `LambdaLanczos<T>(function<void(const vector<double>&, vector<double>&)> mv_mul, int matrix_size)`
-2. `LambdaLanczos<T>(function<void(const vector<double>&, vector<double>&)> mv_mul, int matrix_size, bool find_maximum)`
+1. `LambdaLanczos<T>(function<void (const vector<T>& in, vector<T>& out)> mv_mul, int matrix_size)`
+2. `LambdaLanczos<T>(function< void(const vector<T> in&, vector<T>& out)> mv_mul, int matrix_size, bool find_maximum)`
 
-The first one is equivalent to `LambdaLanczos(mv_mul, matrix_size, false)`, means to calculate the smallest eigenvalue.
+The first one is equivalent to `LambdaLanczos<T>(mv_mul, matrix_size, false)`, means to calculate the smallest eigenvalue.
 The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `long double` or `complex<long double>`.
 
-### Member variables of LambdaLanzcos
+### Member variables
 - `int max_iteration` - controls the limit of Lanczos iteration count.
     * Default value : matrix_size
 
-- `real_t<T> eps` is the convergence threshold of Lanczos iteration.
+- `real_t<T> eps` - is the convergence threshold of Lanczos iteration.
   Here `real_t<T>` means the real type of `T`, i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
   "`eps` = 1e-12" means the eigenvalue will be calculated with 12 digits of precision.
     * Default value : system-dependent; On usual systems,
-	
 	| type (including complex one)       | size (system-dep.) | `eps`   |
 	| ---------------------------------- | ------------------ | ------- |
 	| float                              | 4 bytes            | 1e-4    |
 	| double                             | 8 bytes            | 1e-12   |
 	| long double                        | 16 bytes           | 1e-19   |
 
-- `std::function<void(vector<T>&)> init_vector` is the function used to initialize the first Lanczos vector.
+- `std::function<void(vector<T>&)> init_vector` - is the function used to initialize the first Lanczos vector.
   After this function called, the initial Lanczos vector will be normalized.
     * Default value : a function to initialize a vector randomly in the range of [-1, 1]. For a complex vector,
 	  both real and imaginary part of each element will be initialized in the range.
 
-- (Not necessary to change) `double tridiag_eps_ratio` controls the the convergence threshold of the "bisection routine" in
+- (Not necessary to change) `double tridiag_eps_ratio` - controls the the convergence threshold of the "bisection routine" in
   the Lanczos algorithm, which finds the eigenvalue of an approximated tridiagonal matrix.
     * Default value : 1e-1
 
-- (Not necessary to change)  `int initial_vector_size` controls the initial size of Lanczos vectors.
+- (Not necessary to change)  `int initial_vector_size` - controls the initial size of Lanczos vectors.
     * Default value : 200
 
 ## Licence
