@@ -84,11 +84,12 @@ The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `
   Here `real_t<T>` means the real type of `T`, i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
   "`eps` = 1e-12" means the eigenvalue will be calculated with 12 digits of precision.
     * Default value : system-dependent; On usual systems,
-	| type (including complex one)       | size (system-dep.) | `eps`   |
-	| ---------------------------------- | ------------------ | ------- |
-	| float                              | 4 bytes            | 1e-4    |
-	| double                             | 8 bytes            | 1e-12   |
-	| long double                        | 16 bytes           | 1e-19   |
+	
+      	| type (including complex one)       | size (system-dep.) | `eps`   |
+      	| ---------------------------------- | ------------------ | ------- |
+      	| float                              | 4 bytes            | 1e-4    |
+      	| double                             | 8 bytes            | 1e-12   |
+      	| long double                        | 16 bytes           | 1e-19   |
 
 - `std::function<void(vector<T>&)> init_vector` - is the function used to initialize the first Lanczos vector.
   After this function called, the initial Lanczos vector will be normalized.
