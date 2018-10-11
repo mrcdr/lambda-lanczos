@@ -77,12 +77,14 @@ The first one is equivalent to `LambdaLanczos<T>(mv_mul, matrix_size, false)`, m
 The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `long double` or `complex<long double>`.
 
 ### Member variables
+In the following description, `real_t<T>` means its real type,
+i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
+
 - `int max_iteration` - controls the limit of Lanczos iteration count.
     * Default value : matrix_size
 
 - `real_t<T> eps` - is the convergence threshold of Lanczos iteration.
-  Here `real_t<T>` means the real type of `T`, i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
-  "`eps` = 1e-12" means the eigenvalue will be calculated with 12 digits of precision.
+	"`eps` = 1e-12" means the eigenvalue will be calculated with 12 digits of precision.
     * Default value : system-dependent; On usual systems,
 	
       	| type (including complex one)       | size (system-dep.) | `eps`   |
@@ -96,7 +98,7 @@ The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `
     * Default value : a function to initialize a vector randomly in the range of [-1, 1]. For a complex vector,
 	  both real and imaginary part of each element will be initialized in the range.
 
-- (Not necessary to change) `double tridiag_eps_ratio` - controls the the convergence threshold of the "bisection routine" in
+- (Not necessary to change) `real_t<T> tridiag_eps_ratio` - controls the the convergence threshold of the "bisection routine" in
   the Lanczos algorithm, which finds the eigenvalue of an approximated tridiagonal matrix.
     * Default value : 1e-1
 
