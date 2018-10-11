@@ -71,7 +71,7 @@ So the installation step is as follows:
 ## Details of LambdaLanzcos class
 ### Constructors
 1. `LambdaLanczos<T>(function<void (const vector<T>& in, vector<T>& out)> mv_mul, int matrix_size)`
-2. `LambdaLanczos<T>(function<void (const vector<T> in&, vector<T>& out)> mv_mul, int matrix_size, bool find_maximum)`
+2. `LambdaLanczos<T>(function<void (const vector<T>& in, vector<T>& out)> mv_mul, int matrix_size, bool find_maximum)`
 
 The first one is equivalent to `LambdaLanczos<T>(mv_mul, matrix_size, false)`, means to calculate the smallest eigenvalue.
 The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `long double` or `complex<long double>`.
