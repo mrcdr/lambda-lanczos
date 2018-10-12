@@ -77,7 +77,7 @@ The first one is equivalent to `LambdaLanczos<T>(mv_mul, matrix_size, false)`, m
 The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `long double` or `complex<long double>`.
 
 ### Member variables
-In the following description, `real_t<T>` means its real type,
+In the following description, `real_t<T>` means the real counterpart of `T`,
 i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
 
 - `int max_iteration` - controls the limit of Lanczos iteration count.
