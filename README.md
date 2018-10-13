@@ -114,7 +114,7 @@ i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
 - (Not necessary to change)  `int initial_vector_size` - controls the initial size of Lanczos vectors.
     * Default value : 200
 
-## Use LamdaLanczos correctly
+## Use Lambda Lanczos correctly
 ### What is `eigenvalue_offset`?
   The Lanczos algorithm can find the largest magnitude eigenvalue, so **you must ensure
   the maximum/minimum eigenvalue to be calculated has the largest magnitude**.
