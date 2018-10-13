@@ -34,15 +34,15 @@ void sample1() {
   };
 
   LambdaLanczos<double> engine(mv_mul, n, true); // true means to calculate the largest eigenvalue.
-  double eigen_value;
-  vector<double> eigen_vector(n);
-  int itern = engine.run(eigen_value, eigen_vecor);
+  double eigenvalue;
+  vector<double> eigenvector(n);
+  int itern = engine.run(eigenvalue, eigenvector);
 
   cout << "Iteration count: " << itern << endl;
-  cout << "Eigen value: " << setprecision(16) << eigen_value << endl;
+  cout << "Eigen value: " << setprecision(16) << eigenvalue << endl;
   cout << "Eigen vector:";
   for(int i = 0;i < n;i++) {
-    cout << eigen_vector[i] << " ";
+    cout << eigenvector[i] << " ";
   }
   cout << endl;
 }
@@ -83,9 +83,9 @@ i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
 - `real_t<T> eigenvalue_offset` - shifts the eigenvalues of the given matrix A, i.e.
   the algorithm will calculate the eigenvalue of matrix (A+`eigenvalue_offset`*E), here E
   is the identity matrix. The result eigenvalue from `run()` will take this shifting
-  into acount, so you don't have to correct the result with `eigenvalue_offset`.
+  into account, so you don't have to correct the result with `eigenvalue_offset`.
   
-  To know the reason why `eigenvalue_offset` is neeeded and how to set it correctly, see
+  To know the reason why `eigenvalue_offset` is needed and how to set it correctly, see
   [here](https://github.com/mrcdr/lambda-lanczos#what-is-eigenvalue_offset)
     * Default value : 0.0
 
