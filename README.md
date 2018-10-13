@@ -80,6 +80,15 @@ The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `
 In the following description, `real_t<T>` means the real counterpart of `T`,
 i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
 
+- `real_t<T> eigenvalue_offset` - shifts the eigenvalues of the given matrix A, i.e.
+  the algorithm will calculate the eigenvalue of matrix (A+`eigenvalue_offset`*E), here E
+  is the identity matrix. The result eigenvalue from `run()` will take this shifting
+  into acount, so you don't have to correct the result with `eigenvalue_offset`.
+  
+  To know the reason why `eigenvalue_offset` is neeeded and how to set it correctly, see
+  [here](https://github.com/mrcdr/lambda-lanczos#what-is-eigenvalue_offset)
+    * Default value : 0.0
+
 - `int max_iteration` - controls the limit of Lanczos iteration count.
     * Default value : matrix_size
 
@@ -105,6 +114,21 @@ i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
 - (Not necessary to change)  `int initial_vector_size` - controls the initial size of Lanczos vectors.
     * Default value : 200
 
+## Use **LamdaLanczos** correctly
+### What is `eigenvalue_offset`?
+  The Lanczos algorithm can find the largest magnitude eigenvalue, so **you must ensure
+  the maximum/minimum eigenvalue to be calculated has the largest magnitude**.
+  
+  For any n by n matrix A, the upper bound *r* of the magnitude of its eigenvalues can be 
+  determined by Gershgorin theorem:
+
+  <img src="https://latex.codecogs.com/gif.latex?r=\max_{i=1..n}\left{\sum_{j=1}^n|A_{ij}|\right}"/>
+  
+  or
+
+  <img src="https://latex.codecogs.com/gif.latex?r=\max_{j=1..n}\left{\sum_{i=1}^n|A_{ij}|\right}"/>
+
+  So if you want to calculate the maximum eigenvalue, you should use `eigenvalu_offset = r`. For the minimum eigenvalue `eigenvalue_offset = -r`.
 ## Licence
 
 [MIT](https://github.com/mrcdr/lambda-lanczos/blob/master/LICENSE)

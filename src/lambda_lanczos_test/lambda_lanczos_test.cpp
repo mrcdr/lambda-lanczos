@@ -64,6 +64,8 @@ void test1() {
 
   LambdaLanczos<double> engine(matmul, n, true);
   engine.init_vector = init_vec;
+  engine.eigenvalue_offset = 6.0;
+  
   double eigvalue;
   vector<double> eigvec(n);
   int itern  = engine.run(eigvalue, eigvec);
@@ -81,13 +83,8 @@ void test2() {
   cout << endl << "-- Diagonalization test (real symmetric, large)  --" << endl;
   
   const int n = 100;
-
-  double offset = -10.0;
-  auto matmul = [&](const vector<double>& in, vector<double>& out) {
-    for(int i = 0;i < n;i++) {
-      out[i] += offset*in[i];
-    }
     
+  auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(int i = 0;i < n-1;i++) {
       out[i] += -1.0*in[i+1];
       out[i+1] += -1.0*in[i];
@@ -97,28 +94,25 @@ void test2() {
 //    out[n-1] += -1.0*in[0]; // periodic boundary condition
   };
   /*
-    This lambda is equivalent to applying
-    following n by n matrix ("off" means "offset"):
+    This lambda is equivalent to applying following n by n matrix
     
-    off  -1   0       ..      0
-     -1 off  -1       ..      0
-      0  -1 off       ..      0
+      0  -1   0       ..      0
+     -1   0  -1       ..      0
+      0  -1   0       ..      0
       0     ..        ..      0
-      0     ..      off  -1   0
-      0     ..       -1 off  -1
-      0     ..        0  -1 off
+      0     ..        0  -1   0
+      0     ..       -1   0  -1
+      0     ..        0  -1   0
 
-      Its smallest eigenvalue is -2*cos(pi/(n+1)) + offset.
-      The "offset" is required to make the absolute value of
-      the smallest eigenvalue maximum.
+      Its smallest eigenvalue is -2*cos(pi/(n+1)).
    */
 
-  LambdaLanczos<double> engine(matmul, n);
+  LambdaLanczos<double> engine(matmul, n);  
   engine.eps = 1e-14;
+  engine.eigenvalue_offset = -10.0;  
   double eigvalue;
   vector<double> eigvec(n);
-  int itern = engine.run(eigvalue, eigvec);  
-  eigvalue -= offset;
+  int itern = engine.run(eigvalue, eigvec);
 
   cout << "Iteration count: " << itern << endl;
   cout << "Eigen value: " << setprecision(16) << eigvalue << endl;  

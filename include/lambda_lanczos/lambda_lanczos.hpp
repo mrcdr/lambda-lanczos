@@ -50,15 +50,16 @@ public:
 template <typename T>
 class LambdaLanczos {
 public:
-  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matsize, bool find_maximum);
-  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matsize) : LambdaLanczos(mv_mul, matsize, false) {}
+  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size, bool find_maximum);
+  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size) : LambdaLanczos(mv_mul, matrix_size, false) {}
   
-  int matsize;
+  int matrix_size;
   int max_iteration;
   real_t<T> eps = minimum_effective_decimal<real_t<T>>() * 1e3;
   real_t<T> tridiag_eps_ratio = 1e-1;
   int initial_vector_size = 200;
   bool find_maximum = false;
+  real_t<T> eigenvalue_offset = 0.0;
 
   std::function<void(const vector<T>&, vector<T>&)> mv_mul;
   std::function<void(vector<T>&)> init_vector = VectorRandomInitializer<T>::init;
@@ -79,17 +80,14 @@ private:
 };
 
 
-void mul_compressed_mat(double*, int*, int*, int, int, double*, double*);
-
-
 /* Implementation */
 
 template <typename T>
 inline LambdaLanczos<T>::LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul,
-				int matsize, bool find_maximum) {
+				int matrix_size, bool find_maximum) {
   this->mv_mul = mv_mul;
-  this->matsize = matsize;
-  this->max_iteration = matsize;
+  this->matrix_size = matrix_size;
+  this->max_iteration = matrix_size;
   this->find_maximum = find_maximum;
 }
 
@@ -97,11 +95,11 @@ template <typename T>
 inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
   assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
   
-  vector<vector<T>> u;  // Lanczos vectors
+  vector<vector<T>> u;     // Lanczos vectors
   vector<real_t<T>> alpha; // Diagonal elements of an approximated tridiagonal matrix
   vector<real_t<T>> beta;  // Subdiagonal elements of an approximated tridiagonal matrix
 
-  const int n = this->matsize;
+  const int n = this->matrix_size;
 
   u.reserve(this->initial_vector_size);
   alpha.reserve(this->initial_vector_size);
@@ -121,23 +119,28 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
   normalize(uk);
   u.push_back(uk);
 
-  real_t<T> ev, pev; // Calculated eigen value and previous one
+  real_t<T> ev, pev; // Calculated eigenvalue and previous one
   pev = std::numeric_limits<real_t<T>>::max();
 
   int itern = this->max_iteration;
   for(int k = 1;k <= this->max_iteration;k++) {
-    fill(vk.begin(), vk.end(), 0.0);
-    this->mv_mul(u.back(), vk);
+    /* vk = (A + offset*E)uk, here E is the identity matrix */
+    for(int i = 0;i < n;i++) {
+      vk[i] = uk[i]*this->eigenvalue_offset;
+    }
+    this->mv_mul(uk, vk);
+    
     alphak = std::real(inner_prod(u.back(), vk));
     
-    /* The inner product <u|v> is real, because
-     *   <u|v> = <u|A|u>
-     * On the other hand its complex conjugate is
-     *   <u|v>^* = <v|u> = <u|A^*|u> = <u|A|u>
-     * here the condition A is a symmetric (Hermitian) matrix is used.
-     * Therefore
-     * <u|v> = <v|u>^*
-     * => <u|v> is real.
+    /* The inner product <uk|vk> is real.
+     * Proof:
+     *     <uk|vk> = <uk|A|uk>
+     *   On the other hand its complex conjugate is
+     *     <uk|vk>^* = <vk|uk> = <uk|A^*|uk> = <uk|A|uk>
+     *   here the condition that matrix A is a symmetric (Hermitian) is used.
+     *   Therefore
+     *     <uk|vk> = <vk|uk>^*
+     *   <uk|vk> is real.
      */
     
     alpha.push_back(alphak);
@@ -161,8 +164,9 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
     if(betak < zero_threshold) {
       u.push_back(uk);
       /* This element will never be accessed,
-	 but this "push" guarantees u to always have one more element than 
-	 alpha and beta do.*/
+       * but this "push" guarantees u to always have one more element than 
+       * alpha and beta do.
+       */
       itern = k;
       break;
     }
@@ -178,7 +182,7 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
     }
   }
 
-  eigvalue = ev;
+  eigvalue = ev - this->eigenvalue_offset;
 
   int m = alpha.size();
   vector<T> cv(m+1);
@@ -204,14 +208,11 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
     }
   }
 
-  // Normalize the eigenvector
-  real_t<T> nrm2 = norm(eigvec);
-  for(int i = 0;i < n;i++) {
-    eigvec[i] = eigvec[i]/nrm2;
-  }
+  normalize(eigvec);
 
   return itern;
 }
+
 
 template <typename T>
 inline void LambdaLanczos<T>::schmidt_orth(vector<T>& uorth, const vector<vector<T>>& u) {
@@ -294,7 +295,12 @@ inline real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T
 }  
 
 
-/* Compute the eigenvalue limit by Gerschgorin theorem */
+/*
+ * Compute the upper bound of the absolute value of eigenvalues
+ * by Gerschgorin theorem. This routine gives a rough upper bound,
+ * but it is sufficient because the bisection routine using
+ * the upper bound converges exponentially.
+ */
 template <typename T>
 inline real_t<T> LambdaLanczos<T>::tridiagonal_eigen_limit(const vector<real_t<T>>& alpha,
 						    const vector<real_t<T>>& beta) {
@@ -306,9 +312,9 @@ inline real_t<T> LambdaLanczos<T>::tridiagonal_eigen_limit(const vector<real_t<T
 
 
 /*
- Algorithm from
- Peter Arbenz et al. / "High Performance Algorithms for Structured Matrix Problems" /
- Nova Science Publishers, Inc.
+ * Algorithm from
+ * Peter Arbenz et al. / "High Performance Algorithms for Structured Matrix Problems" /
+ * Nova Science Publishers, Inc.
  */
 template <typename T>
 inline int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
@@ -329,22 +335,6 @@ inline int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
   }
 
   return count;
-}
-
-inline void mul_compressed_mat(double* ca, int* ci, int* cj,
-			int ca_size,
-			int n, double* uk, double* vk) {
-
-  for(int i = 0;i < n;i++) {
-    vk[i] = 0.0;
-  }
-  for(int index = 0;index < ca_size;index++) {
-    vk[ci[index]] += ca[index]*uk[cj[index]];
-    if(ci[index] != cj[index]) {
-      // Multiply corresponding upper triangular element
-      vk[cj[index]] += ca[index]*uk[ci[index]];
-    }
-  }
 }
 
 template <typename T>
