@@ -83,7 +83,7 @@ i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
 - `real_t<T> eigenvalue_offset` - shifts the eigenvalues of the given matrix A, i.e.
   the algorithm will calculate the eigenvalue of matrix (A+`eigenvalue_offset`*E), here E
   is the identity matrix. The result eigenvalue from `run()` will take this shifting
-  into account, so you don't have to correct the result with `eigenvalue_offset`.
+  into account, so you don't have to "reshift" the result with `eigenvalue_offset`.
   
   To know the reason why `eigenvalue_offset` is needed and how to set it correctly, see
   [here](https://github.com/mrcdr/lambda-lanczos#what-is-eigenvalue_offset)
