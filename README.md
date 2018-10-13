@@ -114,21 +114,21 @@ i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
 - (Not necessary to change)  `int initial_vector_size` - controls the initial size of Lanczos vectors.
     * Default value : 200
 
-## Use **LamdaLanczos** correctly
+## Use LamdaLanczos correctly
 ### What is `eigenvalue_offset`?
   The Lanczos algorithm can find the largest magnitude eigenvalue, so **you must ensure
   the maximum/minimum eigenvalue to be calculated has the largest magnitude**.
   
-  For any n by n matrix A, the upper bound *r* of the magnitude of its eigenvalues can be 
+  For any n by n matrix A, the upper bound *r* of the magnitudes of the eigenvalues can be
   determined by Gershgorin theorem:
 
-  <img src="https://latex.codecogs.com/gif.latex?r=\max_{i=1..n}\left{\sum_{j=1}^n|A_{ij}|\right}"/>
+  <img src="https://latex.codecogs.com/gif.latex?\LARGE&space;r=\max_{i=1..n}\left{\sum_{j=1}^n|A_{ij}|\right}"/>
   
   or
 
-  <img src="https://latex.codecogs.com/gif.latex?r=\max_{j=1..n}\left{\sum_{i=1}^n|A_{ij}|\right}"/>
+  <img src="https://latex.codecogs.com/gif.latex?\LARGE&space;r=\max_{j=1..n}\left{\sum_{i=1}^n|A_{ij}|\right}"/>
 
-  So if you want to calculate the maximum eigenvalue, you should use `eigenvalu_offset = r`. For the minimum eigenvalue `eigenvalue_offset = -r`.
+  So if you want to calculate the maximum eigenvalue, you should use `eigenvalue_offset = r`. To calculated the minimum eigenvalue `eigenvalue_offset = -r`.
 ## Licence
 
 [MIT](https://github.com/mrcdr/lambda-lanczos/blob/master/LICENSE)
