@@ -55,7 +55,7 @@ as a list of {row-index, column-index, value} tuples.
 For detailed specs, see [Details](https://github.com/mrcdr/lambda-lanczos#details).
 
 ## Sample programs
-See [here](https://github.com/mrcdr/lambda-lanczos/src/samples/).
+See [here](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples).
 
 ## Requirement
 
