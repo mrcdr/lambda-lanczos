@@ -29,7 +29,7 @@ int main() {
     eigen_out = matrix * eigen_in;
   };
   
-  LambdaLanczos<double> engine(mv_mul, n, true); // true means to calculate the smallest eigenvalue.
+  LambdaLanczos<double> engine(mv_mul, n, true); // true means to calculate the largest eigenvalue.
   double eigenvalue;
   vector<double> eigenvector(n);
   int itern = engine.run(eigenvalue, eigenvector);
