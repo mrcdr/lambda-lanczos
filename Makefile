@@ -1,7 +1,6 @@
 CXX = g++
 
 INCDIR = ./include
-LIBDIR = ./lib
 SRCDIR = ./src
 LDFLAGS = -lm
 
@@ -21,8 +20,3 @@ sample3: $(SRCDIR)/samples/sample3_dynamic.cpp $(HEADERS)
 
 sample4: $(SRCDIR)/samples/sample4_use_Eigen_library.cpp $(HEADERS)
 	$(CXX) -I$(INCDIR) $(SRCDIR)/samples/sample4_use_Eigen_library.cpp -o sample4
-
-.PHONY: clean
-
-clean:
-	rm $(LIBDIR)/*
