@@ -231,7 +231,7 @@ inline void LambdaLanczos<T>::schmidt_orth(vector<T>& uorth, const vector<vector
 
 template <typename T>
 inline real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T>>& alpha,
-						    const vector<real_t<T>>& beta) const {
+							   const vector<real_t<T>>& beta) const {
   real_t<T> eps = this->eps * this->tridiag_eps_ratio;
   real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
   real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
@@ -261,7 +261,7 @@ inline real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T
 
 template <typename T>
 inline real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T>>& alpha,
-						    const vector<real_t<T>>& beta) const {
+							   const vector<real_t<T>>& beta) const {
   real_t<T> eps = this->eps * this->tridiag_eps_ratio;
   real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
   real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
@@ -303,11 +303,11 @@ inline real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T
  */
 template <typename T>
 inline real_t<T> LambdaLanczos<T>::tridiagonal_eigen_limit(const vector<real_t<T>>& alpha,
-						    const vector<real_t<T>>& beta) {
-  real_t<T> r2 = std::pow(norm(alpha), 2);
-  r2 += 2*std::pow(norm(beta), 2);
+							   const vector<real_t<T>>& beta) {
+  real_t<T> r = l1_norm(alpha);
+  r += 2*l1_norm(beta);
   
-  return r2;
+  return r;
 }
 
 
@@ -318,8 +318,8 @@ inline real_t<T> LambdaLanczos<T>::tridiagonal_eigen_limit(const vector<real_t<T
  */
 template <typename T>
 inline int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
-					       const vector<real_t<T>>& alpha,
-					       const vector<real_t<T>>& beta) {
+						      const vector<real_t<T>>& alpha,
+						      const vector<real_t<T>>& beta) {
   real_t<T> q_i = 1.0;
   int count = 0;
   int m = alpha.size();

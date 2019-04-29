@@ -76,6 +76,9 @@ void scalar_mul(T1, vector<T2>&);
 template <typename T>
 void normalize(vector<T>&);
 
+template <typename T>
+real_t<T> l1_norm(const vector<T>&);
+
 
 template <typename T>
 constexpr int sig_decimal_digit();
@@ -130,6 +133,17 @@ inline void scalar_mul(T1 a, vector<T2>& vec) {
 template <typename T>
 inline void normalize(vector<T>& vec) {
   scalar_mul(1.0/norm(vec), vec);
+}
+
+template <typename T>
+inline real_t<T> l1_norm(const vector<T>& vec) {
+  real_t<T> norm = real_t<T>(); // Zero initialization
+  
+  for(const T& element : vec) {
+    norm += std::abs(element);
+  }
+
+  return norm;
 }
 
 

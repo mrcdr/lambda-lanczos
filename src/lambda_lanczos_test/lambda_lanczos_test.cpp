@@ -37,6 +37,17 @@ void inner_prod_test() {
   cout << "ans= " << lambda_lanczos_util::inner_prod(v1, v2) << endl;
 }
 
+void l1_norm_test() {
+  cout << endl << "-- L1 norm test --" << endl;
+  complex<double> c1(1.0, 3.0);
+  complex<double> c2(-1.0, -1.0);
+
+  vector<complex<double>> v{c1, c2};
+  // sqrt(10) + sqrt(2) = 4.576...
+
+  cout << "ans= " << lambda_lanczos_util::l1_norm(v) << endl;
+}
+
 void test1() {
   cout << endl << "-- Diagonalization test (real symmetric)  --" << endl;
   
@@ -199,6 +210,7 @@ void test4() {
 int main() {
   sig_digit_test();
   inner_prod_test();
+  l1_norm_test();
   test1();
   test2();
   test3();
