@@ -11,15 +11,6 @@ using lambda_lanczos::LambdaLanczos;
 template<typename T>
 using vector = std::vector<T>;
 
-class IIV {
-public:
-  int r; // row index
-  int c; // column index
-  double value; // matrix element at (r,c)
-
-  IIV(int r, int c, double value): r(r), c(c), value(value) {}
-};
-
 int main() {
   const int n = 100;
     
