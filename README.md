@@ -1,6 +1,6 @@
 # Lambda Lanczos
 
-Adaptive Lanczos algorithm library
+Adaptive and header-only Lanczos algorithm library
 
 ## Overview
 
@@ -8,7 +8,7 @@ Adaptive Lanczos algorithm library
 the corresponding eigenvector of a symmetric (Hermitian) matrix.
 
 The characteristic feature is the matrix-vector multiplication routine used in
-the Lanczos algorithm is adaptive:
+the Lanczos algorithm is adaptable:
 
 ```c++
 #include <lambda_lanczos/lambda_lanczos.hpp>
@@ -49,9 +49,14 @@ void sample1() {
 
 ```
 
-This feature allows to use a matrix whose elements are partially given,
-e.g. a sparse matrix whose non-zero elements are stored
-as a list of {row-index, column-index, value} tuples.
+This feature allows you to
+- easily combine **Lambda Lanczos** with existing matrix libraries 
+(e.g. [Eigen](http://eigen.tuxfamily.org/index.php); 
+see a [sample code](https://github.com/mrcdr/lambda-lanczos/blob/master/src/samples/sample4_use_Eigen_library.cpp)).
+- use a matrix whose elements are partially given,
+  e.g. a sparse matrix whose non-zero elements are stored
+  as a list of {row-index, column-index, value} tuples.
+
 For detailed specs, see [Details](https://github.com/mrcdr/lambda-lanczos#details).
 
 ## Sample programs
@@ -89,7 +94,7 @@ i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
   into account, so you don't have to "reshift" the result with `eigenvalue_offset`.
   
   To know the reason why `eigenvalue_offset` is needed and how to set it correctly, see
-  [here](https://github.com/mrcdr/lambda-lanczos#what-is-eigenvalue_offset)
+  [here](https://github.com/mrcdr/lambda-lanczos#what-is-eigenvalue_offset).
     * Default value : 0.0
 
 - `int max_iteration` - controls the limit of Lanczos iteration count.
