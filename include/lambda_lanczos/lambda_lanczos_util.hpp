@@ -67,14 +67,18 @@ public:
 template <typename T>
 T inner_prod(const vector<T>&, const vector<T>&);
 
+
 template <typename T>
 double norm(const vector<double>&);
+
 
 template <typename T1, typename T2>
 void scalar_mul(T1, vector<T2>&);
 
+
 template <typename T>
 void normalize(vector<T>&);
+
 
 template <typename T>
 real_t<T> l1_norm(const vector<T>&);
@@ -82,6 +86,7 @@ real_t<T> l1_norm(const vector<T>&);
 
 template <typename T>
 constexpr int sig_decimal_digit();
+
 
 template <typename T>
 constexpr T minimum_effective_decimal();
@@ -122,6 +127,7 @@ inline real_t<T> norm(const vector<T>& vec) {
   // The norm of any complex vector <v|v> is real by definition.
 }
 
+
 template <typename T1, typename T2>
 inline void scalar_mul(T1 a, vector<T2>& vec) {
   int n = vec.size();
@@ -130,10 +136,12 @@ inline void scalar_mul(T1 a, vector<T2>& vec) {
   }
 }
 
+
 template <typename T>
 inline void normalize(vector<T>& vec) {
   scalar_mul(1.0/norm(vec), vec);
 }
+
 
 template <typename T>
 inline real_t<T> l1_norm(const vector<T>& vec) {
@@ -157,10 +165,12 @@ inline constexpr int sig_decimal_digit() {
 	       log10(std::numeric_limits<T>::radix));
 }
 
+
 template <typename T>
 inline constexpr T minimum_effective_decimal() {
   return pow(10, -sig_decimal_digit<T>());
 }
+
 
 } /* namespace lambda_lanczos_util */
 

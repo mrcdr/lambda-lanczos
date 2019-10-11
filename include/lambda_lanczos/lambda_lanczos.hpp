@@ -41,11 +41,13 @@ public:
   static void init(vector<T>&);
 };
 
+
 template <typename T>
 struct VectorRandomInitializer<complex<T>> {
 public:
   static void init(vector<complex<T>>&);
 };
+
 
 template <typename T>
 class LambdaLanczos {
@@ -80,6 +82,8 @@ private:
 };
 
 
+
+
 /* Implementation */
 
 template <typename T>
@@ -90,6 +94,7 @@ inline LambdaLanczos<T>::LambdaLanczos(std::function<void(const vector<T>&, vect
   this->max_iteration = matrix_size;
   this->find_maximum = find_maximum;
 }
+
 
 template <typename T>
 inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
@@ -229,6 +234,7 @@ inline void LambdaLanczos<T>::schmidt_orth(vector<T>& uorth, const vector<vector
   }
 }
 
+
 template <typename T>
 inline real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T>>& alpha,
 							   const vector<real_t<T>>& beta) const {
@@ -258,6 +264,7 @@ inline real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T
 
   return lower; // The "lower" almost equals the "upper" here.
 }
+
 
 template <typename T>
 inline real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T>>& alpha,
@@ -336,6 +343,7 @@ inline int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
 
   return count;
 }
+
 
 template <typename T>
 inline void VectorRandomInitializer<T>::init(vector<T>& v) {
