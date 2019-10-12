@@ -57,7 +57,7 @@ see a [sample code](https://github.com/mrcdr/lambda-lanczos/blob/master/src/samp
   e.g. a sparse matrix whose non-zero elements are stored
   as a list of {row-index, column-index, value} tuples.
 
-For detailed specs, see [Details](https://github.com/mrcdr/lambda-lanczos#details).
+For detailed specs, see [Wiki](https://github.com/mrcdr/lambda-lanczos/wiki/#Detailed-specs).
 
 ## Sample programs
 See [here](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples).
@@ -66,7 +66,6 @@ See [here](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples).
 
 C++11 compatible environment
 
-
 ## Installation
 
 **Lambda Lanczos** is a header-only library.
@@ -74,53 +73,6 @@ So the installation step is as follows:
 
 1. Clone or download the latest version from [Github](https://github.com/mrcdr/lambda-lanczos/).
 2. Place the `include` directory anywhere your project can find.
-
-
-## Details of LambdaLanzcos class
-### Constructors
-1. `LambdaLanczos<T>(function<void (const vector<T>& in, vector<T>& out)> mv_mul, int matrix_size)`
-2. `LambdaLanczos<T>(function<void (const vector<T>& in, vector<T>& out)> mv_mul, int matrix_size, bool find_maximum)`
-
-The first one is equivalent to `LambdaLanczos<T>(mv_mul, matrix_size, false)`, means to calculate the smallest eigenvalue.
-The type `T` should be `double`, `complex<double>`, `float`, `complex<float>`, `long double` or `complex<long double>`.
-
-### Member variables
-In the following description, `real_t<T>` means the real counterpart of `T`,
-i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
-
-- `real_t<T> eigenvalue_offset` - shifts the eigenvalues of the given matrix A, i.e.
-  the algorithm will calculate the eigenvalue of matrix (A+`eigenvalue_offset`*E), here E
-  is the identity matrix. The result eigenvalue from `run()` will take this shifting
-  into account, so you don't have to "reshift" the result with `eigenvalue_offset`.
-  
-  To know the reason why `eigenvalue_offset` is needed and how to set it correctly, see
-  [here](https://github.com/mrcdr/lambda-lanczos#what-is-eigenvalue_offset).
-    * Default value : 0.0
-
-- `int max_iteration` - controls the limit of Lanczos iteration count.
-    * Default value : matrix_size
-
-- `real_t<T> eps` - is the convergence threshold of Lanczos iteration.
-	"`eps` = 1e-12" means the eigenvalue will be calculated with 12 digits of precision.
-    * Default value : system-dependent; On usual systems,
-	
-      	| type (including complex one)       | size (system-dep.) | `eps`   |
-      	| ---------------------------------- | ------------------ | ------- |
-      	| float                              | 4 bytes            | 1e-4    |
-      	| double                             | 8 bytes            | 1e-12   |
-      	| long double                        | 16 bytes           | 1e-19   |
-
-- `std::function<void(vector<T>&)> init_vector` - is the function used to initialize the first Lanczos vector.
-  After this function called, the initial Lanczos vector will be normalized.
-    * Default value : a function to initialize a vector randomly in the range of [-1, 1]. For a complex vector,
-	  both real and imaginary part of each element will be initialized in the range.
-
-- (Not necessary to change) `real_t<T> tridiag_eps_ratio` - controls the the convergence threshold of the "bisection routine" in
-  the Lanczos algorithm, which finds the eigenvalue of an approximated tridiagonal matrix.
-    * Default value : 1e-1
-
-- (Not necessary to change)  `int initial_vector_size` - controls the initial size of Lanczos vectors.
-    * Default value : 200
 
 ## Use Lambda Lanczos correctly
 ### What is `eigenvalue_offset`?
@@ -137,6 +89,7 @@ i.e. `real_t<double>` is `double` and `real_t<complex<double>>` is `double`.
   <img src="https://latex.codecogs.com/gif.latex?\large&space;r=\max_{j=1..n}\left{\sum_{i=1}^n|A_{ij}|\right}"/>
 
   So if you want to calculate the maximum eigenvalue, you should use `eigenvalue_offset = r`. To calculate the minimum eigenvalue `eigenvalue_offset = -r`.
+
 ## License
 
 [MIT](https://github.com/mrcdr/lambda-lanczos/blob/master/LICENSE)
