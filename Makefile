@@ -20,3 +20,7 @@ sample3: $(SRCDIR)/samples/sample3_dynamic.cpp $(HEADERS)
 
 sample4: $(SRCDIR)/samples/sample4_use_Eigen_library.cpp $(HEADERS)
 	$(CXX) -I$(INCDIR) $(SRCDIR)/samples/sample4_use_Eigen_library.cpp -o sample4
+
+det_offset: $(SRCDIR)/determine_eigenvalue_offset/determine_eigenvalue_offset.cpp $(HEADERS)
+	$(CXX) -I$(INCDIR) $(SRCDIR)/determine_eigenvalue_offset/determine_eigenvalue_offset.cpp -o det_offset
+
