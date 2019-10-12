@@ -88,7 +88,10 @@ So the installation step is as follows:
 
   <img src="https://latex.codecogs.com/gif.latex?\large&space;r=\max_{j=1..n}\left{\sum_{i=1}^n|A_{ij}|\right}"/>
 
-  So if you want to calculate the maximum eigenvalue, you should use `eigenvalue_offset = r`. To calculate the minimum eigenvalue `eigenvalue_offset = -r`.
+  So corresponding code would be like [this](https://github.com/mrcdr/lambda-lanczos/blob/master/src/determine_eigenvalue_offset/determine_eigenvalue_offset.cpp).
+  If you want to calculate the maximum eigenvalue, you should use `eigenvalue_offset = r`. To calculate the minimum eigenvalue `eigenvalue_offset = -r`.
+
+  More information about `eigenvalue_offset` is available [here](https://github.com/mrcdr/lambda-lanczos/wiki/More-about-eigenvalue_offset)
 
 ## License
 

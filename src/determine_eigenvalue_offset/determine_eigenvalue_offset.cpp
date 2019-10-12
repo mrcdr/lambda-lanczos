@@ -1,5 +1,4 @@
 #include <iostream>
-#include <limits>
 #include <lambda_lanczos/lambda_lanczos.hpp>
 
 template<typename T>
@@ -52,6 +51,12 @@ double determine_eigenvalue_offset(double** matrix, int n) {
 
 
 
+
+
+
+/*
+ * Just for testing
+ */
 int main() {
   const int n = 3;
   double** matrix = new double*[n];
