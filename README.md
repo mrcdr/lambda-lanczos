@@ -1,6 +1,6 @@
 # Lambda Lanczos
 
-Adaptive and header-only Lanczos algorithm library
+C++ adaptive and header-only Lanczos algorithm library
 
 ## Overview
 
