@@ -52,10 +52,10 @@ public:
 template <typename T>
 class LambdaLanczos {
 public:
-  LambdaLanczos() {}
+  LambdaLanczos();
   LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size, bool find_maximum);
   LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size) : LambdaLanczos(mv_mul, matrix_size, false) {}
-  
+
   int matrix_size;
   int max_iteration;
   real_t<T> eps = minimum_effective_decimal<real_t<T>>() * 1e3;
@@ -66,8 +66,15 @@ public:
 
   std::function<void(const vector<T>&, vector<T>&)> mv_mul;
   std::function<void(vector<T>&)> init_vector = VectorRandomInitializer<T>::init;
-
   int run(real_t<T>&, vector<T>&) const;
+
+  int  SetSize(int matrix_size);
+  void SetInitVec(std::function<void(vector<T>&)> init_vector);
+  void SetMul(std::function<void(const vector<T>&, vector<T>&)> mv_mul);
+  void SetFindMax(bool find_maximum);
+  void SetEvalOffset(T offset);
+  void SetEpsilon(T epsilon);
+  void SetTriEpsRatio(T tri_eps_ratio);
 
 private:
   static void schmidt_orth(vector<T>&, const vector<vector<T>>&);
@@ -88,6 +95,14 @@ private:
 /* Implementation */
 
 template <typename T>
+inline LambdaLanczos<T>::LambdaLanczos() {
+  this->matrix_size = 0;
+  this->max_iteration = 0;
+  this->find_maximum = 0;
+}
+
+
+template <typename T>
 inline LambdaLanczos<T>::LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul,
 				int matrix_size, bool find_maximum) {
   this->mv_mul = mv_mul;
@@ -99,6 +114,7 @@ inline LambdaLanczos<T>::LambdaLanczos(std::function<void(const vector<T>&, vect
 
 template <typename T>
 inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
+  assert(matrix_size > 0);
   assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
   
   vector<vector<T>> u;     // Lanczos vectors
@@ -344,6 +360,53 @@ inline int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
 
   return count;
 }
+
+
+template <typename T>
+inline int LambdaLanczos<T>::SetSize(int matrix_size)
+{
+  this->matrix_size = matrix_size;
+  this->max_iteration = matrix_size;
+  return matrix_size;
+}
+
+template <typename T>
+inline void LambdaLanczos<T>::SetMul(std::function<void(const vector<T>&, vector<T>&)> mv_mul)
+{
+  this->mv_mul = mv_mul;
+}
+
+template <typename T>
+inline void LambdaLanczos<T>::SetInitVec(std::function<void(vector<T>&)> init_vector)
+{
+  this->init_vector = init_vector;
+}
+
+template <typename T>
+inline void LambdaLanczos<T>::SetFindMax(bool find_maximum) {
+  this->find_maximum = find_maximum;
+}
+
+template <typename T>
+inline void LambdaLanczos<T>::SetEvalOffset(T offset)
+{ 
+  this->eigenvalue_offset = offset;
+}
+
+template <typename T>
+inline void LambdaLanczos<T>::SetEpsilon(T epsilon)
+{ 
+  this->eps = epsilon;
+}
+
+template <typename T>
+inline void LambdaLanczos<T>::SetTriEpsRatio(T tri_eps_ratio)
+{ 
+  this->tridiag_eps_ratio = tri_eps_ratio;
+}
+
+
+
 
 
 template <typename T>
