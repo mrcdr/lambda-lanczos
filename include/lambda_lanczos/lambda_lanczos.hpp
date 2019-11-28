@@ -52,6 +52,7 @@ public:
 template <typename T>
 class LambdaLanczos {
 public:
+  LambdaLanczos() {}
   LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size, bool find_maximum);
   LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size) : LambdaLanczos(mv_mul, matrix_size, false) {}
   
