@@ -13,9 +13,6 @@ using vector = std::vector<T>;
 
 template<typename T>
 using complex = std::complex<T>;
-
-using std::begin;
-using std::end;
 }
 
 
@@ -111,8 +108,8 @@ inline complex<T> ConjugateProduct<complex<T>>::prod(complex<T> a, complex<T> b)
 
 template <typename T>
 inline T inner_prod(const vector<T>& v1, const vector<T>& v2) {
-  return std::inner_product(begin(v1), end(v1),
-			    begin(v2), T(),
+  return std::inner_product(std::begin(v1), std::end(v1),
+			    std::begin(v2), T(),
 			    [](T a, T b) -> T { return a+b; },
 			    ConjugateProduct<T>::prod);
   // T() means zero value of type T
