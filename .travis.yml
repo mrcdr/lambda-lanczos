@@ -7,12 +7,14 @@ matrix:
 
     - language: cpp
       compiler: gcc
+      # "dist" specifies the operating system ("bionic"=ubuntu18.04)
+      dist: bionic
       #         OPTIONAL
       #install:
       #  - sudo apt-get install -qq cppcheck
       #  - git clone https://github.com/kward/shunit2 shunit2
       script:
-        - g++ -std=c++11 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
+        - g++ -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #         OPTIONAL (not sure what this does...)
         #- cppcheck --quiet --error-exitcode=1
         - ./lambda_lanczos_test
@@ -21,11 +23,13 @@ matrix:
 
     - language: cpp
       compiler: clang
+      # "dist" specifies the operating system ("bionic"=ubuntu18.04)
+      dist: bionic
       #         OPTIONAL
       #install:
       #  - sudo apt-get install -qq cppcheck
       script:
-        - clang++ -std=c++11 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
+        - clang++ -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #         OPTIONAL (not sure what this does...)
         #- cppcheck --quiet --error-exitcode=1
         - ./lambda_lanczos_test
