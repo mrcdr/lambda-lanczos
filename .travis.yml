@@ -12,7 +12,6 @@ matrix:
       #  - sudo apt-get install -qq cppcheck
       #  - git clone https://github.com/kward/shunit2 shunit2
       script:
-        - cd tests
         - g++ -std=c++11 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #         OPTIONAL (not sure what this does...)
         #- cppcheck --quiet --error-exitcode=1
@@ -26,7 +25,6 @@ matrix:
       #install:
       #  - sudo apt-get install -qq cppcheck
       script:
-        - cd tests
         - clang++ -std=c++11 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #         OPTIONAL (not sure what this does...)
         #- cppcheck --quiet --error-exitcode=1
