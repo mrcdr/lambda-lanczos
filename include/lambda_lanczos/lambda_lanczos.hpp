@@ -20,12 +20,7 @@ using vector = std::vector<T>;
 template<typename T>
 using complex = std::complex<T>;
 
-using std::cout;
-using std::endl;
-using std::fill;
 using std::abs;
-using std::begin;
-using std::end;
 using namespace lambda_lanczos_util;
 }
 
