@@ -1,4 +1,10 @@
-# Lambda Lanczos
+[![Build Status](https://travis-ci.org/jewettaij/lambda-lanczos.svg?branch=master)](https://travis-ci.org/jewettaij/lambda-lanczos.svg?branch=master)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)]()
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/jewettaij/lambda-lanczos)]()
+
+
+Lambda Lanczos
+===========
 
 C++ adaptive and header-only Lanczos algorithm library
 

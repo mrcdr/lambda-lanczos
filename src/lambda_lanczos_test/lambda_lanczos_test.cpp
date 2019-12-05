@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
+#include <cassert>
 #include <lambda_lanczos/lambda_lanczos.hpp>
 
 using std::cout;
@@ -13,6 +14,11 @@ using vector = std::vector<T>;
 
 template<typename T>
 using complex = std::complex<T>;
+
+template<typename T>
+inline static bool Similar(T a, T b, T eps=1.0e-06) {
+  return std::abs(a - b) < std::abs(eps);
+}
 
 void sig_digit_test() {
   cout << endl << "-- Significant decimal digit test --" << endl;
@@ -88,7 +94,13 @@ void test1() {
     cout << eigvec[i] << " ";
   }
   cout << endl;
+
+  assert(Similar(eigvalue, 4.0));
+  assert(Similar(std::abs(eigvec[0]), 0.57735026919));
+  assert(Similar(std::abs(eigvec[1]), 0.57735026919));
+  assert(Similar(std::abs(eigvec[2]), 0.57735026919));
 }
+
 
 void test2() {
   cout << endl << "-- Diagonalization test (real symmetric, large)  --" << endl;
@@ -125,9 +137,13 @@ void test2() {
   vector<double> eigvec(n);
   int itern = engine.run(eigvalue, eigvec);
 
+  assert(Similar(eigvalue, -2.0, 0.002));
+
   cout << "Iteration count: " << itern << endl;
   cout << "Eigen value: " << setprecision(16) << eigvalue << endl;  
   cout << "Eigen vector:" << endl;
+
+  
   for(int i = 0;i < n;i++) {
     cout << eigvec[i] << endl;
   }
@@ -172,6 +188,14 @@ void test3() {
     cout << eigvec[i] << " ";
   }
   cout << endl;
+
+  assert(Similar(eigvalue, 4.0));
+  assert(Similar(eigvec[0].real(), 0.0));
+  assert(Similar(eigvec[1].real(), 0.0));
+  assert(Similar(eigvec[2].real(), 0.0));
+  assert(Similar(std::abs(eigvec[0].imag()), 0.57735026919));
+  assert(Similar(std::abs(eigvec[1].imag()), 0.57735026919));
+  assert(Similar(std::abs(eigvec[2].imag()), 0.57735026919));
 }
 
 void test4() {
@@ -205,6 +229,8 @@ void test4() {
     cout << eigvec[i] << " ";
   }
   cout << endl;
+
+  assert(Similar(eigvalue, -2.0));
 }
 
 int main() {

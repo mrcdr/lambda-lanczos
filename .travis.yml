@@ -1,0 +1,35 @@
+# helpful link:
+#https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
+
+
+matrix:
+  include:
+
+    - language: cpp
+      compiler: gcc
+      #         OPTIONAL
+      #install:
+      #  - sudo apt-get install -qq cppcheck
+      #  - git clone https://github.com/kward/shunit2 shunit2
+      script:
+        - cd tests
+        - g++ -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
+        #         OPTIONAL (not sure what this does...)
+        #- cppcheck --quiet --error-exitcode=1
+        - ./lambda_lanczos_test
+        - cd ../
+
+
+    - language: cpp
+      compiler: clang
+      #         OPTIONAL
+      #install:
+      #  - sudo apt-get install -qq cppcheck
+      script:
+        - cd tests
+        - clang++ -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
+        #         OPTIONAL (not sure what this does...)
+        #- cppcheck --quiet --error-exitcode=1
+        - ./lambda_lanczos_test
+        - cd ../
+
