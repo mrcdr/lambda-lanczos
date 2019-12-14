@@ -1,0 +1,1 @@
+add_executable(lambda_lanczos_test lambda_lanczos_test.cpp)
