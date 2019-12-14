@@ -8,7 +8,7 @@
 #include <cmath>
 #include <numeric>
 #include <random>
-#include <lambda_lanczos/lambda_lanczos_util.hpp>
+#include <lambda_lanczos_util.hpp>
 
 
 namespace lambda_lanczos {

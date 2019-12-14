@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
-#include <lambda_lanczos/lambda_lanczos.hpp>
+#include <lambda_lanczos.hpp>
 
 using std::cout;
 using std::endl;

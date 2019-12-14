@@ -1,10 +1,10 @@
 CXX = g++
 
-INCDIR = ./include
+INCDIR = ./include/lambda_lanczos
 SRCDIR = ./src
 LDFLAGS = -lm
 
-HEADERS = $(INCDIR)/lambda_lanczos/lambda_lanczos.hpp $(INCDIR)/lambda_lanczos/lambda_lanczos_util.hpp
+HEADERS = $(INCDIR)/lambda_lanczos.hpp $(INCDIR)/lambda_lanczos_util.hpp
 
 lambda_lanczos_test: $(SRCDIR)/lambda_lanczos_test/lambda_lanczos_test.cpp $(HEADERS)
 	$(CXX) -I$(INCDIR) $(SRCDIR)/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test

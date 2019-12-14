@@ -1,5 +1,5 @@
 #include <iostream>
-#include <lambda_lanczos/lambda_lanczos.hpp>
+#include <lambda_lanczos.hpp>
 
 template<typename T>
 using real_t = lambda_lanczos::real_t<T>;
