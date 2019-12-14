@@ -143,7 +143,7 @@ inline void normalize(vector<T>& vec) {
 template <typename T>
 inline real_t<T> l1_norm(const vector<T>& vec) {
   real_t<T> norm = real_t<T>(); // Zero initialization
-  
+
   for(const T& element : vec) {
     norm += std::abs(element);
   }
@@ -154,7 +154,7 @@ inline real_t<T> l1_norm(const vector<T>& vec) {
 
 /*
  * This returns the significant decimal digits of type T.
- * 
+ *
  */
 template <typename T>
 inline constexpr int sig_decimal_digit() {
