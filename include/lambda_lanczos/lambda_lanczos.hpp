@@ -46,19 +46,19 @@ public:
 template <typename T>
 class LambdaLanczos {
 public:
-  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size, bool find_maximum);
-  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, int matrix_size) : LambdaLanczos(mv_mul, matrix_size, false) {}
-
-  int matrix_size;
-  int max_iteration;
-  real_t<T> eps = minimum_effective_decimal<real_t<T>>() * 1e3;
-  real_t<T> tridiag_eps_ratio = 1e-1;
-  int initial_vector_size = 200;
-  bool find_maximum = false;
-  real_t<T> eigenvalue_offset = 0.0;
+  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, size_t matrix_size, bool find_maximum);
+  LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul, size_t matrix_size) : LambdaLanczos(mv_mul, matrix_size, false) {}
 
   std::function<void(const vector<T>&, vector<T>&)> mv_mul;
   std::function<void(vector<T>&)> init_vector = VectorRandomInitializer<T>::init;
+
+  size_t matrix_size;
+  int max_iteration;
+  real_t<T> eps = minimum_effective_decimal<real_t<T>>() * 1e3;
+  real_t<T> tridiag_eps_ratio = 1e-1;
+  size_t initial_vector_size = 200;
+  bool find_maximum;
+  real_t<T> eigenvalue_offset = 0.0;
 
   int run(real_t<T>&, vector<T>&) const;
 
@@ -82,12 +82,8 @@ private:
 
 template <typename T>
 inline LambdaLanczos<T>::LambdaLanczos(std::function<void(const vector<T>&, vector<T>&)> mv_mul,
-				int matrix_size, bool find_maximum) {
-  this->mv_mul = mv_mul;
-  this->matrix_size = matrix_size;
-  this->max_iteration = matrix_size;
-  this->find_maximum = find_maximum;
-}
+				       size_t matrix_size, bool find_maximum) :
+  mv_mul(mv_mul), matrix_size(matrix_size), max_iteration(matrix_size), find_maximum(find_maximum) {}
 
 
 template <typename T>
@@ -98,7 +94,7 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
   vector<real_t<T>> alpha; // Diagonal elements of an approximated tridiagonal matrix
   vector<real_t<T>> beta;  // Subdiagonal elements of an approximated tridiagonal matrix
 
-  const int n = this->matrix_size;
+  const auto n = this->matrix_size;
 
   u.reserve(this->initial_vector_size);
   alpha.reserve(this->initial_vector_size);
@@ -124,7 +120,7 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
   int itern = this->max_iteration;
   for(int k = 1;k <= this->max_iteration;k++) {
     /* vk = (A + offset*E)uk, here E is the identity matrix */
-    for(int i = 0;i < n;i++) {
+    for(size_t i = 0;i < n;i++) {
       vk[i] = uk[i]*this->eigenvalue_offset;
     }
     this->mv_mul(uk, vk);
@@ -144,7 +140,7 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
 
     alpha.push_back(alphak);
 
-    for(int i = 0;i < n; i++) {
+    for(size_t i = 0;i < n; i++) {
       uk[i] = vk[i] - betak*u[k-1][i] - alphak*u[k][i];
     }
 
@@ -183,7 +179,7 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
 
   eigvalue = ev - this->eigenvalue_offset;
 
-  int m = alpha.size();
+  auto m = alpha.size();
   vector<T> cv(m+1);
   cv[0] = 0.0;
   cv[m] = 0.0;
@@ -195,14 +191,14 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
     eigvec.resize(n);
   }
 
-  for(int i = 0;i < n;i++) {
+  for(size_t i = 0;i < n;i++) {
     eigvec[i] = cv[m-1]*u[m-1][i];
   }
 
-  for(int k = m-2;k >= 1;k--) {
+  for(size_t k = m-2;k >= 1;k--) {
     cv[k] = ((ev - alpha[k+1])*cv[k+1] - beta[k+1]*cv[k+2])/beta[k];
 
-    for(int i = 0;i < n;i++) {
+    for(size_t i = 0;i < n;i++) {
       eigvec[i] += cv[k]*u[k][i];
     }
   }
@@ -217,12 +213,12 @@ template <typename T>
 inline void LambdaLanczos<T>::schmidt_orth(vector<T>& uorth, const vector<vector<T>>& u) {
   /* Vectors in u must be normalized, but uorth doesn't have to be. */
 
-  int n = uorth.size();
+  auto n = uorth.size();
 
-  for(int k = 0;k < u.size();k++) {
+  for(size_t k = 0;k < u.size();k++) {
     T innprod = inner_prod(uorth, u[k]);
 
-    for(int i = 0;i < n;i++) {
+    for(size_t i = 0;i < n;i++) {
       uorth[i] -= innprod * u[k][i];
     }
   }
@@ -238,7 +234,7 @@ inline real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T
   real_t<T> lower = -r;
   real_t<T> upper = r;
   real_t<T> mid;
-  int nmid; // Number of eigenvalues smaller than the "mid"
+  unsigned int nmid; // Number of eigenvalues smaller than the "mid"
 
   while(upper-lower > std::min(std::abs(lower), std::abs(upper))*eps) {
     mid = (lower+upper)/2.0;
@@ -269,9 +265,9 @@ inline real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T
   real_t<T> lower = -r;
   real_t<T> upper = r;
   real_t<T> mid;
-  int nmid; // Number of eigenvalues smaller than the "mid"
+  unsigned int nmid; // Number of eigenvalues smaller than the "mid"
 
-  int m = alpha.size() - 1;  /* Number of eigenvalues of the approximated triangular matrix,
+  size_t m = alpha.size() - 1;  /* Number of eigenvalues of the approximated triangular matrix,
 				which equals the rank of it */
 
   while(upper-lower > std::min(std::abs(lower), std::abs(upper))*eps) {
@@ -322,9 +318,9 @@ inline int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
 						      const vector<real_t<T>>& beta) {
   real_t<T> q_i = 1.0;
   int count = 0;
-  int m = alpha.size();
+  size_t m = alpha.size();
 
-  for(int i = 1;i < m;i++){
+  for(size_t i = 1;i < m;i++){
     q_i = alpha[i] - c - beta[i-1]*beta[i-1]/q_i;
     if(q_i < 0){
       count++;
@@ -344,8 +340,8 @@ inline void VectorRandomInitializer<T>::init(vector<T>& v) {
   std::mt19937 mt(dev());
   std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
-  int n = v.size();
-  for(int i = 0;i < n;i++) {
+  size_t n = v.size();
+  for(size_t i = 0;i < n;i++) {
     v[i] = rand(mt);
   }
 
@@ -359,8 +355,8 @@ inline void VectorRandomInitializer<complex<T>>::init(vector<complex<T>>& v) {
   std::mt19937 mt(dev());
   std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
-  int n = v.size();
-  for(int i = 0;i < n;i++) {
+  size_t n = v.size();
+  for(size_t i = 0;i < n;i++) {
     v[i] = complex<T>(rand(mt), rand(mt));
   }
 

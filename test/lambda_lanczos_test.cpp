@@ -59,7 +59,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   };
 
   auto init_vec = [&](vector<double>& vec) {
-    for(int i = 0;i < n;i++) {
+    for(size_t i = 0;i < n;i++) {
       vec[i] = 0.0;
     }
 
@@ -72,7 +72,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
 
   double eigvalue;
   vector<double> eigvec(n);
-  int itern  = engine.run(eigvalue, eigvec);
+  engine.run(eigvalue, eigvec);
 
 
   vector<double> correct_eigvec(n);
@@ -118,7 +118,7 @@ TEST(DIAGONALIZE_TEST, DYNAMIC_MATRIX) {
   engine.eigenvalue_offset = -10.0;
   double eigvalue;
   vector<double> eigvec(n);
-  int itern = engine.run(eigvalue, eigvec);
+  engine.run(eigvalue, eigvec);
 
   double correct_eigvalue = -2.0*cos(M_PI/(n+1));
 
@@ -152,7 +152,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE) {
   engine.init_vector = init_vec;
   double eigvalue;
   vector<complex<double>> eigvec(n);
-  int itern  = engine.run(eigvalue, eigvec);
+  engine.run(eigvalue, eigvec);
 
 
   vector<complex<double>> correct_eigvec(n);
@@ -187,7 +187,7 @@ void test4() {
   LambdaLanczos<complex<double>> engine(matmul, n);
   double eigvalue;
   vector<complex<double>> eigvec(n);
-  int itern  = engine.run(eigvalue, eigvec);
+  engine.run(eigvalue, eigvec);
 
 
   vector<complex<double>> correct_eigvec { 1.0, complex<double>(0.0, 1.0), -1.0 };
