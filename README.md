@@ -77,7 +77,7 @@ In order to run tests, [Google Test](https://github.com/google/googletest) is re
 So the installation step is as follows:
 
 1. Clone or download the latest version from [Github](https://github.com/mrcdr/lambda-lanczos/).
-2. Place the `include` directory anywhere your project can find.
+2. Place the `include/lambda_lanczos` directory anywhere your project can find.
 
 ## Use Lambda Lanczos correctly
 ### What is `eigenvalue_offset`?
