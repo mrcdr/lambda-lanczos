@@ -66,6 +66,11 @@ See [here](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples).
 
 C++11 compatible environment
 
+## Dependencies
+**Lambda Lanczos** itself does not depend on any libraries.
+
+In order to run tests, [Google Test](https://github.com/google/googletest) is required.
+
 ## Installation
 
 **Lambda Lanczos** is a header-only library.
