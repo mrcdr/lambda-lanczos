@@ -27,7 +27,7 @@ matrix:
         - cd build
         - cmake ..
         - make lambda_lanczos_test
-	- ctest --verbose
+	- ctest
 
       #after_success:
       # ---- Optional: Report code-coverage test results to codecov.io ----
