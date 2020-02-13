@@ -14,30 +14,37 @@ matrix:
       #  Optional: To test the output of your program after running, you can use
       #  - git clone https://github.com/kward/shunit2 shunit2
       script:
-        - g++ -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
-        - ./lambda_lanczos_test
+        #- g++ -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
+        #- ./lambda_lanczos_test
         # ---- Optional: Code-coverage tests: ----
         #- g++ -g -O0 -coverage -fno-inline -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #- ./lambda_lanczos_test
         # ---- Optional: check for memory errors (probably not needed) ----
         #- g++ -g -O0  -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #- valgrind --leak-check=yes --error-exitcode=1 ./lambda_lanczos_test
+
+	- mkdir -p build
+        - cd build
+        - cmake ..
+        - make lambda_lanczos_test
+	- ctest --verbose
+
       #after_success:
       # ---- Optional: Report code-coverage test results to codecov.io ----
       #  - bash <(curl -s https://codecov.io/bash)
 
 
-    - language: cpp
-      compiler: clang
+    #- language: cpp
+      #compiler: clang
       # "dist" specifies the operating system ("bionic"=ubuntu18.04)
-      dist: bionic
+      #dist: bionic
       #install:
       #  - sudo apt-get install valgrind
       #  Optional: To test the output of your program after running, you can use
       #  - git clone https://github.com/kward/shunit2 shunit2
-      script:
-        - clang++ -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
-        - ./lambda_lanczos_test
+      #script:
+        #- clang++ -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
+        #- ./lambda_lanczos_test
         # ---- Optional: Code-coverage tests: ----
         #- clang++ -g -O0 -coverage -fno-inline -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #- ./lambda_lanczos_test
