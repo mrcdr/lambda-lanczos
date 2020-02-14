@@ -9,7 +9,8 @@ matrix:
       compiler: gcc
       # "dist" specifies the operating system ("bionic"=ubuntu18.04)
       dist: bionic
-      #install:
+      install:
+      - sudo apt-get install libeigen3-dev
       #  - sudo apt-get install valgrind
       #  Optional: To test the output of your program after running, you can use
       #  - git clone https://github.com/kward/shunit2 shunit2
