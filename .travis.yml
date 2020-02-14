@@ -11,14 +11,6 @@ matrix:
       dist: bionic
       install:
         - sudo apt-get install libeigen3-dev
-        - sudo apt-get install --no-install-recommends libgtest-dev
-        - pushd /usr/src/gtest
-        - sudo cmake CMakeLists.txt
-        - sudo make
-        - popd
-        - pushd /usr/lib
-        - sudo ln -s /usr/src/gtest/libgtest* .
-        - popd
       #  - sudo apt-get install valgrind
       #  Optional: To test the output of your program after running, you can use
       #  - git clone https://github.com/kward/shunit2 shunit2
