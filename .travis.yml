@@ -23,7 +23,7 @@ matrix:
         #- g++ -g -O0  -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
         #- valgrind --leak-check=yes --error-exitcode=1 ./lambda_lanczos_test
 
-	- mkdir -p build
+        - mkdir -p build
         - cd build
         - cmake ..
         - make lambda_lanczos_test
