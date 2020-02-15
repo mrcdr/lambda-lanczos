@@ -17,6 +17,7 @@ matrix:
             - cmake
             - cmake-data
             - libgtest-dev
+            - libeigen3-dev
       env: COMPILER=g++-5
       #install:
       #  - sudo apt-get install valgrind
