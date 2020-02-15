@@ -18,7 +18,7 @@ matrix:
             - libeigen3-dev
       env: COMPILER=g++
 
-      compiler: clang
+    - compiler: clang
       # "dist" specifies the operating system ("bionic"=ubuntu18.04)
       dist: bionic
       addons:
