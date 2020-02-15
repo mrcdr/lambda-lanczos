@@ -6,8 +6,8 @@ LDFLAGS = -lm
 
 HEADERS = $(INCDIR)/lambda_lanczos.hpp $(INCDIR)/lambda_lanczos_util.hpp
 
-lambda_lanczos_test: test/lambda_lanczos_test.cpp $(HEADERS)
-	$(CXX) -I$(INCDIR) test/lambda_lanczos_test.cpp -o lambda_lanczos_test
+lambda_lanczos_test: $(SRCDIR)/lambda_lanczos_test/lambda_lanczos_test.cpp $(HEADERS)
+	$(CXX) -I$(INCDIR) $(SRCDIR)/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
 
 sample1: $(SRCDIR)/samples/sample1_simple.cpp $(HEADERS)
 	$(CXX) -I$(INCDIR) $(SRCDIR)/samples/sample1_simple.cpp -o sample1
