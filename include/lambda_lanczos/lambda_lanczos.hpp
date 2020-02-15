@@ -64,10 +64,9 @@ public:
 
 private:
   static void schmidt_orth(vector<T>&, const vector<vector<T>>&);
-  real_t<T> find_minimum_eigenvalue(const vector<real_t<T>>&,
-				    const vector<real_t<T>>&) const;
-  real_t<T> find_maximum_eigenvalue(const vector<real_t<T>>&,
-				    const vector<real_t<T>>&) const;
+  real_t<T> find_mth_eigenvalue(const vector<real_t<T>>&,
+				const vector<real_t<T>>&,
+				const size_t m) const;
   static real_t<T> tridiagonal_eigen_limit(const vector<real_t<T>>&,
 					   const vector<real_t<T>>&);
   static int num_of_eigs_smaller_than(real_t<T>,
@@ -149,11 +148,8 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
     betak = norm(uk);
     beta.push_back(betak);
 
-    if(this->find_maximum) {
-      ev = find_maximum_eigenvalue(alpha, beta);
-    } else {
-      ev = find_minimum_eigenvalue(alpha, beta);
-    }
+    ev = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-2 : 0);
+    // The first element of alpha is a dummy. Thus its size is alpha.size()-1
 
     const real_t<T> zero_threshold = minimum_effective_decimal<real_t<T>>()*1e-1;
     if(betak < zero_threshold) {
@@ -226,8 +222,9 @@ inline void LambdaLanczos<T>::schmidt_orth(vector<T>& uorth, const vector<vector
 
 
 template <typename T>
-inline real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T>>& alpha,
-							   const vector<real_t<T>>& beta) const {
+inline real_t<T> LambdaLanczos<T>::find_mth_eigenvalue(const vector<real_t<T>>& alpha,
+						       const vector<real_t<T>>& beta,
+						       const size_t m) const {
   real_t<T> eps = this->eps * this->tridiag_eps_ratio;
   real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
   real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
@@ -239,45 +236,10 @@ inline real_t<T> LambdaLanczos<T>::find_minimum_eigenvalue(const vector<real_t<T
   while(upper-lower > std::min(std::abs(lower), std::abs(upper))*eps) {
     mid = (lower+upper)/2.0;
     nmid = num_of_eigs_smaller_than(mid, alpha, beta);
-    if(nmid >= 1) {
+    if(nmid >= m+1) {
       upper = mid;
     } else {
       lower = mid;
-    }
-
-    if(mid == pmid) {
-      /* This avoids an infinite loop due to zero matrix */
-      break;
-    }
-    pmid = mid;
-  }
-
-  return lower; // The "lower" almost equals the "upper" here.
-}
-
-
-template <typename T>
-inline real_t<T> LambdaLanczos<T>::find_maximum_eigenvalue(const vector<real_t<T>>& alpha,
-							   const vector<real_t<T>>& beta) const {
-  real_t<T> eps = this->eps * this->tridiag_eps_ratio;
-  real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
-  real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
-  real_t<T> lower = -r;
-  real_t<T> upper = r;
-  real_t<T> mid;
-  unsigned int nmid; // Number of eigenvalues smaller than the "mid"
-
-  size_t m = alpha.size() - 1;  /* Number of eigenvalues of the approximated triangular matrix,
-				which equals the rank of it */
-
-  while(upper-lower > std::min(std::abs(lower), std::abs(upper))*eps) {
-    mid = (lower+upper)/2.0;
-    nmid = num_of_eigs_smaller_than(mid, alpha, beta);
-
-    if(nmid < m) {
-      lower = mid;
-    } else {
-      upper = mid;
     }
 
     if(mid == pmid) {
