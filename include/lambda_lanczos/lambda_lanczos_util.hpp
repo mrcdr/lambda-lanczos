@@ -6,6 +6,7 @@
 #include <limits>
 #include <cmath>
 
+#if 0
 namespace lambda_lanczos_util {
 namespace {
 template<typename T>
@@ -14,49 +15,45 @@ using vector = std::vector<T>;
 template<typename T>
 using complex = std::complex<T>;
 }
+#endif //#if 0
 
 
 /*
- * Type to corresponding real type map,
- * used as realType<double>::type
+ * real_t<T> is a type mapper.  It is defined below.
+ * By default, real_t<T> returns T.  However real_t<complex<T>> returns T.
+ * Usage example: This function returns a real number even if T is complex:
+ * template <typename T>
+ * inline real_t<T> norm(const std::vector<T>& vec);
  */
 template <typename T>
-struct realTypeMap;
-
-template <>
-struct realTypeMap<double> {
-  typedef double type;
+struct realTypeMap {
+  typedef T type;
 };
-
-template <>
-struct realTypeMap<float> {
-  typedef float type;
+template <typename T>
+struct realTypeMap<std::complex<T>> {
+  typedef T type;
 };
-
-template <>
-struct realTypeMap<long double> {
-  typedef long double type;
-};
-
-template <typename real_t>
-struct realTypeMap<complex<real_t>> {
-  typedef real_t type;
-};
-
 template <typename T>
 using real_t = typename realTypeMap<T>::type;
 
 
+/*
+ * Define a function, ConjugateProduct::prod(a,b), which returns a*b by default.
+ * If the arguments are complex numbers, it returns conj(a)*b instead.
+ */
 template <typename T>
 struct ConjugateProduct {
 public:
-  static T prod(T, T);
+  static T prod(T a, T b) {
+    return a*b;
+  }
 };
-
 template <typename T>
-struct ConjugateProduct<complex<T>> {
+struct ConjugateProduct<std::complex<T>> {
 public:
-  static complex<T> prod(complex<T>, complex<T>);
+  static std::complex<T> prod(std::complex<T> a, std::complex<T> b) {
+    return std::conj(a)*b;
+  }
 };
 
 
