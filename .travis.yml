@@ -10,31 +10,25 @@ matrix:
       dist: bionic
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
           packagees:
-            - g++-5
+            - g++
             - cmake
             - cmake-data
             - libgtest-dev
             - libeigen3-dev
-      env: COMPILER=g++-5
+      env: COMPILER=g++
 
       compiler: clang
       # "dist" specifies the operating system ("bionic"=ubuntu18.04)
       dist: bionic
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise
           packagees:
-            - clang++-3.6
             - cmake
             - cmake-data
             - libgtest-dev
             - libeigen3-dev
-      env: COMPILER=clang++-3.6
+      env: COMPILER=clang++
 
 #install:
   # - sudo apt-get install valgrind
