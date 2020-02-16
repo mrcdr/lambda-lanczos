@@ -6,8 +6,9 @@
 #include <limits>
 #include <cmath>
 
-#if 0
 namespace lambda_lanczos_util {
+
+#if 0
 namespace {
 template<typename T>
 using vector = std::vector<T>;
@@ -35,27 +36,6 @@ struct realTypeMap<std::complex<T>> {
 };
 template <typename T>
 using real_t = typename realTypeMap<T>::type;
-
-
-/*
- * Define a function, ConjugateProduct::prod(a,b), which returns a*b by default.
- * If the arguments are complex numbers, it returns conj(a)*b instead.
- */
-template <typename T>
-struct ConjugateProduct {
-public:
-  static T prod(T a, T b) {
-    return a*b;
-  }
-};
-template <typename T>
-struct ConjugateProduct<std::complex<T>> {
-public:
-  static std::complex<T> prod(std::complex<T> a, std::complex<T> b) {
-    return std::conj(a)*b;
-  }
-};
-
 
 
 template <typename T>
@@ -91,16 +71,27 @@ constexpr T minimum_effective_decimal();
 
 
 /* Implementation */
+  
+/*
+ * ConjugateProduct::prod(a,b) is a function which returns a*b by default.
+ * However if the arguments are complex numbers, it returns conj(a)*b instead.
+ *
+ * (Since it is a static function, we don't need to include it in the interface.
+ *  We can hide it here in the implementation section instead.)
+ */
+template <typename T>
+struct ConjugateProduct {
+public:
+  static T prod(T a, T b) { return a*b; }
+};
 
 template <typename T>
-inline T ConjugateProduct<T>::prod(T a, T b) {
-  return a*b;
-}
-
-template <typename T>
-inline complex<T> ConjugateProduct<complex<T>>::prod(complex<T> a, complex<T> b) {
-  return conj(a)*b;
-}
+struct ConjugateProduct<std::complex<T>> {
+public:
+  static std::complex<T> prod(std::complex<T> a, std::complex<T> b) {
+    return std::conj(a)*b;
+  }
+};
 
 
 template <typename T>
