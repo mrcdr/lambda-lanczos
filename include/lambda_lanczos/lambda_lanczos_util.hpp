@@ -8,17 +8,6 @@
 
 namespace lambda_lanczos_util {
 
-#if 0
-namespace {
-template<typename T>
-using vector = std::vector<T>;
-
-template<typename T>
-using complex = std::complex<T>;
-}
-#endif //#if 0
-
-
 /*
  * real_t<T> is a type mapper.  It is defined below.
  * By default, real_t<T> returns T.  However real_t<complex<T>> returns T.
@@ -56,18 +45,6 @@ void normalize(vector<T>&);
 
 template <typename T>
 real_t<T> l1_norm(const vector<T>&);
-
-
-template <typename T>
-constexpr int sig_decimal_digit();
-
-
-template <typename T>
-constexpr T minimum_effective_decimal();
-
-
-
-
 
 
 /* Implementation */
