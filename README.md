@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/mrcdr/lambda-lanczos.svg?branch=master)](https://travis-ci.org/mrcdr/lambda-lanczos.svg?branch=master)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/mrcdr/lambda-lanczos)]()
 
