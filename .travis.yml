@@ -53,20 +53,10 @@ script:
   - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage" ..
   - make lambda_lanczos_test VERBOSE=1
   - ctest --verbose
-  # ---- Optional: Code-coverage tests: ----
-  #- clang++ -g -O0 -coverage -fno-inline -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
-  #- ./lambda_lanczos_test
   # ---- Optional: check for memory errors (probably not needed) ----
   #- clang++ -g -O0  -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
   #- valgrind --leak-check=yes --error-exitcode=1 ./lambda_lanczos_test
 
-#after_success:
-  # ---- Optional: Report code-coverage test results to codecov.io ----
-  #  - bash <(curl -s https://codecov.io/bash)
-
 after_success:
-  - cd test/CMakeFiles/lambda_lanczos_test.dir
-#  - lcov --directory . --capture --output-file coverage.info
-#  - lcov --remove coverage.info "*/gtest/*" "*/c++/*" --output-file coverageFiltered.info
-#  - lcov --list coverageFiltered.info
-  - bash <(curl -s https://codecov.io/bash) #-f coverageFiltered.info
+  # Report code-coverage test results to codecov.io
+  - bash <(curl -s https://codecov.io/bash)
