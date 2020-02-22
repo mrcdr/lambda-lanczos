@@ -50,7 +50,7 @@ before_scipt:
 script:
   - mkdir -p build
   - cd build
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_CXX_FLAGS="--coverage" ..
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage" ..
   - make lambda_lanczos_test VERBOSE=1
   - ctest --verbose
   # ---- Optional: Code-coverage tests: ----
