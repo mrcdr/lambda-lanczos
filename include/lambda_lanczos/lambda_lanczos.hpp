@@ -72,6 +72,7 @@ private:
   static int num_of_eigs_smaller_than(real_t<T>,
 				      const vector<real_t<T>>&,
 				      const vector<real_t<T>>&);
+  real_t<T> UpperBoundEvals() const;
 };
 
 
@@ -92,6 +93,15 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
   vector<vector<T>> u;     // Lanczos vectors
   vector<real_t<T>> alpha; // Diagonal elements of an approximated tridiagonal matrix
   vector<real_t<T>> beta;  // Subdiagonal elements of an approximated tridiagonal matrix
+
+  real_t<T> eigenval_offset = this->eigenvalue_offset;
+  if (eigenval_offset == 0.0) {
+    // If not set, then choose the eigenvalue offset automatically
+    if (find_maximum)
+      eigenval_offset = UpperBoundEvals();
+    else
+      eigenval_offset = -UpperBoundEvals();
+  }
 
   const auto n = this->matrix_size;
 
@@ -120,7 +130,7 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
   for(int k = 1;k <= this->max_iteration;k++) {
     /* vk = (A + offset*E)uk, here E is the identity matrix */
     for(size_t i = 0;i < n;i++) {
-      vk[i] = uk[i]*this->eigenvalue_offset;
+      vk[i] = uk[i]*eigenval_offset;
     }
     this->mv_mul(uk, vk);
 
@@ -173,7 +183,7 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, vector<T>& eigvec) const {
     }
   }
 
-  eigvalue = ev - this->eigenvalue_offset;
+  eigvalue = ev - eigenval_offset;
 
   auto m = alpha.size();
   vector<T> cv(m+1);
@@ -293,6 +303,32 @@ inline int LambdaLanczos<T>::num_of_eigs_smaller_than(real_t<T> c,
   }
 
   return count;
+}
+
+
+// Find an upper bound for the eigenvalue with the maximum magnitude.
+// According to Gershgorin theorem, max_j{Σ_i|Aij|}, is an upper bound.
+// We can infer the contents of each column in the matrix by multiplying
+// it with different unit vectors.
+template <typename T>
+inline real_t<T> LambdaLanczos<T>::UpperBoundEvals() const {
+  const auto n = this->matrix_size;
+  vector<T> unit_vec_j(n);
+  vector<T> matrix_column_j(n);
+  real_t<T> eval_upper_bound = 0.0;
+  for (int j = 0; j < n; j++) {
+    std::fill(unit_vec_j.begin(), unit_vec_j.end(), 0);  // fill with zeros
+    unit_vec_j[j] = 1.0;  // = jth element is 1, all other elements are 0
+    // Multiplying the matrix by a unit vector vector (a vector containing only
+    // 1 non-zero element at position j) extracts the jth column of the matrix.
+    this->mv_mul(unit_vec_j, matrix_column_j);
+    real_t<T> sum_column = 0.0;  // compute Σ_i|Aij|
+    for (int i = 0; i < n; i++)
+      sum_column += std::abs(matrix_column_j[i]);
+    if (eval_upper_bound < sum_column)
+      eval_upper_bound = sum_column; // compute max_j{Σ_i|Aij|}
+  }
+  return eval_upper_bound;
 }
 
 
