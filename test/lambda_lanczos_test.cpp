@@ -94,9 +94,10 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   engine.run(eigvalue, eigvec);
 
 
+  auto sign = eigvec[0]/std::abs(eigvec[0]);
   vector<double> correct_eigvec(n);
   for(size_t i = 0;i < n; i++) {
-    correct_eigvec[i] = 1.0/sqrt(3.0);
+    correct_eigvec[i] = sign*1.0/sqrt(3.0);
   }
   double correct_eigvalue = 4.0;
 
@@ -129,9 +130,10 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_NOT_FIX_RANDOM_SEED) {
   engine.run(eigvalue, eigvec);
 
 
+  auto sign = eigvec[0]/std::abs(eigvec[0]);
   vector<double> correct_eigvec(n);
   for(size_t i = 0;i < n; i++) {
-    correct_eigvec[i] = 1.0/sqrt(3.0);
+    correct_eigvec[i] = sign*1.0/sqrt(3.0);
   }
   double correct_eigvalue = 4.0;
 
