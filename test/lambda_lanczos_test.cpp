@@ -12,7 +12,7 @@ using vector = std::vector<T>;
 template<typename T>
 using complex = std::complex<T>;
 
-void sig_digit_test() {
+/*void sig_digit_test() {
   std::cout << std::endl << "-- Significant decimal digit test --" << std::endl;
   std::cout << "float " << lambda_lanczos::util::sig_decimal_digit<float>() << " "
 	    << lambda_lanczos::util::minimum_effective_decimal<float>() << std::endl;
@@ -20,7 +20,7 @@ void sig_digit_test() {
 	    << lambda_lanczos::util::minimum_effective_decimal<double>() << std::endl;
   std::cout << "long double " << lambda_lanczos::util::sig_decimal_digit<long double>() << " "
 	    << lambda_lanczos::util::minimum_effective_decimal<long double>() << std::endl;
-}
+}*/
 
 template <typename T>
 void vector_initializer(vector<T>& v);
@@ -90,7 +90,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   engine.eigenvalue_offset = 6.0;
 
   double eigvalue;
-  vector<double> eigvec(n);
+  vector<double> eigvec(1); // The size will be enlarged automatically
   engine.run(eigvalue, eigvec);
 
 
