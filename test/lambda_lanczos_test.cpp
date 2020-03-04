@@ -14,12 +14,12 @@ using complex = std::complex<T>;
 
 void sig_digit_test() {
   std::cout << std::endl << "-- Significant decimal digit test --" << std::endl;
-  std::cout << "float " << lambda_lanczos_util::sig_decimal_digit<float>() << " "
-       << lambda_lanczos_util::minimum_effective_decimal<float>() << std::endl;
-  std::cout << "double " << lambda_lanczos_util::sig_decimal_digit<double>() << " "
-       << lambda_lanczos_util::minimum_effective_decimal<double>() << std::endl;
-  std::cout << "long double " << lambda_lanczos_util::sig_decimal_digit<long double>() << " "
-       << lambda_lanczos_util::minimum_effective_decimal<long double>() << std::endl;
+  std::cout << "float " << lambda_lanczos::util::sig_decimal_digit<float>() << " "
+	    << lambda_lanczos::util::minimum_effective_decimal<float>() << std::endl;
+  std::cout << "double " << lambda_lanczos::util::sig_decimal_digit<double>() << " "
+	    << lambda_lanczos::util::minimum_effective_decimal<double>() << std::endl;
+  std::cout << "long double " << lambda_lanczos::util::sig_decimal_digit<long double>() << " "
+	    << lambda_lanczos::util::minimum_effective_decimal<long double>() << std::endl;
 }
 
 template <typename T>
@@ -54,7 +54,7 @@ TEST(UNIT_TEST, INNER_PRODUCT) {
   vector<complex<double>> v1{3.0, c1};
   vector<complex<double>> v2{3.0, c2};
 
-  auto result = lambda_lanczos_util::inner_prod(v1, v2);
+  auto result = lambda_lanczos::util::inner_prod(v1, v2);
   complex<double> correct(23.0, -2.0);
 
   EXPECT_DOUBLE_EQ(correct.real(), result.real());
@@ -67,7 +67,7 @@ TEST(UNIT_TEST, L1_NORM) {
 
   vector<complex<double>> v{c1, c2};
 
-  EXPECT_DOUBLE_EQ(sqrt(10.0)+sqrt(2.0), lambda_lanczos_util::l1_norm(v));
+  EXPECT_DOUBLE_EQ(sqrt(10.0)+sqrt(2.0), lambda_lanczos::util::l1_norm(v));
 }
 
 TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
@@ -146,7 +146,7 @@ TEST(DIAGONALIZE_TEST, DYNAMIC_MATRIX) {
   for(size_t i = 0;i < n;i++) {
     correct_eigvec[i] = sign * std::sin((i+1)*M_PI/(n+1));
   }
-  lambda_lanczos_util::normalize(correct_eigvec);
+  lambda_lanczos::util::normalize(correct_eigvec);
 
   EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
   for(size_t i = 0;i < n;i++) {
@@ -214,7 +214,7 @@ TEST(DIAGONALIZE_TEST, HERMITIAN_MATRIX) {
 
 
   vector<complex<double>> correct_eigvec { 1.0, I_, -1.0 };
-  lambda_lanczos_util::normalize(correct_eigvec);
+  lambda_lanczos::util::normalize(correct_eigvec);
   complex<double> phase_factor = std::exp(complex<double>(0.0, 1.0)*std::arg(eigvec[0]));
   for(size_t i = 0;i < n; i++) {
     correct_eigvec[i] *= phase_factor;

@@ -6,7 +6,7 @@
 #include <limits>
 #include <cmath>
 
-namespace lambda_lanczos_util {
+namespace lambda_lanczos { namespace util {
 
 /*
  * real_t<T> is a type mapper.  It is defined below.
@@ -28,23 +28,23 @@ using real_t = typename realTypeMap<T>::type;
 
 
 template <typename T>
-T inner_prod(const vector<T>&, const vector<T>&);
+T inner_prod(const std::vector<T>&, const std::vector<T>&);
 
 
 template <typename T>
-double norm(const vector<double>&);
+double norm(const std::vector<double>&);
 
 
 template <typename T1, typename T2>
-void scalar_mul(T1, vector<T2>&);
+void scalar_mul(T1, std::vector<T2>&);
 
 
 template <typename T>
-void normalize(vector<T>&);
+void normalize(std::vector<T>&);
 
 
 template <typename T>
-real_t<T> l1_norm(const vector<T>&);
+real_t<T> l1_norm(const std::vector<T>&);
 
 
 /* Implementation */
@@ -72,7 +72,7 @@ public:
 
 
 template <typename T>
-inline T inner_prod(const vector<T>& v1, const vector<T>& v2) {
+inline T inner_prod(const std::vector<T>& v1, const std::vector<T>& v2) {
   return std::inner_product(std::begin(v1), std::end(v1),
 			    std::begin(v2), T(),
 			    [](T a, T b) -> T { return a+b; },
@@ -84,14 +84,14 @@ inline T inner_prod(const vector<T>& v1, const vector<T>& v2) {
 
 
 template <typename T>
-inline real_t<T> norm(const vector<T>& vec) {
+inline real_t<T> norm(const std::vector<T>& vec) {
   return std::sqrt(std::real(inner_prod(vec, vec)));
   // The norm of any complex vector <v|v> is real by definition.
 }
 
 
 template <typename T1, typename T2>
-inline void scalar_mul(T1 a, vector<T2>& vec) {
+inline void scalar_mul(T1 a, std::vector<T2>& vec) {
   int n = vec.size();
   for(int i = 0;i < n;i++) {
     vec[i] *= a;
@@ -100,13 +100,13 @@ inline void scalar_mul(T1 a, vector<T2>& vec) {
 
 
 template <typename T>
-inline void normalize(vector<T>& vec) {
+inline void normalize(std::vector<T>& vec) {
   scalar_mul(1.0/norm(vec), vec);
 }
 
 
 template <typename T>
-inline real_t<T> l1_norm(const vector<T>& vec) {
+inline real_t<T> l1_norm(const std::vector<T>& vec) {
   real_t<T> norm = real_t<T>(); // Zero initialization
 
   for(const T& element : vec) {
@@ -133,7 +133,6 @@ inline constexpr T minimum_effective_decimal() {
   return pow(10, -sig_decimal_digit<T>());
 }
 
-
-} /* namespace lambda_lanczos_util */
+}} /* namespace lambda_lanczos::util */
 
 #endif /* LAMBDA_LANCZOS_UTIL_H_ */
