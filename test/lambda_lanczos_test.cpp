@@ -106,6 +106,41 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   }
 }
 
+TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_NOT_FIX_RANDOM_SEED) {
+  const size_t n = 3;
+  double matrix[n][n] = { {2.0, 1.0, 1.0},
+                          {1.0, 2.0, 1.0},
+			  {1.0, 1.0, 2.0} };
+  /* Its eigenvalues are {4, 1, 1} */
+
+  auto matmul = [&](const vector<double>& in, vector<double>& out) {
+    for(size_t i = 0;i < n;i++) {
+      for(size_t j = 0;j < n;j++) {
+	out[i] += matrix[i][j]*in[j];
+      }
+    }
+  };
+
+  LambdaLanczos<double> engine(matmul, n, true);
+  engine.eigenvalue_offset = 6.0;
+
+  double eigvalue;
+  vector<double> eigvec(1); // The size will be enlarged automatically
+  engine.run(eigvalue, eigvec);
+
+
+  vector<double> correct_eigvec(n);
+  for(size_t i = 0;i < n; i++) {
+    correct_eigvec[i] = 1.0/sqrt(3.0);
+  }
+  double correct_eigvalue = 4.0;
+
+  EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
+  for(size_t i = 0;i < n;i++) {
+    EXPECT_NEAR(correct_eigvec[i], eigvec[i], std::abs(correct_eigvalue*engine.eps*10));
+  }
+}
+
 TEST(DIAGONALIZE_TEST, DYNAMIC_MATRIX) {
   const size_t n = 10;
 
@@ -171,6 +206,41 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE) {
 
   LambdaLanczos<complex<double>> engine(matmul, n, true);
   engine.init_vector = vector_initializer<complex<double>>;
+  double eigvalue;
+  vector<complex<double>> eigvec(n);
+  engine.run(eigvalue, eigvec);
+
+
+  vector<complex<double>> correct_eigvec(n);
+  complex<double> phase_factor = std::exp(complex<double>(0.0, 1.0)*std::arg(eigvec[0]));
+  for(size_t i = 0;i < n; i++) {
+    correct_eigvec[i] = 1.0 / std::sqrt(n) * phase_factor;
+  }
+  double correct_eigvalue = 4.0;
+
+  EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
+  for(size_t i = 0;i < n;i++) {
+    EXPECT_NEAR(correct_eigvec[i].real(), eigvec[i].real(), std::abs(correct_eigvalue*engine.eps*10));
+    EXPECT_NEAR(correct_eigvec[i].imag(), eigvec[i].imag(), std::abs(correct_eigvalue*engine.eps*10));
+  }
+}
+
+TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE_NOT_FIX_RANDOM_SEED) {
+  const size_t n = 3;
+  complex<double> matrix[n][n] = { {2.0, 1.0, 1.0},
+				   {1.0, 2.0, 1.0},
+				   {1.0, 1.0, 2.0} };
+  /* Its eigenvalues are {4, 1, 1} */
+
+  auto matmul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
+    for(size_t i = 0;i < n;i++) {
+      for(size_t j = 0;j < n;j++) {
+	out[i] += matrix[i][j]*in[j];
+      }
+    }
+  };
+
+  LambdaLanczos<complex<double>> engine(matmul, n, true);
   double eigvalue;
   vector<complex<double>> eigvec(n);
   engine.run(eigvalue, eigvec);
