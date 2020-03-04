@@ -18,6 +18,9 @@ matrix:
             - libeigen3-dev
             - lcov
       env: COMPILER=g++
+      after_success:
+        # Report code-coverage test results to codecov.io
+        - bash <(curl -s https://codecov.io/bash)
 
     - compiler: clang
       # "dist" specifies the operating system ("bionic"=ubuntu18.04)
@@ -57,6 +60,3 @@ script:
   #- clang++ -g -O0  -std=c++14 -I./include ./src/lambda_lanczos_test/lambda_lanczos_test.cpp -o lambda_lanczos_test
   #- valgrind --leak-check=yes --error-exitcode=1 ./lambda_lanczos_test
 
-after_success:
-  # Report code-coverage test results to codecov.io
-  - bash <(curl -s https://codecov.io/bash)

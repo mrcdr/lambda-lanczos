@@ -39,8 +39,7 @@ private:
   using real_t = util::real_t<n_type>;
 
 public:
-  LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size, bool find_maximum);
-  LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size) : LambdaLanczos(mv_mul, matrix_size, false) {}
+  LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size, bool find_maximum = false);
 
   std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul;
   std::function<void(std::vector<T>&)> init_vector = VectorRandomInitializer<T>::init;
