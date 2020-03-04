@@ -7,58 +7,24 @@
 #include <cmath>
 
 namespace lambda_lanczos_util {
-namespace {
-template<typename T>
-using vector = std::vector<T>;
-
-template<typename T>
-using complex = std::complex<T>;
-}
-
 
 /*
- * Type to corresponding real type map,
- * used as realType<double>::type
+ * real_t<T> is a type mapper.  It is defined below.
+ * By default, real_t<T> returns T.  However real_t<complex<T>> returns T.
+ * Usage example: This function returns a real number even if T is complex:
+ * template <typename T>
+ * inline real_t<T> norm(const std::vector<T>& vec);
  */
 template <typename T>
-struct realTypeMap;
-
-template <>
-struct realTypeMap<double> {
-  typedef double type;
+struct realTypeMap {
+  typedef T type;
 };
-
-template <>
-struct realTypeMap<float> {
-  typedef float type;
+template <typename T>
+struct realTypeMap<std::complex<T>> {
+  typedef T type;
 };
-
-template <>
-struct realTypeMap<long double> {
-  typedef long double type;
-};
-
-template <typename real_t>
-struct realTypeMap<complex<real_t>> {
-  typedef real_t type;
-};
-
 template <typename T>
 using real_t = typename realTypeMap<T>::type;
-
-
-template <typename T>
-struct ConjugateProduct {
-public:
-  static T prod(T, T);
-};
-
-template <typename T>
-struct ConjugateProduct<complex<T>> {
-public:
-  static complex<T> prod(complex<T>, complex<T>);
-};
-
 
 
 template <typename T>
@@ -81,29 +47,28 @@ template <typename T>
 real_t<T> l1_norm(const vector<T>&);
 
 
-template <typename T>
-constexpr int sig_decimal_digit();
-
-
-template <typename T>
-constexpr T minimum_effective_decimal();
-
-
-
-
-
-
 /* Implementation */
+  
+/*
+ * ConjugateProduct::prod(a,b) is a function which returns a*b by default.
+ * However if the arguments are complex numbers, it returns conj(a)*b instead.
+ *
+ * (Since it is a static function, we don't need to include it in the interface.
+ *  We can hide it here in the implementation section instead.)
+ */
+template <typename T>
+struct ConjugateProduct {
+public:
+  static T prod(T a, T b) { return a*b; }
+};
 
 template <typename T>
-inline T ConjugateProduct<T>::prod(T a, T b) {
-  return a*b;
-}
-
-template <typename T>
-inline complex<T> ConjugateProduct<complex<T>>::prod(complex<T> a, complex<T> b) {
-  return conj(a)*b;
-}
+struct ConjugateProduct<std::complex<T>> {
+public:
+  static std::complex<T> prod(std::complex<T> a, std::complex<T> b) {
+    return std::conj(a)*b;
+  }
+};
 
 
 template <typename T>
