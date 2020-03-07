@@ -2,15 +2,15 @@
 #https://stackoverflow.com/questions/27644586/how-to-set-up-travis-ci-with-multiple-languages
 
 language: cpp
-sudo: required
-matrix:
+os: linux
+jobs:
   include:
     - compiler: gcc
       # "dist" specifies the operating system ("bionic"=ubuntu18.04)
       dist: bionic
       addons:
         apt:
-          packagees:
+          packages:
             - g++
             - cmake
             - cmake-data
@@ -27,7 +27,7 @@ matrix:
       dist: bionic
       addons:
         apt:
-          packagees:
+          packages:
             - cmake
             - cmake-data
             - libgtest-dev
@@ -43,13 +43,14 @@ matrix:
   #  Optional: To test the output of your program after running, you can use
   #  - git clone https://github.com/kward/shunit2 shunit2
 
-before_scipt:
+before_script:
   - mkdir -p gtest_build
   - pushd gtest_build
   - cmake -DCMAKE_CXX_COMPILER=$COMPILER /usr/src/gtest/
   - make
   - sudo cp *.a /usr/lib
   - popd
+
 script:
   - mkdir -p build
   - cd build
