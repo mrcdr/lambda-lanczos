@@ -63,7 +63,7 @@ see a [sample code](https://github.com/mrcdr/lambda-lanczos/blob/master/src/samp
   e.g. a sparse matrix whose non-zero elements are stored
   as a list of {row-index, column-index, value} tuples.
 
-For detailed specs, see [Wiki](https://github.com/mrcdr/lambda-lanczos/wiki/#Detailed-specs).
+For detailed specs, see [Wiki](https://github.com/mrcdr/lambda-lanczos/wiki/Detailed-specs).
 
 ## Sample programs
 See [here](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples).
@@ -102,7 +102,7 @@ So the installation step is as follows:
   So corresponding code would be like [this](https://github.com/mrcdr/lambda-lanczos/blob/master/src/determine_eigenvalue_offset/determine_eigenvalue_offset.cpp).
   If you want to calculate the maximum eigenvalue, you should use `eigenvalue_offset = r`. To calculate the minimum eigenvalue `eigenvalue_offset = -r`.
 
-  More information about `eigenvalue_offset` is available [here](https://github.com/mrcdr/lambda-lanczos/wiki/More-about-eigenvalue_offset)
+  More information about `eigenvalue_offset` is available [here](https://github.com/mrcdr/lambda-lanczos/wiki/More-about-eigenvalue_offset).
 
 ## License
 
