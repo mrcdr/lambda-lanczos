@@ -8,6 +8,7 @@
 #include <cmath>
 #include <numeric>
 #include <random>
+#include <algorithm>
 #include <lambda_lanczos_util.hpp>
 
 
@@ -111,10 +112,11 @@ inline int LambdaLanczos<T>::run(real_t<T>& eigvalue, std::vector<T>& eigvec) co
   int itern = this->max_iteration;
   for(int k = 1;k <= this->max_iteration;k++) {
     /* vk = (A + offset*E)uk, here E is the identity matrix */
-    for(size_t i = 0;i < n;i++) {
-      vk[i] = uk[i]*this->eigenvalue_offset;
-    }
+    std::fill(vk.begin(), vk.end(), 0.0);
     this->mv_mul(uk, vk);
+    for(size_t i = 0;i < n;i++) {
+      vk[i] += uk[i]*this->eigenvalue_offset;
+    }
 
     alphak = std::real(util::inner_prod(u.back(), vk));
 

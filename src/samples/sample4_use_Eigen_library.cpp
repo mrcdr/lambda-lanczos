@@ -26,9 +26,10 @@ int main() {
     auto eigen_in = Eigen::Map<const Eigen::VectorXd>(&in[0], in.size());
     auto eigen_out = Eigen::Map<Eigen::VectorXd>(&out[0], out.size());
 
-    eigen_out = matrix * eigen_in;
+    eigen_out = matrix * eigen_in; // Easy version
+    // eigen_out.noalias() += matrix * eigen_in; // Efficient version
   };
-  
+
   LambdaLanczos<double> engine(mv_mul, n, true); // true means to calculate the largest eigenvalue.
   double eigenvalue;
   vector<double> eigenvector(n);
