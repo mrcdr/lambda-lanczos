@@ -27,28 +27,6 @@ template <typename T>
 using real_t = typename realTypeMap<T>::type;
 
 
-template <typename T>
-T inner_prod(const std::vector<T>&, const std::vector<T>&);
-
-
-template <typename T>
-double norm(const std::vector<double>&);
-
-
-template <typename T1, typename T2>
-void scalar_mul(T1, std::vector<T2>&);
-
-
-template <typename T>
-void normalize(std::vector<T>&);
-
-
-template <typename T>
-real_t<T> l1_norm(const std::vector<T>&);
-
-
-/* Implementation */
-  
 /*
  * ConjugateProduct::prod(a,b) is a function which returns a*b by default.
  * However if the arguments are complex numbers, it returns conj(a)*b instead.
