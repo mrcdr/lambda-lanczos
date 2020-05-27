@@ -1,0 +1,8 @@
+/**
+\mainpage
+This document contains full specs of *lambda-lanczos*.
+What users should know is just #lambda_lanczos::LambdaLanczos class,
+but [sample codes](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples) may be more helpful.
+
+Github repository: https://github.com/mrcdr/lambda-lanczos/
+*/

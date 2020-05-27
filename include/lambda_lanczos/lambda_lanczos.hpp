@@ -15,13 +15,21 @@
 namespace lambda_lanczos {
 
 
-/*
+/**
+ * @brief Template class to implement random vector initializer.
+ *
  * "Partially specialization of function" is not allowed,
  * so here it is mimicked by wrapping the "init" function with a class template.
  */
 template <typename T>
 struct VectorRandomInitializer {
 public:
+  /**
+   * @brief Initialize given vector randomly in the range of [-1, 1].
+   *
+   * For complex type, the real and imaginary part of each element will be initialized in
+   * the range of [-1, 1].
+   */
   static void init(std::vector<T>& v) {
     std::random_device dev;
     std::mt19937 mt(dev());
@@ -51,6 +59,9 @@ public:
 };
 
 
+/**
+ * @brief Calculation engine for Lanczos algorithm
+ */
 template <typename T>
 class LambdaLanczos {
 private:
@@ -58,21 +69,74 @@ private:
   using real_t = util::real_t<n_type>;
 
 public:
-  std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul;
-  std::function<void(std::vector<T>&)> init_vector = VectorRandomInitializer<T>::init;
+  /**
+   * @brief Matrix-vector multiplication routine.
+   *
+   * This must be a function to calculate `A*in` and store the result
+   * into `out`, where `A` is the matrix to be diagonalized.
+   */
+  std::function<void(const std::vector<T>& in, std::vector<T>& out)> mv_mul;
 
+  /** @brief Function to initialize the initial Lanczos vector.
+   *
+   * After this function called, the output vector will be normalized automatically.  
+   * Default value is #lambda_lanczos::VectorRandomInitializer::init.
+   */
+  std::function<void(std::vector<T>& vec)> init_vector = VectorRandomInitializer<T>::init;
+
+  /** @brief Dimension of the matrix to be diagonalized. */
   size_t matrix_size;
-  int max_iteration;
+  /** @brief Iteration limit of Lanczos algorithm, set to `matrix_size` automatically. */
+  size_t max_iteration;
+  /** @brief Convergence threshold of Lanczos iteration.
+   *
+   * `eps` = 1e-12 means that the eigenvalue will be calculated with 12 digits of precision.
+   *
+   * Default value is system-dependent. On usual 64-bit systems:
+   * | type (including complex one)       | size (system-dep.) | `eps`   |
+   * | ---------------------------------- | ------------------ | ------- |
+   * | float                              | 4 bytes            | 1e-4    |
+   * | double                             | 8 bytes            | 1e-12   |
+   * | long double                        | 16 bytes           | 1e-19   |
+   */
   real_t<T> eps = util::minimum_effective_decimal<real_t<T>>() * 1e3;
-  real_t<T> tridiag_eps_ratio = 1e-1;
-  size_t initial_vector_size = 200;
+
+  /** @brief true to calculate maximum eigenvalue, false to calculate minimum one.*/
   bool find_maximum;
+
+  /**
+   * @brief Shifts the eigenvalues of the given matrix A.
+   *
+   * The algorithm will calculate the eigenvalue of matrix (A+`eigenvalue_offset`*E),
+   * here E is the identity matrix. The result eigenvalue from `run()` will take this shifting into account,
+   * so you don't have to "reshift" the result with `eigenvalue_offset`.
+   **/
   real_t<T> eigenvalue_offset = 0.0;
+
+  /** @brief (Not necessary to change)
+   *
+   * Description for those who know the Lanczos algorithm:  
+   * This is the ratio between the convergence threshold of resulted eigenvalue and the that of
+   * tridiagonal eigenvalue. To convergent whole Lanczos algorithm,
+   * the convergence threshold for the tridiagonal eigenvalue should be smaller than `eps`.
+   */
+  real_t<T> tridiag_eps_ratio = 1e-1;
+
+  /** @brief (Not necessary to change)
+   *
+   * This variable specifies the initial reserved size of Lanczos vectors.
+   * Controlling this variable might affect reserving efficiency,
+   * but that would be very small compared to matrix-vector-multiplication cost.
+   */
+  size_t initial_vector_size = 200;
 
   LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size, bool find_maximum = false) :
     mv_mul(mv_mul), matrix_size(matrix_size), max_iteration(matrix_size), find_maximum(find_maximum) {}
 
-
+  /**
+   * @brief Executes Lanczos algorithm and stores the result into reference variables passed as arguments.
+   * @return Lanczos-iteration count
+   */
   int run(real_t<T>& eigvalue, std::vector<T>& eigvec) const {
     assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
 
@@ -109,7 +173,7 @@ public:
       std::fill(vk.begin(), vk.end(), 0.0);
       this->mv_mul(uk, vk);
       for(size_t i = 0;i < n;i++) {
-	vk[i] += uk[i]*this->eigenvalue_offset;
+        vk[i] += uk[i]*this->eigenvalue_offset;
       }
 
       alphak = std::real(util::inner_prod(u.back(), vk));
@@ -128,7 +192,7 @@ public:
       alpha.push_back(alphak);
 
       for(size_t i = 0;i < n; i++) {
-	uk[i] = vk[i] - betak*u[k-1][i] - alphak*u[k][i];
+        uk[i] = vk[i] - betak*u[k-1][i] - alphak*u[k][i];
       }
 
       schmidt_orth(uk, u);
@@ -141,23 +205,23 @@ public:
 
       const real_t<T> zero_threshold = util::minimum_effective_decimal<real_t<T>>()*1e-1;
       if(betak < zero_threshold) {
-	u.push_back(uk);
-	/* This element will never be accessed,
-	 * but this "push" guarantees u to always have one more element than
-	 * alpha and beta do.
-	 */
-	itern = k;
-	break;
+        u.push_back(uk);
+        /* This element will never be accessed,
+         * but this "push" guarantees u to always have one more element than
+         * alpha and beta do.
+         */
+        itern = k;
+        break;
       }
 
       util::normalize(uk);
       u.push_back(uk);
 
       if(std::abs(ev-pev) < std::min(std::abs(ev), std::abs(pev))*this->eps) {
-	itern = k;
-	break;
+        itern = k;
+        break;
       } else {
-	pev = ev;
+        pev = ev;
       }
     }
 
@@ -183,7 +247,7 @@ public:
       cv[k] = ((ev - alpha[k+1])*cv[k+1] - beta[k+1]*cv[k+2])/beta[k];
 
       for(size_t i = 0;i < n;i++) {
-	eigvec[i] += cv[k]*u[k][i];
+        eigvec[i] += cv[k]*u[k][i];
       }
     }
 
@@ -193,24 +257,30 @@ public:
   }
 
 private:
+  /**
+   * @brief Orthogonalizes vector `uorth` with respect to vectors in `u`.
+   *
+   * Vectors in `u` must be normalized, but uorth doesn't have to be.
+   */
   void schmidt_orth(std::vector<T>& uorth, const std::vector<std::vector<T>>& u) const {
-    /* Vectors in u must be normalized, but uorth doesn't have to be. */
-
     auto n = uorth.size();
 
     for(size_t k = 0;k < u.size();k++) {
       T innprod = util::inner_prod(uorth, u[k]);
 
       for(size_t i = 0;i < n;i++) {
-	uorth[i] -= innprod * u[k][i];
+        uorth[i] -= innprod * u[k][i];
       }
     }
   }
 
 
+  /**
+   * @brief Finds the `m`th smaller eigenvalue of given tridiagonal matrix.
+   */
   util::real_t<T> find_mth_eigenvalue(const std::vector<util::real_t<T>>& alpha,
-				      const std::vector<util::real_t<T>>& beta,
-				      const size_t m) const {
+                                      const std::vector<util::real_t<T>>& beta,
+                                      const size_t m) const {
     real_t<T> eps = this->eps * this->tridiag_eps_ratio;
     real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
     real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
@@ -223,14 +293,14 @@ private:
       mid = (lower+upper)/2.0;
       nmid = num_of_eigs_smaller_than(mid, alpha, beta);
       if(nmid >= m+1) {
-	upper = mid;
+        upper = mid;
       } else {
-	lower = mid;
+        lower = mid;
       }
 
       if(mid == pmid) {
-	/* This avoids an infinite loop due to zero matrix */
-	break;
+        /* This avoids an infinite loop due to zero matrix */
+        break;
       }
       pmid = mid;
     }
@@ -239,14 +309,15 @@ private:
   }
 
 
-  /*
-   * Compute the upper bound of the absolute value of eigenvalues
-   * by Gerschgorin theorem. This routine gives a rough upper bound,
+  /**
+   * @brief Computes the upper bound of the absolute value of eigenvalues by Gerschgorin theorem.
+   *
+   * This routine gives a rough upper bound,
    * but it is sufficient because the bisection routine using
    * the upper bound converges exponentially.
    */
   util::real_t<T> tridiagonal_eigen_limit(const std::vector<real_t<T>>& alpha,
-					  const std::vector<real_t<T>>& beta) const {
+                                          const std::vector<real_t<T>>& beta) const {
     real_t<T> r = util::l1_norm(alpha);
     r += 2*util::l1_norm(beta);
 
@@ -254,14 +325,16 @@ private:
   }
 
 
-  /*
+  /**
+   * @brief Finds the number of eigenvalues of given tridiagonal matrix smaller than `c`.
+   *
    * Algorithm from
    * Peter Arbenz et al. / "High Performance Algorithms for Structured Matrix Problems" /
    * Nova Science Publishers, Inc.
    */
   int num_of_eigs_smaller_than(real_t<T> c,
-			       const std::vector<real_t<T>>& alpha,
-			       const std::vector<real_t<T>>& beta) const {
+                               const std::vector<real_t<T>>& alpha,
+                               const std::vector<real_t<T>>& beta) const {
     real_t<T> q_i = 1.0;
     int count = 0;
     size_t m = alpha.size();
@@ -269,10 +342,10 @@ private:
     for(size_t i = 1;i < m;i++){
       q_i = alpha[i] - c - beta[i-1]*beta[i-1]/q_i;
       if(q_i < 0){
-	count++;
+        count++;
       }
       if(q_i == 0){
-	q_i = util::minimum_effective_decimal<real_t<T>>();
+        q_i = util::minimum_effective_decimal<real_t<T>>();
       }
     }
 

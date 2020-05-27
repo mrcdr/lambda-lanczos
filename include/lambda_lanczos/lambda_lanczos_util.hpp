@@ -8,35 +8,50 @@
 
 namespace lambda_lanczos { namespace util {
 
-/*
- * real_t<T> is a type mapper.  It is defined below.
- * By default, real_t<T> returns T.  However real_t<complex<T>> returns T.
- * Usage example: This function returns a real number even if T is complex:
- * template <typename T>
- * inline real_t<T> norm(const std::vector<T>& vec);
+
+/**
+ * @brief Template class to map specific types. See #real_t<T> for usage.
+ *
  */
 template <typename T>
 struct realTypeMap {
   typedef T type;
 };
+
 template <typename T>
 struct realTypeMap<std::complex<T>> {
   typedef T type;
 };
+
+/**
+ * @brief Type mapper from `T` to real type of `T`.
+ *
+ * By default, `real_t<T>` returns `T`.
+ * However `real_t<complex<T>>` returns `T`.  
+ * Usage example: This function returns a real number even if `T` is complex:
+ * @code
+ * template <typename T>
+ * inline real_t<T> norm(const std::vector<T>& vec);
+ * @endcode
+ */
 template <typename T>
 using real_t = typename realTypeMap<T>::type;
 
 
-/*
+/**
+ * @brief Template class to implement positive-definite product
+ *
  * ConjugateProduct::prod(a,b) is a function which returns a*b by default.
  * However if the arguments are complex numbers, it returns conj(a)*b instead.
- *
- * (Since it is a static function, we don't need to include it in the interface.
- *  We can hide it here in the implementation section instead.)
+ * This structure is required because partial specialization of
+ * function template is not allowed in C++.
  */
 template <typename T>
 struct ConjugateProduct {
 public:
+  /**
+   * @brief Returns a*b for real-type arguments, conj(a)*b for complex-type arguments.
+   */
   static T prod(T a, T b) { return a*b; }
 };
 
@@ -48,7 +63,13 @@ public:
   }
 };
 
-
+/**
+ * @brief Returns "mathematical" inner product of v1 and v2.
+ *
+ * This function is needed because
+ * std::inner_product calculates transpose(v1)*v2 instead of dagger(v1)*v2 for complex type.
+ *
+ */
 template <typename T>
 inline T inner_prod(const std::vector<T>& v1, const std::vector<T>& v2) {
   return std::inner_product(std::begin(v1), std::end(v1),
@@ -56,18 +77,20 @@ inline T inner_prod(const std::vector<T>& v1, const std::vector<T>& v2) {
 			    [](T a, T b) -> T { return a+b; },
 			    ConjugateProduct<T>::prod);
   // T() means zero value of type T
-  // This spec is required because std::inner_product calculates
-  // v1*v2 not conj(v1)*v2
 }
 
-
+/**
+ * @brief Returns Euclidean norm of given vector.
+ */
 template <typename T>
 inline real_t<T> norm(const std::vector<T>& vec) {
   return std::sqrt(std::real(inner_prod(vec, vec)));
   // The norm of any complex vector <v|v> is real by definition.
 }
 
-
+/**
+ * @brief Multiplies each element of vec by a.
+ */
 template <typename T1, typename T2>
 inline void scalar_mul(T1 a, std::vector<T2>& vec) {
   int n = vec.size();
@@ -76,13 +99,18 @@ inline void scalar_mul(T1 a, std::vector<T2>& vec) {
   }
 }
 
-
+/**
+ * @brief Normalizes given vector.
+ */
 template <typename T>
 inline void normalize(std::vector<T>& vec) {
   scalar_mul(1.0/norm(vec), vec);
 }
 
 
+/**
+ * @brief Returns 1-norm of given vector.
+ */
 template <typename T>
 inline real_t<T> l1_norm(const std::vector<T>& vec) {
   real_t<T> norm = real_t<T>(); // Zero initialization
@@ -95,8 +123,8 @@ inline real_t<T> l1_norm(const std::vector<T>& vec) {
 }
 
 
-/*
- * This returns the significant decimal digits of type T.
+/**
+ * @brief Returns the significant decimal digits of type T.
  *
  */
 template <typename T>
