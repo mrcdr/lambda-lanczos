@@ -168,7 +168,7 @@ public:
     pev = std::numeric_limits<real_t<T>>::max();
 
     int itern = this->max_iteration;
-    for(int k = 1;k <= this->max_iteration;k++) {
+    for(size_t k = 1;k <= this->max_iteration;k++) {
       /* vk = (A + offset*E)uk, here E is the identity matrix */
       std::fill(vk.begin(), vk.end(), 0.0);
       this->mv_mul(uk, vk);
