@@ -3,11 +3,10 @@
 
 language: cpp
 os: linux
+dist: bionic # "dist" specifies the operating system ("bionic"=ubuntu18.04)
 jobs:
   include:
     - compiler: gcc
-      # "dist" specifies the operating system ("bionic"=ubuntu18.04)
-      dist: bionic
       addons:
         apt:
           packages:
@@ -24,8 +23,6 @@ jobs:
         - bash <(curl -s https://codecov.io/bash)
 
     - compiler: clang
-      # "dist" specifies the operating system ("bionic"=ubuntu18.04)
-      dist: bionic
       addons:
         apt:
           packages:
