@@ -63,7 +63,7 @@ see a [sample code](https://github.com/mrcdr/lambda-lanczos/blob/master/src/samp
   e.g. a sparse matrix whose non-zero elements are stored
   as a list of {row-index, column-index, value} tuples.
 
-For detailed specs, see [Wiki](https://github.com/mrcdr/lambda-lanczos/wiki/Detailed-specs).
+For detailed specs, see [API reference](https://mrcdr.github.io/lib-docs/lambda-lanczos/).
 
 ## Sample programs
 See [here](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples).
