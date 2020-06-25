@@ -65,6 +65,9 @@ public:
 template <typename T>
 class LambdaLanczos {
 private:
+  /**
+   * @brief See #util::real_t for details.
+   */
   template <typename n_type>
   using real_t = util::real_t<n_type>;
 
@@ -74,6 +77,7 @@ public:
    *
    * This must be a function to calculate `A*in` and store the result
    * into `out`, where `A` is the matrix to be diagonalized.
+   * You can assume the output vector `out` has been initialized with zeros before the `mv_mul` is called.
    */
   std::function<void(const std::vector<T>& in, std::vector<T>& out)> mv_mul;
 
@@ -130,6 +134,15 @@ public:
    */
   size_t initial_vector_size = 200;
 
+  /**
+    * @brief Constructs Lanczos calculation engine.
+    *
+    * @param mv_mul Matrix-vector multiplication routine. See #mv_mul for details.
+    * @param matrix_size The size of your matrix, i.e. if your matrix is n by n,
+    * `matrix_size` should be n.
+    * @param find_maximum specifies which of the minimum or maximum eigenvalue to be calculated.
+    * By default, `find_maximum=false` so the library will calculates the minimum one.
+    */
   LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size, bool find_maximum = false) :
     mv_mul(mv_mul), matrix_size(matrix_size), max_iteration(matrix_size), find_maximum(find_maximum) {}
 
