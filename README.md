@@ -23,27 +23,33 @@ using lambda_lanczos::LambdaLanczos;
 /* Some include and using declarations are omitted */
 
 
-void sample1() {
+void sample() {
   const int n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},
                           {1.0, 2.0, 1.0},
                           {1.0, 1.0, 2.0} };
-  /* Its eigenvalues are {4, 1, 1} */
+  // its eigenvalues are {4, 1, 1}
 
-  // the matrix-vector multiplication routine
+  /* Prepare matrix-vector multiplication routine used in Lanczos algorithm */
   auto mv_mul = [&](const vector<double>& in, vector<double>& out) {
     for(int i = 0;i < n;i++) {
       for(int j = 0;j < n;j++) {
         out[i] += matrix[i][j]*in[j];
       }
-    } 
+    }
   };
 
+
+  /* Execute Lanczos algorithm */
   LambdaLanczos<double> engine(mv_mul, n, true); // true means to calculate the largest eigenvalue.
   double eigenvalue;
   vector<double> eigenvector(n);
   int itern = engine.run(eigenvalue, eigenvector);
+  //// If C++17 is available, the following notation does the same thing:
+  // auto [eigenvalue, eigenvector, itern] = engine.run()
 
+
+  /* Print result */
   cout << "Iteration count: " << itern << endl;
   cout << "Eigen value: " << setprecision(16) << eigenvalue << endl;
   cout << "Eigen vector:";

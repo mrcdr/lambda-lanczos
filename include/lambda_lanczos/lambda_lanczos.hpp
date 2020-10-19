@@ -2,6 +2,7 @@
 #define LAMBDA_LANCZOS_H_
 
 #include <vector>
+#include <tuple>
 #include <functional>
 #include <cassert>
 #include <limits>
@@ -267,6 +268,23 @@ public:
     util::normalize(eigvec);
 
     return itern;
+  }
+
+  /**
+   * @brief Executes Lanczos algorithm and return result as a tuple.
+   *
+   * This function provides C++17 multiple-value-return interface.
+   *
+   * @return Eigenvalue
+   * @return Eigenvector
+   * @return Lanczos-iteration count
+   */
+  std::tuple<real_t<T>, std::vector<T>, int> run() const {
+    real_t<T> eigvalue;
+    std::vector<T> eigvec(this->matrix_size);
+    int itern = this->run(eigvalue, eigvec);
+
+    return {eigvalue, eigvec, itern};
   }
 
 private:

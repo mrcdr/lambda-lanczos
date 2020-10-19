@@ -102,6 +102,41 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   }
 }
 
+TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_MULTIPLE_VALUE_RETURN_FEATURE) {
+  const size_t n = 3;
+  double matrix[n][n] = { {2.0, 1.0, 1.0},
+                          {1.0, 2.0, 1.0},
+			  {1.0, 1.0, 2.0} };
+  /* Its eigenvalues are {4, 1, 1} */
+
+  auto matmul = [&](const vector<double>& in, vector<double>& out) {
+    for(size_t i = 0;i < n;i++) {
+      for(size_t j = 0;j < n;j++) {
+	out[i] += matrix[i][j]*in[j];
+      }
+    }
+  };
+
+  LambdaLanczos<double> engine(matmul, n, true);
+  engine.init_vector = vector_initializer<double>;
+  engine.eigenvalue_offset = 6.0;
+
+  auto [eigvalue, eigvec, itern] = engine.run(); // C++17 multiple value return
+
+
+  auto sign = eigvec[0]/std::abs(eigvec[0]);
+  vector<double> correct_eigvec(n);
+  for(size_t i = 0;i < n; i++) {
+    correct_eigvec[i] = sign*1.0/sqrt(3.0);
+  }
+  double correct_eigvalue = 4.0;
+
+  EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
+  for(size_t i = 0;i < n;i++) {
+    EXPECT_NEAR(correct_eigvec[i], eigvec[i], std::abs(correct_eigvalue*engine.eps*10));
+  }
+}
+
 TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_NOT_FIX_RANDOM_SEED) {
   const size_t n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},
