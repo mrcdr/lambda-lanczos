@@ -296,6 +296,38 @@ TEST(DIAGONALIZE_TEST, HERMITIAN_MATRIX) {
   }
 }
 
+TEST(DIAGONALIZE_TEST, SINGLE_ELEMENT_MATRIX) {
+  const size_t n = 1;
+
+  double correct_eigvalue = 2.0;
+  double matrix[n][n] = { {correct_eigvalue} };
+
+  auto matmul = [&](const vector<double>& in, vector<double>& out) {
+    for(size_t i = 0;i < n;i++) {
+      for(size_t j = 0;j < n;j++) {
+	out[i] += matrix[i][j]*in[j];
+      }
+    }
+  };
+
+  LambdaLanczos<double> engine(matmul, n, true);
+  engine.init_vector = vector_initializer<double>;
+
+  double eigvalue;
+  vector<double> eigvec(1); // The size will be enlarged automatically
+  engine.run(eigvalue, eigvec);
+
+
+  auto sign = eigvec[0]/std::abs(eigvec[0]);
+  vector<double> correct_eigvec(n);
+  correct_eigvec[0] = sign;
+
+  EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
+  for(size_t i = 0;i < n;i++) {
+    EXPECT_NEAR(correct_eigvec[i], eigvec[i], std::abs(correct_eigvalue*engine.eps*10));
+  }
+}
+
 template <typename T, typename RE>
 void generate_random_matrix(T** a, vector<T>& eigvec, T& eigvalue,
 			    size_t n, size_t rand_n, RE eng) {

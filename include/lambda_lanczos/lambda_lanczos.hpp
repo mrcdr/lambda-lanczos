@@ -177,8 +177,8 @@ public:
     util::normalize(uk);
     u.push_back(uk);
 
-    real_t<T> ev, pev; // Calculated eigenvalue and previous one
-    pev = std::numeric_limits<real_t<T>>::max();
+    real_t<T> ev = 0.0; // Calculated eigenvalue (the initial value will never be used)
+    real_t<T> pev = std::numeric_limits<real_t<T>>::max(); // Previous eigenvalue
 
     int itern = this->max_iteration;
     for(size_t k = 1;k <= this->max_iteration;k++) {
