@@ -1,3 +1,7 @@
+#ifdef _MSC_VER
+#define _USE_MATH_DEFINES
+#endif
+
 #include <lambda_lanczos.hpp>
 #include <iostream>
 #include <cstdio>
@@ -12,15 +16,6 @@ using vector = std::vector<T>;
 template<typename T>
 using complex = std::complex<T>;
 
-/*void sig_digit_test() {
-  std::cout << std::endl << "-- Significant decimal digit test --" << std::endl;
-  std::cout << "float " << lambda_lanczos::util::sig_decimal_digit<float>() << " "
-	    << lambda_lanczos::util::minimum_effective_decimal<float>() << std::endl;
-  std::cout << "double " << lambda_lanczos::util::sig_decimal_digit<double>() << " "
-	    << lambda_lanczos::util::minimum_effective_decimal<double>() << std::endl;
-  std::cout << "long double " << lambda_lanczos::util::sig_decimal_digit<long double>() << " "
-	    << lambda_lanczos::util::minimum_effective_decimal<long double>() << std::endl;
-}*/
 
 template <typename T>
 void vector_initializer(vector<T>& v);
