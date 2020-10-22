@@ -313,17 +313,16 @@ private:
                                       const std::vector<util::real_t<T>>& beta,
                                       const size_t m) const {
     real_t<T> eps = this->eps * this->tridiag_eps_ratio;
+    real_t<T> mid;
     real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
     real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
     real_t<T> lower = -r;
     real_t<T> upper = r;
-    real_t<T> mid;
-    unsigned int nmid; // Number of eigenvalues smaller than the "mid"
 
     while(upper-lower > std::min(std::abs(lower), std::abs(upper))*eps) {
       mid = (lower+upper)/2.0;
-      nmid = num_of_eigs_smaller_than(mid, alpha, beta);
-      if(nmid >= m+1) {
+
+      if(num_of_eigs_smaller_than(mid, alpha, beta) >= m+1) {
         upper = mid;
       } else {
         lower = mid;
@@ -363,11 +362,11 @@ private:
    * Peter Arbenz et al. / "High Performance Algorithms for Structured Matrix Problems" /
    * Nova Science Publishers, Inc.
    */
-  int num_of_eigs_smaller_than(real_t<T> c,
+  size_t num_of_eigs_smaller_than(real_t<T> c,
                                const std::vector<real_t<T>>& alpha,
                                const std::vector<real_t<T>>& beta) const {
     real_t<T> q_i = 1.0;
-    int count = 0;
+    size_t count = 0;
     size_t m = alpha.size();
 
     for(size_t i = 1;i < m;i++){
