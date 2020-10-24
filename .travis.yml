@@ -52,4 +52,4 @@ script:
   - cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_CXX_FLAGS="--coverage" -DCMAKE_EXE_LINKER_FLAGS="--coverage" ..
   - make lambda_lanczos_test VERBOSE=1
   - ctest --verbose
-  - valgrind --leak-check=full --error-exitcode=1 ctest
+  - valgrind --leak-check=full --error-exitcode=1 ctest --verbose
