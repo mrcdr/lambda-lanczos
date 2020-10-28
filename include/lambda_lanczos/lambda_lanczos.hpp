@@ -209,7 +209,7 @@ public:
         uk[i] = vk[i] - betak*u[k-1][i] - alphak*u[k][i];
       }
 
-      schmidt_orth(uk, u);
+      util::schmidt_orth(uk, u);
 
       betak = util::norm(uk);
       beta.push_back(betak);
@@ -288,24 +288,6 @@ public:
   }
 
 private:
-  /**
-   * @brief Orthogonalizes vector `uorth` with respect to vectors in `u`.
-   *
-   * Vectors in `u` must be normalized, but uorth doesn't have to be.
-   */
-  void schmidt_orth(std::vector<T>& uorth, const std::vector<std::vector<T>>& u) const {
-    auto n = uorth.size();
-
-    for(size_t k = 0;k < u.size();k++) {
-      T innprod = util::inner_prod(uorth, u[k]);
-
-      for(size_t i = 0;i < n;i++) {
-        uorth[i] -= innprod * u[k][i];
-      }
-    }
-  }
-
-
   /**
    * @brief Finds the `m`th smaller eigenvalue of given tridiagonal matrix.
    */
