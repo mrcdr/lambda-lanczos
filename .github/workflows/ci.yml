@@ -58,11 +58,11 @@ jobs:
       working-directory: ${{github.workspace}}/build
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C $BUILD_TYPE
+      run: ctest -C $BUILD_TYPE --verbose
 
     - name: Memory Test
       working-directory: ${{github.workspace}}/build
-      run: valgrind --leak-check=full --error-exitcode=1 ctest -C $BUILD_TYPE --verbose
+      run: valgrind --leak-check=full --error-exitcode=1 ctest -C $BUILD_TYPE
 
     - name: Upload Code-Coverage Data
       working-directory: ${{github.workspace}}/build
