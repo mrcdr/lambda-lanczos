@@ -17,6 +17,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Install external programs
+      run: |
+        sudo apt-get install valgrind
+
 
     - name: Prepare Google Test
       run: |
@@ -26,7 +31,7 @@ jobs:
         cd googletest
         mkdir -p build
         cd build
-        cmake ..
+        cmake .. -DBUILD_GMOCK=OFF
         make
         sudo make install
 
