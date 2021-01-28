@@ -95,9 +95,8 @@ inline real_t<T> norm(const std::vector<T>& vec) {
  */
 template <typename T1, typename T2>
 inline void scalar_mul(T1 a, std::vector<T2>& vec) {
-  int n = vec.size();
-  for(int i = 0;i < n;i++) {
-    vec[i] *= a;
+  for(auto& elem : vec) {
+    elem *= a;
   }
 }
 
@@ -131,14 +130,14 @@ inline real_t<T> l1_norm(const std::vector<T>& vec) {
  * Vectors in `u` must be normalized, but uorth doesn't have to be.
  */
 template <typename T>
-void schmidt_orth(std::vector<T>& uorth, const std::vector<std::vector<T>>& u) {
-  auto n = uorth.size();
+inline void schmidt_orth(std::vector<T>& uorth, const std::vector<std::vector<T>>& u) {
+  const auto n = uorth.size();
 
-  for(size_t k = 0;k < u.size();k++) {
-    T innprod = util::inner_prod(u[k], uorth);
+  for(const auto& uk : u) {
+    T innprod = util::inner_prod(uk, uorth);
 
     for(size_t i = 0;i < n;i++) {
-      uorth[i] -= innprod * u[k][i];
+      uorth[i] -= innprod * uk[i];
     }
   }
 }
