@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mrcdr/lambda-lanczos.svg?branch=master)](https://travis-ci.org/mrcdr/lambda-lanczos.svg?branch=master)
+![CI](https://github.com/mrcdr/lambda-lanczos/workflows/CI/badge.svg)
 [![codecov](https://codecov.io/gh/mrcdr/lambda-lanczos/branch/master/graph/badge.svg)](https://codecov.io/gh/mrcdr/lambda-lanczos)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/mrcdr/lambda-lanczos)]()
