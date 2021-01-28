@@ -5,6 +5,7 @@
 #include <complex>
 #include <limits>
 #include <cmath>
+#include <cassert>
 
 namespace lambda_lanczos { namespace util {
 
@@ -27,7 +28,7 @@ struct realTypeMap<std::complex<T>> {
  * @brief Type mapper from `T` to real type of `T`.
  *
  * By default, `real_t<T>` returns `T`.
- * However `real_t<complex<T>>` returns `T`.  
+ * However `real_t<complex<T>>` returns `T`.
  * Usage example: This function returns a real number even if `T` is complex:
  * @code
  * template <typename T>
@@ -72,6 +73,7 @@ public:
  */
 template <typename T>
 inline T inner_prod(const std::vector<T>& v1, const std::vector<T>& v2) {
+  assert(v1.size() == v2.size());
   return std::inner_product(std::begin(v1), std::end(v1),
 			    std::begin(v2), T(),
 			    [](T a, T b) -> T { return a+b; },
@@ -124,7 +126,7 @@ inline real_t<T> l1_norm(const std::vector<T>& vec) {
 
 
 /**
- * @brief Orthogonalizes vector `uorth` with respect to vectors in `u`.
+ * @brief Orthogonalizes vector `uorth` with respect to orthonormal vectors in `u`.
  *
  * Vectors in `u` must be normalized, but uorth doesn't have to be.
  */
@@ -133,7 +135,7 @@ void schmidt_orth(std::vector<T>& uorth, const std::vector<std::vector<T>>& u) {
   auto n = uorth.size();
 
   for(size_t k = 0;k < u.size();k++) {
-    T innprod = util::inner_prod(uorth, u[k]);
+    T innprod = util::inner_prod(u[k], uorth);
 
     for(size_t i = 0;i < n;i++) {
       uorth[i] -= innprod * u[k][i];

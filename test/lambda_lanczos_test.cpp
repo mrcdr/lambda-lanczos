@@ -56,6 +56,38 @@ TEST(UNIT_TEST, INNER_PRODUCT) {
   EXPECT_DOUBLE_EQ(correct.imag(), result.imag());
 }
 
+TEST(UNIT_TEST, SCHMIDT_ORTHOGONALIZATION) {
+  const size_t n = 10;
+
+  std::mt19937 eng(1);
+  std::uniform_real_distribution<double> dist(-10.0, 10.0);
+
+  const size_t num_vec = n/2;
+  vector<vector<complex<double>>> us;
+  for(size_t k = 0;k < num_vec;k++) {
+    vector<complex<double>> u(n);
+    for(auto& elem : u) {
+      elem = complex<double>(dist(eng), dist(eng));
+    }
+
+    lambda_lanczos::util::schmidt_orth(u, us);
+    lambda_lanczos::util::normalize(u);
+    us.push_back(u);
+  }
+
+  vector<complex<double>> v(n);
+  for(auto& elem : v) {
+    elem = complex<double>(dist(eng), dist(eng));
+  }
+  lambda_lanczos::util::schmidt_orth(v, us);
+
+  for(const auto& u : us) {
+    auto ip = lambda_lanczos::util::inner_prod(v, u);
+    EXPECT_NEAR(0.0, ip.real(), 1e-15*n);
+    EXPECT_NEAR(0.0, ip.imag(), 1e-15*n);
+  }
+}
+
 TEST(UNIT_TEST, L1_NORM) {
   complex<double> c1(1.0, 3.0);
   complex<double> c2(-1.0, -1.0);
