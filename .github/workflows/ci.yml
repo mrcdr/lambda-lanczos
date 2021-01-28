@@ -23,7 +23,7 @@ jobs:
         mkdir -p gtest_build
         cd gtest_build
         git clone https://github.com/google/googletest.git -b release-1.10.0
-        ls -la
+        cd googletest
         mkdir -p build
         cd build
         cmake ..
