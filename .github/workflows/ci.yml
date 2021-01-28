@@ -23,11 +23,12 @@ jobs:
       run: |
         git clone https://github.com/google/googletest.git -b release-1.10.0
         ls -la
-        cd googletest        # Main directory of the cloned repository.
-        mkdir build          # Create a directory to hold the build output.
+        cd googletest
+        mkdir build
         cd build
-        cmake ..             # Generate native build scripts for GoogleTest.
+        cmake ..
         make
+        sudo make install
 
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
