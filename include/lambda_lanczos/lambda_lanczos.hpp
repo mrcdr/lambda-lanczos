@@ -10,7 +10,7 @@
 #include <numeric>
 #include <random>
 #include <algorithm>
-#include <lambda_lanczos_util.hpp>
+#include "lambda_lanczos_util.hpp"
 
 
 namespace lambda_lanczos {
@@ -84,7 +84,7 @@ public:
 
   /** @brief Function to initialize the initial Lanczos vector.
    *
-   * After this function called, the output vector will be normalized automatically.  
+   * After this function called, the output vector will be normalized automatically.
    * Default value is #lambda_lanczos::VectorRandomInitializer::init.
    */
   std::function<void(std::vector<T>& vec)> init_vector = VectorRandomInitializer<T>::init;
@@ -120,7 +120,7 @@ public:
 
   /** @brief (Not necessary to change)
    *
-   * Description for those who know the Lanczos algorithm:  
+   * Description for those who know the Lanczos algorithm:
    * This is the ratio between the convergence threshold of resulted eigenvalue and the that of
    * tridiagonal eigenvalue. To convergent whole Lanczos algorithm,
    * the convergence threshold for the tridiagonal eigenvalue should be smaller than `eps`.
