@@ -396,18 +396,18 @@ TEST(DIAGONALIZE_TEST, SINGLE_ELEMENT_MATRIX) {
 }
 
 template <typename T, typename RE>
-void generate_random_matrix(T** a, vector<T>& eigvec, T& eigvalue,
-			    size_t n, size_t rand_n, RE eng) {
+void generate_random_symmetric_matrix(T** a, vector<T>& eigvec, T& eigvalue,
+                                      size_t n, size_t rand_n, RE eng) {
   const T min_eigvalue = 1.0;
   std::uniform_int_distribution<size_t> dist_index(0, n-1);
   std::uniform_real_distribution<double> dist_angle(0.0, 2*M_PI);
   std::uniform_real_distribution<double> dist_element(min_eigvalue, n*10);
 
+  /* Generate a random diagonal matrix */
+  std::fill(a[0], a[0]+n*n, 0.0);
   T max_eigvalue = min_eigvalue;
   size_t max_eig_index = 0;
   for(size_t i = 0;i < n;i++) {
-    a[i] = a[0]+n*i;
-    std::fill(a[i], a[i]+n, 0.0);
     a[i][i] = dist_element(eng);
     if(a[i][i] > max_eigvalue) {
       max_eigvalue = a[i][i];
@@ -432,9 +432,9 @@ void generate_random_matrix(T** a, vector<T>& eigvec, T& eigvalue,
 
     T c = std::cos(theta);
     T s = std::sin(theta);
-    T akk = a[k][k];
-    T akl = a[k][l];
-    T all = a[l][l];
+    T a_kk = a[k][k];
+    T a_kl = a[k][l];
+    T a_ll = a[l][l];
 
     for(size_t i = 0;i < n;i++) {
       T aki_next = c*a[k][i] - s*a[l][i];
@@ -448,10 +448,10 @@ void generate_random_matrix(T** a, vector<T>& eigvec, T& eigvalue,
       a[i][l] = a[l][i];
     }
 
-    a[k][k] = c*(c*akk - s*akl) - s*(c*akl - s*all);
-    a[k][l] = s*(c*akk - s*akl) + c*(c*akl - s*all);
+    a[k][k] = c*(c*a_kk - s*a_kl) - s*(c*a_kl - s*a_ll);
+    a[k][l] = s*(c*a_kk - s*a_kl) + c*(c*a_kl - s*a_ll);
     a[l][k] = a[k][l];
-    a[l][l] = s*(s*akk + c*akl) + c*(s*akl + c*all);
+    a[l][l] = s*(s*a_kk + c*a_kl) + c*(s*a_kl + c*a_ll);
 
 
     T vk_next = c*eigvec[k] - s*eigvec[l];
@@ -472,8 +472,8 @@ TEST(DIAGONALIZE_TEST, RANDOM_SYMMETRIC_MATRIX) {
   vector<double> correct_eigvec(n);
   double correct_eigvalue = 0.0;
 
-  generate_random_matrix(matrix, correct_eigvec, correct_eigvalue,
-			 n, n*10, std::mt19937(1));
+  generate_random_symmetric_matrix(matrix, correct_eigvec, correct_eigvalue,
+                                   n, n*10, std::mt19937(1));
 
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(size_t i = 0;i < n;i++) {
@@ -500,3 +500,122 @@ TEST(DIAGONALIZE_TEST, RANDOM_SYMMETRIC_MATRIX) {
   delete[] matrix;
 }
 
+
+
+template <typename T, typename RE>
+void generate_random_hermitian_matrix(complex<T>** a, vector<complex<T>>& eigvec, T& eigvalue,
+                                     size_t n, size_t rand_n, RE eng) {
+  const complex<T> I_ (0, 1);
+
+
+  const T min_eigvalue = 1.0;
+  std::uniform_int_distribution<size_t> dist_index(0, n-1);
+  std::uniform_real_distribution<T> dist_angle(0.0, 2*M_PI);
+  std::uniform_real_distribution<T> dist_element(min_eigvalue, n*10);
+
+  /* Generate a random diagonal matrix */
+  std::fill(a[0], a[0]+n*n, 0.0);
+  T max_eigvalue = min_eigvalue;
+  size_t max_eig_index = 0;
+  for(size_t i = 0;i < n;i++) {
+    T eigvalue_tmp = dist_element(eng);
+    a[i][i] = eigvalue_tmp;
+    if(eigvalue_tmp > max_eigvalue) {
+      max_eigvalue = eigvalue_tmp;
+      max_eig_index = i;
+    }
+  }
+
+  eigvalue = max_eigvalue;
+
+  /* Eigenvector corresponding to the maximum eigenvalue */
+  std::fill(eigvec.begin(), eigvec.end(), T());
+  eigvec[max_eig_index] = 1.0;
+
+  for(size_t i = 0;i < rand_n;i++) {
+    size_t k = dist_index(eng);
+    size_t l = dist_index(eng);
+    while(k == l) {
+      l = dist_index(eng);
+    }
+
+    auto theta = dist_angle(eng);
+    auto phi1 = dist_angle(eng);
+    auto phi2 = dist_angle(eng);
+
+    complex<T> u_kk =  std::exp(I_*phi1)*std::cos(theta);
+    complex<T> u_kl = -std::exp(I_*phi2)*std::sin(theta);
+    complex<T> u_lk = std::exp(-I_*phi2)*std::sin(theta);
+    complex<T> u_ll = std::exp(-I_*phi1)*std::cos(theta);
+
+    auto a_kk = a[k][k];
+    auto a_kl = a[k][l];
+    auto a_lk = a[l][k];
+    auto a_ll = a[l][l];
+
+    for(size_t i = 0;i < n;i++) {
+      auto aki_next = u_kk*a[k][i] + u_kl*a[l][i];
+      a[l][i]       = u_lk*a[k][i] + u_ll*a[l][i];
+      a[k][i] = aki_next;
+    }
+
+    /* Hermitize */
+    for(size_t i = 0;i < n;i++) {
+      a[i][k] = std::conj(a[k][i]);
+      a[i][l] = std::conj(a[l][i]);
+    }
+
+    a[k][k] = u_kk*(a_kk*std::conj(u_kk) + a_kl*std::conj(u_kl)) + u_kl*(a_lk*std::conj(u_kk) + a_ll*std::conj(u_kl));
+    a[k][l] = u_kk*(a_kk*std::conj(u_lk) + a_kl*std::conj(u_ll)) + u_kl*(a_lk*std::conj(u_lk) + a_ll*std::conj(u_ll));
+    a[l][k] = std::conj(a[k][l]);
+    a[l][l] = u_lk*(a_kk*std::conj(u_lk) + a_kl*std::conj(u_ll)) + u_ll*(a_lk*std::conj(u_lk) + a_ll*std::conj(u_ll));
+
+
+    auto vk_next = u_kk*eigvec[k] + u_kl*eigvec[l];
+    eigvec[l] = u_lk*eigvec[k] + u_ll*eigvec[l];
+    eigvec[k] = vk_next;
+  }
+}
+
+TEST(DIAGONALIZE_TEST, RANDOM_HERMITIAN_MATRIX) {
+  const size_t n = 10;
+
+  complex<double>** matrix = new complex<double>*[n];
+  matrix[0] = new complex<double>[n*n];
+  for(size_t i = 0;i < n;i++) {
+    matrix[i] = matrix[0]+n*i;
+  }
+
+  vector<complex<double>> correct_eigvec(n);
+  double correct_eigvalue = 0.0;
+
+  generate_random_hermitian_matrix(matrix, correct_eigvec, correct_eigvalue,
+                                   n, n*10, std::mt19937(1));
+
+  auto matmul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
+    for(size_t i = 0;i < n;i++) {
+      for(size_t j = 0;j < n;j++) {
+	out[i] += matrix[i][j]*in[j];
+      }
+    }
+  };
+
+  LambdaLanczos<complex<double>> engine(matmul, n, true);
+  engine.init_vector = vector_initializer<complex<double>>;
+  engine.eps = 1e-14;
+  double eigvalue;
+  vector<complex<double>> eigvec(n);
+  engine.run(eigvalue, eigvec);
+
+  EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
+
+  const complex<double> I_(0, 1);
+  auto phase = std::exp(I_*(std::arg(eigvec[0])-std::arg(correct_eigvec[0])));
+  for(size_t i = 0;i < n;i++) {
+    EXPECT_NEAR((correct_eigvec[i]*phase).real(), eigvec[i].real(), std::abs(correct_eigvalue*engine.eps*10));
+    EXPECT_NEAR((correct_eigvec[i]*phase).imag(), eigvec[i].imag(), std::abs(correct_eigvalue*engine.eps*10));
+  }
+
+  delete[] matrix[0];
+  delete[] matrix;
+}
