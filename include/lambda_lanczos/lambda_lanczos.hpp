@@ -151,7 +151,9 @@ public:
    * @brief Executes Lanczos algorithm and stores the result into reference variables passed as arguments.
    * @return Lanczos-iteration count
    */
-  int run(real_t<T>& eigvalue, std::vector<T>& eigvec) const {
+  int run(std::vector<real_t<T>>& eigvalues, std::vector<std::vector<T>>& eigvecs) const {
+    const size_t nroot = eigvecs.size();
+    assert(eigvalues.size()==nroot);
     assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
 
     std::vector<std::vector<T>> u; // Lanczos vectors
@@ -178,8 +180,8 @@ public:
     util::normalize(uk);
     u.push_back(uk);
 
-    real_t<T> ev = 0.0; // Calculated eigenvalue (the initial value will never be used)
-    real_t<T> pev = std::numeric_limits<real_t<T>>::max(); // Previous eigenvalue
+    std::vector<real_t<T>> evs(nroot, 0.0); // Calculated eigenvalue (the initial value will never be used)
+    std::vector<real_t<T>> pevs(nroot, std::numeric_limits<real_t<T>>::max()); // Previous eigenvalue
 
     int itern = this->max_iteration;
     for(size_t k = 1;k <= this->max_iteration;k++) {
@@ -214,7 +216,8 @@ public:
       betak = util::norm(uk);
       beta.push_back(betak);
 
-      ev = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-2 : 0);
+      for (size_t iroot=0ul; iroot<nroot; ++iroot)
+          evs[iroot] = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-2-iroot : iroot);
       // The first element of alpha is a dummy. Thus its size is alpha.size()-1
 
       const real_t<T> zero_threshold = util::minimum_effective_decimal<real_t<T>>()*1e-1;
@@ -231,15 +234,24 @@ public:
       util::normalize(uk);
       u.push_back(uk);
 
-      if(std::abs(ev-pev) < std::min(std::abs(ev), std::abs(pev))*this->eps) {
-        itern = k;
-        break;
-      } else {
-        pev = ev;
+      /*
+       * only break loop if convergence condition is met for all roots
+       */
+      bool break_cond = true;
+      for (size_t iroot=0ul; iroot<nroot; ++iroot) {
+          const auto& ev = evs[iroot];
+          const auto& pev = pevs[iroot];
+          if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
+              break_cond = false;
+              break;
+          }
       }
+      if (break_cond) break;
+      else pevs = evs;
     }
 
-    eigvalue = ev - this->eigenvalue_offset;
+    eigvalues = evs;
+    for (auto& ev: eigvalues) ev -= this->eigenvalue_offset;
 
     auto m = alpha.size();
     std::vector<T> cv(m+1);
@@ -249,23 +261,27 @@ public:
 
     beta[m-1] = 0.0;
 
-    if(eigvec.size() < n) {
-      eigvec.resize(n);
+    for(size_t iroot=0ul; iroot<nroot; ++iroot) {
+        auto& eigvec = eigvecs[iroot];
+        auto& ev = evs[iroot];
+
+        if (eigvec.size() < n) {
+            eigvec.resize(n);
+        }
+
+        for (size_t i = 0; i < n; i++) {
+            eigvec[i] = cv[m - 1] * u[m - 1][i];
+        }
+
+        for (size_t k = m - 2; k >= 1; k--) {
+            cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
+
+            for (size_t i = 0; i < n; i++) {
+                eigvec[i] += cv[k] * u[k][i];
+            }
+        }
+        util::normalize(eigvec);
     }
-
-    for(size_t i = 0;i < n;i++) {
-      eigvec[i] = cv[m-1]*u[m-1][i];
-    }
-
-    for(size_t k = m-2;k >= 1;k--) {
-      cv[k] = ((ev - alpha[k+1])*cv[k+1] - beta[k+1]*cv[k+2])/beta[k];
-
-      for(size_t i = 0;i < n;i++) {
-        eigvec[i] += cv[k]*u[k][i];
-      }
-    }
-
-    util::normalize(eigvec);
 
     return itern;
   }
@@ -285,6 +301,15 @@ public:
     int itern = this->run(eigvalue, eigvec);
 
     return {eigvalue, eigvec, itern};
+  }
+
+  int run(real_t<T>& eigvalue, std::vector<T>& eigvec) const{
+      std::vector<real_t<T>> eigvalues(1);
+      std::vector<std::vector<T>> eigvecs(1);
+      auto retval = run(eigvalues, eigvecs);
+      eigvalue = eigvalues[0];
+      eigvec = std::move(eigvecs[0]);
+      return retval;
   }
 
 private:
