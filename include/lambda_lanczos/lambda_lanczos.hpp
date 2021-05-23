@@ -337,13 +337,13 @@ private:
     size_t m = alpha.size();
 
     if(q_i < 0){
-      count++;
+      ++count;
     }
 
     for(size_t i = 1; i < m; ++i){
       q_i = alpha[i] - c - beta[i-1]*beta[i-1]/q_i;
       if(q_i < 0){
-        count++;
+        ++count;
       }
       if(q_i == 0){
         q_i = util::minimum_effective_decimal<real_t<T>>();
