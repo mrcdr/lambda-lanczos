@@ -395,6 +395,58 @@ TEST(DIAGONALIZE_TEST, SINGLE_ELEMENT_MATRIX) {
   }
 }
 
+TEST(DIAGONALIZE_TEST, MULTIPLE_EIGENPAIRS) {
+  const int n = 8;
+  const size_t nroot = 3;
+
+  double matrix[n][n] = {
+    { 6, -3, -3,  0, -1,  1, -1,  1},
+    {-3, -4,  2,  2, -1, -5,  0, -4},
+    {-3,  2,  2, -3,  0,  0, -1, -1},
+    { 0,  2, -3,  0, -3,  3,  2,  2},
+    {-1, -1,  0, -3, -2,  0, -5, -4},
+    { 1, -5,  0,  3,  0, -4,  5,  0},
+    {-1,  0, -1,  2, -5,  5, -4,  4},
+    { 1, -4, -1,  2, -4,  0,  4,  2}
+  };
+
+  // the matrix-vector multiplication routine
+  auto mv_mul = [&](const vector<double>& in, vector<double>& out) {
+    for(int i = 0; i < n; ++i) {
+      for(int j = 0; j < n; ++j) {
+        out[i] += matrix[i][j]*in[j];
+      }
+    }
+  };
+
+  LambdaLanczos<double> engine(mv_mul, n, false); // false means to calculate the smallest eigenvalue.
+  engine.eps = 1e-7;
+
+  vector<double> eigenvalues(nroot);
+  vector<vector<double>> eigenvectors(nroot, {n});
+  engine.run(eigenvalues, eigenvectors);
+
+
+  std::array<double, n> correct_eigvals = {-13.21508597, -8.50033154, -4.26674892};
+  std::array<std::array<double, n>, nroot> correct_eigvecs = {{
+    { 0.02081752, -0.49222707,  0.13202088,  0.24048092,  0.15089223, -0.60850056,  0.48079787, -0.24043829},
+    { 0.16645991,  0.51818471, -0.00646562, -0.09493495,  0.60595718,  0.02042567,  0.52346924,  0.23043415},
+    { 0.03381669, -0.07999997,  0.32090331,  0.61650970,  0.41812886, -0.01782613, -0.45571810,  0.35575946}
+  }};
+
+
+  for(size_t iroot = 0; iroot < nroot; ++iroot) {
+    EXPECT_NEAR(correct_eigvals[iroot], eigenvalues[iroot], std::abs(correct_eigvals[iroot]*engine.eps));
+
+    auto sign = eigenvectors[iroot][0]/std::abs(eigenvectors[iroot][0]);
+    for(size_t i = 0; i < n; ++i) {
+      correct_eigvecs[iroot][i] *= sign;
+      EXPECT_NEAR(correct_eigvecs[iroot][i], eigenvectors[iroot][i], std::abs(correct_eigvals[iroot]*engine.eps*10));
+    }
+  }
+}
+
+
 template <typename T, typename RE>
 void generate_random_symmetric_matrix(T** a, vector<T>& eigvec, T& eigvalue,
                                       size_t n, size_t rand_n, RE eng) {
