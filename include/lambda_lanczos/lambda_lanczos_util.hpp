@@ -5,6 +5,7 @@
 #include <complex>
 #include <limits>
 #include <cmath>
+#include <numeric>
 #include <cassert>
 
 namespace lambda_lanczos { namespace util {
@@ -125,15 +126,18 @@ inline real_t<T> l1_norm(const std::vector<T>& vec) {
 
 
 /**
- * @brief Orthogonalizes vector `uorth` with respect to orthonormal vectors in `u`.
+ * @brief Orthogonalizes vector `uorth` with respect to orthonormal vectors defined by given iterators.
  *
  * Vectors in `u` must be normalized, but uorth doesn't have to be.
  */
-template <typename T>
-inline void schmidt_orth(std::vector<T>& uorth, const std::vector<std::vector<T>>& u) {
+template <typename ForwardIterator, typename T>
+inline void schmidt_orth(std::vector<T>& uorth,
+                         ForwardIterator first,
+                         ForwardIterator last) {
   const auto n = uorth.size();
 
-  for(const auto& uk : u) {
+  for(auto iter = first; iter != last; ++iter) {
+    const auto& uk = *iter;
     T innprod = util::inner_prod(uk, uorth);
 
     for(size_t i = 0;i < n;i++) {

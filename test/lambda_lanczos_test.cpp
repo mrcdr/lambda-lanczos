@@ -70,7 +70,7 @@ TEST(UNIT_TEST, SCHMIDT_ORTHOGONALIZATION) {
       elem = complex<double>(dist(eng), dist(eng));
     }
 
-    lambda_lanczos::util::schmidt_orth(u, us);
+    lambda_lanczos::util::schmidt_orth(u, us.begin(), us.end());
     lambda_lanczos::util::normalize(u);
     us.push_back(u);
   }
@@ -79,7 +79,7 @@ TEST(UNIT_TEST, SCHMIDT_ORTHOGONALIZATION) {
   for(auto& elem : v) {
     elem = complex<double>(dist(eng), dist(eng));
   }
-  lambda_lanczos::util::schmidt_orth(v, us);
+  lambda_lanczos::util::schmidt_orth(v, us.begin(), us.end());
 
   for(const auto& u : us) {
     auto ip = lambda_lanczos::util::inner_prod(v, u);

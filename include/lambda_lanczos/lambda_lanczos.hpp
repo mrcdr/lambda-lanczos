@@ -1,6 +1,7 @@
 #ifndef LAMBDA_LANCZOS_H_
 #define LAMBDA_LANCZOS_H_
 
+#include <iostream>
 #include <vector>
 #include <tuple>
 #include <functional>
@@ -157,82 +158,59 @@ public:
     assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
 
     std::vector<std::vector<T>> u; // Lanczos vectors
-    std::vector<real_t<T>> alpha; // Diagonal elements of an approximated tridiagonal matrix
-    std::vector<real_t<T>> beta;  // Subdiagonal elements of an approximated tridiagonal matrix
-
-    const auto n = this->matrix_size;
+    std::vector<real_t<T>> alpha;  // Diagonal elements of an approximated tridiagonal matrix
+    std::vector<real_t<T>> beta;   // Subdiagonal elements of an approximated tridiagonal matrix
 
     u.reserve(this->initial_vector_size);
     alpha.reserve(this->initial_vector_size);
     beta.reserve(this->initial_vector_size);
 
-    u.emplace_back(n, 0.0); // Same as u.push_back(vector<T>(n, 0.0))
+    const auto n = this->matrix_size;
 
-    std::vector<T> vk(n, 0.0);
+    std::vector<T> au(n, 0.0); // Temporal storage to store matrix-vector multiplication result
 
-    real_t<T> alphak = 0.0;
-    alpha.push_back(alphak);
-    real_t<T> betak = 0.0;
-    beta.push_back(betak);
+    u.emplace_back(n);
+    this->init_vector(u[0]);
+    util::normalize(u[0]);
 
-    std::vector<T> uk(n);
-    this->init_vector(uk);
-    util::normalize(uk);
-    u.push_back(uk);
-
-    std::vector<real_t<T>> evs(nroot, 0.0); // Calculated eigenvalue (the initial value will never be used)
+    std::vector<real_t<T>> evs(nroot); // Calculated eigenvalue
     std::vector<real_t<T>> pevs(nroot, std::numeric_limits<real_t<T>>::max()); // Previous eigenvalue
 
     int itern = this->max_iteration;
     for(size_t k = 1;k <= this->max_iteration;k++) {
-      /* vk = (A + offset*E)uk, here E is the identity matrix */
-      std::fill(vk.begin(), vk.end(), 0.0);
-      this->mv_mul(uk, vk);
+      /* au = (A + offset*E)uk, here E is the identity matrix */
+      std::fill(au.begin(), au.end(), 0.0);
+      this->mv_mul(u[k-1], au);
       for(size_t i = 0;i < n;i++) {
-        vk[i] += uk[i]*this->eigenvalue_offset;
+        au[i] += u[k-1][i]*this->eigenvalue_offset;
       }
 
-      alphak = std::real(util::inner_prod(u.back(), vk));
+      alpha.push_back(std::real(util::inner_prod(u[k-1], au)));
 
-      /* The inner product <uk|vk> is real.
-       * Proof:
-       *     <uk|vk> = <uk|A|uk>
-       *   On the other hand its complex conjugate is
-       *     <uk|vk>^* = <vk|uk> = <uk|A^*|uk> = <uk|A|uk>
-       *   here the condition that matrix A is a symmetric (Hermitian) is used.
-       *   Therefore
-       *     <uk|vk> = <vk|uk>^*
-       *   <uk|vk> is real.
-       */
-
-      alpha.push_back(alphak);
-
+      u.emplace_back(n);
       for(size_t i = 0;i < n; i++) {
-        uk[i] = vk[i] - betak*u[k-1][i] - alphak*u[k][i];
+        if(k == 1) {
+          u[k][i] = au[i] - alpha[k-1]*u[k-1][i];
+        } else {
+          u[k][i] = au[i] - beta[k-1]*u[k-2][i] - alpha[k-1]*u[k-1][i];
+        }
       }
 
-      util::schmidt_orth(uk, u);
+      util::schmidt_orth(u[k], u.begin(), u.end()-1);
 
-      betak = util::norm(uk);
-      beta.push_back(betak);
+      beta.push_back(util::norm(u[k]));
 
-      for (size_t iroot = 0;iroot<nroot;++iroot)
-          evs[iroot] = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-2-iroot : iroot);
-      // The first element of alpha is a dummy. Thus its size is alpha.size()-1
+      for (size_t iroot = 0;iroot<nroot;++iroot) {
+        evs[iroot] = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-1-iroot : iroot);
+      }
 
       const real_t<T> zero_threshold = util::minimum_effective_decimal<real_t<T>>()*1e-1;
-      if(betak < zero_threshold) {
-        u.push_back(uk);
-        /* This element will never be accessed,
-         * but this "push" guarantees u to always have one more element than
-         * alpha and beta do.
-         */
+      if(beta.back() < zero_threshold) {
         itern = k;
         break;
       }
 
-      util::normalize(uk);
-      u.push_back(uk);
+      util::normalize(u[k]);
 
       /*
        * only break loop if convergence condition is met for all roots
@@ -246,8 +224,12 @@ public:
           break;
         }
       }
-      if (break_cond) break;
-      else pevs = evs;
+
+      if (break_cond) {
+        break;
+      } else {
+        pevs = evs;
+      }
     }
 
     eigvalues = evs;
@@ -350,9 +332,13 @@ private:
   size_t num_of_eigs_smaller_than(real_t<T> c,
                                   const std::vector<real_t<T>>& alpha,
                                   const std::vector<real_t<T>>& beta) const {
-    real_t<T> q_i = 1.0;
+    real_t<T> q_i = alpha[0] - c;
     size_t count = 0;
     size_t m = alpha.size();
+
+    if(q_i < 0){
+      count++;
+    }
 
     for(size_t i = 1;i < m;i++){
       q_i = alpha[i] - c - beta[i-1]*beta[i-1]/q_i;
@@ -371,16 +357,15 @@ private:
   /**
    * @brief Computes an eigenvector corresponding to given eigenvalue for given tri-diagonal matrix.
    */
-  std::vector<T> tridiagonal_eigenvector(real_t<T> ev,
-                                         const std::vector<real_t<T>>& alpha,
-                                         const std::vector<real_t<T>>& beta) const {
+  static std::vector<T> tridiagonal_eigenvector(real_t<T> ev,
+                                                const std::vector<real_t<T>>& alpha,
+                                                const std::vector<real_t<T>>& beta) {
     const auto m = alpha.size();
     std::vector<T> cv(m+1);
-    cv[0] = 0.0;
     cv[m] = 0.0;
     cv[m-1] = 1.0;
 
-    for (size_t k = m - 2; k >= 1; k--) {
+    for (size_t k = m-1; k-- > 0;) {
       cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
     }
 
@@ -391,18 +376,18 @@ private:
   /**
    * @brief Computes an eigenvector corresponding to given eigenvalue for the original matrix.
    */
-  std::vector<T> eigenvector(real_t<T> ev,
-                             const std::vector<real_t<T>>& alpha,
-                             const std::vector<real_t<T>>& beta,
-                             const std::vector<std::vector<T>> u) const {
+  static std::vector<T> eigenvector(real_t<T> ev,
+                                    const std::vector<real_t<T>>& alpha,
+                                    const std::vector<real_t<T>>& beta,
+                                    const std::vector<std::vector<T>> u) {
     const auto m = alpha.size();
-    const auto n = this->matrix_size;
+    const auto n = u[0].size();
 
-    std::vector<T> eigvec(n, 0);
+    std::vector<T> eigvec(n, 0.0);
 
     auto cv = tridiagonal_eigenvector(ev, alpha, beta);
 
-    for (size_t k = m - 1; k >= 1; k--) {
+    for (size_t k = m; k-- > 0;) {
       for (size_t i = 0; i < n; i++) {
         eigvec[i] += cv[k] * u[k][i];
       }
