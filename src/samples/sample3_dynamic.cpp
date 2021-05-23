@@ -13,7 +13,7 @@ using vector = std::vector<T>;
 
 int main() {
   const int n = 100;
-    
+
   auto mv_mul = [&](const vector<double>& in, vector<double>& out) {
     for(int i = 0;i < n-1;i++) {
       out[i] += -1.0*in[i+1];
@@ -22,7 +22,7 @@ int main() {
   };
   /*
     This lambda is equivalent to applying following n by n matrix
-    
+
       0  -1   0       ..      0
      -1   0  -1       ..      0
       0  -1   0       ..      0
@@ -50,6 +50,6 @@ int main() {
     cout << eigenvector[i] << " ";
   }
   cout << endl;
-  
+
   return EXIT_SUCCESS;
 }

@@ -76,9 +76,9 @@ template <typename T>
 inline T inner_prod(const std::vector<T>& v1, const std::vector<T>& v2) {
   assert(v1.size() == v2.size());
   return std::inner_product(std::begin(v1), std::end(v1),
-			    std::begin(v2), T(),
-			    [](T a, T b) -> T { return a+b; },
-			    ConjugateProduct<T>::prod);
+                            std::begin(v2), T(),
+                            [](T a, T b) -> T { return a+b; },
+                            ConjugateProduct<T>::prod);
   // T() means zero value of type T
 }
 
@@ -154,7 +154,7 @@ inline void schmidt_orth(std::vector<T>& uorth,
 template <typename T>
 inline constexpr int sig_decimal_digit() {
   return (int)(std::numeric_limits<T>::digits *
-	       log10(std::numeric_limits<T>::radix));
+               log10(std::numeric_limits<T>::radix));
 }
 
 

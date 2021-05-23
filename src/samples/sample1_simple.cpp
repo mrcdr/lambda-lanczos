@@ -24,7 +24,7 @@ int main() {
       for(int j = 0;j < n;j++) {
         out[i] += matrix[i][j]*in[j];
       }
-    } 
+    }
   };
 
   LambdaLanczos<double> engine(mv_mul, n, true); // true means to calculate the largest eigenvalue.
@@ -39,6 +39,6 @@ int main() {
     cout << eigenvector[i] << " ";
   }
   cout << endl;
-  
+
   return EXIT_SUCCESS;
 }

@@ -31,11 +31,11 @@ int main() {
   matrix.emplace_back(2, 1, -1.0);
   /*
     means a 3x3 matrix
-    
+
     0  1  1
     1  0 -1
     1 -1  0 .
-    
+
     Its eigenvalues are {1, 1, -2}
    */
 
@@ -58,6 +58,6 @@ int main() {
     cout << eigenvector[i] << " ";
   }
   cout << endl;
-  
+
   return EXIT_SUCCESS;
 }

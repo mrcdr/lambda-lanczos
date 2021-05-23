@@ -101,13 +101,13 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   const size_t n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},
                           {1.0, 2.0, 1.0},
-			  {1.0, 1.0, 2.0} };
+                          {1.0, 1.0, 2.0} };
   /* Its eigenvalues are {4, 1, 1} */
 
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -138,13 +138,13 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_MULTIPLE_VALUE_RETURN_FEATURE) {
   const size_t n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},
                           {1.0, 2.0, 1.0},
-			  {1.0, 1.0, 2.0} };
+                          {1.0, 1.0, 2.0} };
   /* Its eigenvalues are {4, 1, 1} */
 
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -173,13 +173,13 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_NOT_FIX_RANDOM_SEED) {
   const size_t n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},
                           {1.0, 2.0, 1.0},
-			  {1.0, 1.0, 2.0} };
+                          {1.0, 1.0, 2.0} };
   /* Its eigenvalues are {4, 1, 1} */
 
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -256,14 +256,14 @@ TEST(DIAGONALIZE_TEST, DYNAMIC_MATRIX) {
 TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE) {
   const size_t n = 3;
   complex<double> matrix[n][n] = { {2.0, 1.0, 1.0},
-				   {1.0, 2.0, 1.0},
-				   {1.0, 1.0, 2.0} };
+                                   {1.0, 2.0, 1.0},
+                                   {1.0, 1.0, 2.0} };
   /* Its eigenvalues are {4, 1, 1} */
 
   auto matmul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -292,14 +292,14 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE) {
 TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE_NOT_FIX_RANDOM_SEED) {
   const size_t n = 3;
   complex<double> matrix[n][n] = { {2.0, 1.0, 1.0},
-				   {1.0, 2.0, 1.0},
-				   {1.0, 1.0, 2.0} };
+                                   {1.0, 2.0, 1.0},
+                                   {1.0, 1.0, 2.0} };
   /* Its eigenvalues are {4, 1, 1} */
 
   auto matmul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -328,14 +328,14 @@ TEST(DIAGONALIZE_TEST, HERMITIAN_MATRIX) {
   const size_t n = 3;
   const auto I_ = complex<double>(0.0, 1.0);
   complex<double> matrix[n][n] = { { 0.0, I_  , 1.0},
-				   { -I_, 0.0 , I_ },
-				   { 1.0, -I_ , 0.0} };
+                                   { -I_, 0.0 , I_ },
+                                   { 1.0, -I_ , 0.0} };
   /* Its eigenvalues are {-2, 1, 1} */
 
   auto matmul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -372,7 +372,7 @@ TEST(DIAGONALIZE_TEST, SINGLE_ELEMENT_MATRIX) {
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -478,7 +478,7 @@ TEST(DIAGONALIZE_TEST, RANDOM_SYMMETRIC_MATRIX) {
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };
@@ -595,7 +595,7 @@ TEST(DIAGONALIZE_TEST, RANDOM_HERMITIAN_MATRIX) {
   auto matmul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
     for(size_t i = 0;i < n;i++) {
       for(size_t j = 0;j < n;j++) {
-	out[i] += matrix[i][j]*in[j];
+        out[i] += matrix[i][j]*in[j];
       }
     }
   };

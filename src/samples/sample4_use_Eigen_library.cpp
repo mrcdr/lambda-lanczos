@@ -42,6 +42,6 @@ int main() {
     cout << eigenvector[i] << " ";
   }
   cout << endl;
-  
+
   return EXIT_SUCCESS;
 }
