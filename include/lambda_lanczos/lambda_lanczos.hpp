@@ -216,7 +216,7 @@ public:
       betak = util::norm(uk);
       beta.push_back(betak);
 
-      for (size_t iroot=0ul; iroot<nroot; ++iroot)
+      for (size_t iroot = 0;iroot<nroot;++iroot)
           evs[iroot] = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-2-iroot : iroot);
       // The first element of alpha is a dummy. Thus its size is alpha.size()-1
 
@@ -238,7 +238,7 @@ public:
        * only break loop if convergence condition is met for all roots
        */
       bool break_cond = true;
-      for (size_t iroot=0ul; iroot<nroot; ++iroot) {
+      for(size_t iroot = 0;iroot<nroot;++iroot) {
         const auto& ev = evs[iroot];
         const auto& pev = pevs[iroot];
         if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
@@ -251,36 +251,14 @@ public:
     }
 
     eigvalues = evs;
-    for (auto& ev: eigvalues) ev -= this->eigenvalue_offset;
+    beta.back() = 0.0;
 
-    auto m = alpha.size();
-    std::vector<T> cv(m+1);
-    cv[0] = 0.0;
-    cv[m] = 0.0;
-    cv[m-1] = 1.0;
-
-    beta[m-1] = 0.0;
-
-    for(size_t iroot=0ul; iroot<nroot; ++iroot) {
+    for(size_t iroot = 0;iroot < nroot;++iroot) {
       auto& eigvec = eigvecs[iroot];
-      auto& ev = evs[iroot];
+      auto& ev = eigvalues[iroot];
 
-      if (eigvec.size() < n) {
-        eigvec.resize(n);
-      }
-
-      for (size_t i = 0; i < n; i++) {
-        eigvec[i] = cv[m - 1] * u[m - 1][i];
-      }
-
-      for (size_t k = m - 2; k >= 1; k--) {
-        cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
-
-        for (size_t i = 0; i < n; i++) {
-          eigvec[i] += cv[k] * u[k][i];
-        }
-      }
-      util::normalize(eigvec);
+      eigvec = eigenvector(ev, alpha, beta, u);
+      ev -= this->eigenvalue_offset;
     }
 
     return itern;
@@ -370,8 +348,8 @@ private:
    * Nova Science Publishers, Inc.
    */
   size_t num_of_eigs_smaller_than(real_t<T> c,
-                               const std::vector<real_t<T>>& alpha,
-                               const std::vector<real_t<T>>& beta) const {
+                                  const std::vector<real_t<T>>& alpha,
+                                  const std::vector<real_t<T>>& beta) const {
     real_t<T> q_i = 1.0;
     size_t count = 0;
     size_t m = alpha.size();
@@ -387,6 +365,52 @@ private:
     }
 
     return count;
+  }
+
+
+  /**
+   * @brief Computes an eigenvector corresponding to given eigenvalue for given tri-diagonal matrix.
+   */
+  std::vector<T> tridiagonal_eigenvector(real_t<T> ev,
+                                         const std::vector<real_t<T>>& alpha,
+                                         const std::vector<real_t<T>>& beta) const {
+    const auto m = alpha.size();
+    std::vector<T> cv(m+1);
+    cv[0] = 0.0;
+    cv[m] = 0.0;
+    cv[m-1] = 1.0;
+
+    for (size_t k = m - 2; k >= 1; k--) {
+      cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
+    }
+
+    return cv;
+  }
+
+
+  /**
+   * @brief Computes an eigenvector corresponding to given eigenvalue for the original matrix.
+   */
+  std::vector<T> eigenvector(real_t<T> ev,
+                             const std::vector<real_t<T>>& alpha,
+                             const std::vector<real_t<T>>& beta,
+                             const std::vector<std::vector<T>> u) const {
+    const auto m = alpha.size();
+    const auto n = this->matrix_size;
+
+    std::vector<T> eigvec(n, 0);
+
+    auto cv = tridiagonal_eigenvector(ev, alpha, beta);
+
+    for (size_t k = m - 1; k >= 1; k--) {
+      for (size_t i = 0; i < n; i++) {
+        eigvec[i] += cv[k] * u[k][i];
+      }
+    }
+
+    util::normalize(eigvec);
+
+    return eigvec;
   }
 };
 
