@@ -38,7 +38,7 @@ public:
     std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
     size_t n = v.size();
-    for(size_t i = 0;i < n;i++) {
+    for(size_t i = 0; i < n; ++i) {
       v[i] = rand(mt);
     }
   }
@@ -54,7 +54,7 @@ public:
     std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
     size_t n = v.size();
-    for(size_t i = 0;i < n;i++) {
+    for(size_t i = 0; i < n; ++i) {
       v[i] = std::complex<T>(rand(mt), rand(mt));
     }
   }
@@ -177,18 +177,18 @@ public:
     std::vector<real_t<T>> pevs(nroot, std::numeric_limits<real_t<T>>::max()); // Previous eigenvalue
 
     int itern = this->max_iteration;
-    for(size_t k = 1;k <= this->max_iteration;k++) {
+    for(size_t k = 1; k <= this->max_iteration; ++k) {
       /* au = (A + offset*E)uk, here E is the identity matrix */
       std::fill(au.begin(), au.end(), 0.0);
       this->mv_mul(u[k-1], au);
-      for(size_t i = 0;i < n;i++) {
+      for(size_t i = 0; i < n; ++i) {
         au[i] += u[k-1][i]*this->eigenvalue_offset;
       }
 
       alpha.push_back(std::real(util::inner_prod(u[k-1], au)));
 
       u.emplace_back(n);
-      for(size_t i = 0;i < n; i++) {
+      for(size_t i = 0; i < n; ++i) {
         if(k == 1) {
           u[k][i] = au[i] - alpha[k-1]*u[k-1][i];
         } else {
@@ -200,7 +200,7 @@ public:
 
       beta.push_back(util::norm(u[k]));
 
-      for (size_t iroot = 0;iroot<nroot;++iroot) {
+      for (size_t iroot = 0; iroot < nroot; ++iroot) {
         evs[iroot] = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-1-iroot : iroot);
       }
 
@@ -216,7 +216,7 @@ public:
        * only break loop if convergence condition is met for all roots
        */
       bool break_cond = true;
-      for(size_t iroot = 0;iroot<nroot;++iroot) {
+      for(size_t iroot = 0; iroot < nroot; ++iroot) {
         const auto& ev = evs[iroot];
         const auto& pev = pevs[iroot];
         if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
@@ -235,7 +235,7 @@ public:
     eigvalues = evs;
     beta.back() = 0.0;
 
-    for(size_t iroot = 0;iroot < nroot;++iroot) {
+    for(size_t iroot = 0; iroot < nroot; ++iroot) {
       auto& eigvec = eigvecs[iroot];
       auto& ev = eigvalues[iroot];
 
@@ -340,7 +340,7 @@ private:
       count++;
     }
 
-    for(size_t i = 1;i < m;i++){
+    for(size_t i = 1; i < m; ++i){
       q_i = alpha[i] - c - beta[i-1]*beta[i-1]/q_i;
       if(q_i < 0){
         count++;
@@ -388,7 +388,7 @@ private:
     auto cv = tridiagonal_eigenvector(ev, alpha, beta);
 
     for (size_t k = m; k-- > 0;) {
-      for (size_t i = 0; i < n; i++) {
+      for (size_t i = 0; i < n; ++i) {
         eigvec[i] += cv[k] * u[k][i];
       }
     }

@@ -38,7 +38,7 @@ int main() {
   cout << "Iteration count: " << itern << endl;
   cout << "Eigen value: " << setprecision(16) << eigenvalue << endl;
   cout << "Eigen vector: ";
-  for(int i = 0;i < n;i++) {
+  for(int i = 0; i < n; ++i) {
     cout << eigenvector[i] << " ";
   }
   cout << endl;

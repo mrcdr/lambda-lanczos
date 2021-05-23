@@ -140,7 +140,7 @@ inline void schmidt_orth(std::vector<T>& uorth,
     const auto& uk = *iter;
     T innprod = util::inner_prod(uk, uorth);
 
-    for(size_t i = 0;i < n;i++) {
+    for(size_t i = 0; i < n; ++i) {
       uorth[i] -= innprod * uk[i];
     }
   }

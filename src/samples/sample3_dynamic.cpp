@@ -15,7 +15,7 @@ int main() {
   const int n = 100;
 
   auto mv_mul = [&](const vector<double>& in, vector<double>& out) {
-    for(int i = 0;i < n-1;i++) {
+    for(int i = 0; i < n-1; ++i) {
       out[i] += -1.0*in[i+1];
       out[i+1] += -1.0*in[i];
     }
@@ -46,7 +46,7 @@ int main() {
   cout << "Iteration count: " << itern << endl;
   cout << "Eigen value: " << setprecision(16) << eigenvalue << endl;
   cout << "Eigen vector: ";
-  for(int i = 0;i < n;i++) {
+  for(int i = 0; i < n; ++i) {
     cout << eigenvector[i] << " ";
   }
   cout << endl;

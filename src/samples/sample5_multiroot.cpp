@@ -29,8 +29,8 @@ int main() {
 
   // the matrix-vector multiplication routine
   auto mv_mul = [&](const vector<double>& in, vector<double>& out) {
-    for(int i = 0;i < n;i++) {
-      for(int j = 0;j < n;j++) {
+    for(int i = 0; i < n; ++i) {
+      for(int j = 0; j < n; ++j) {
         out[i] += matrix[i][j]*in[j];
       }
     }
@@ -44,10 +44,10 @@ int main() {
   int itern = engine.run(eigenvalues, eigenvectors);
 
   cout << "Iteration count: " << itern << endl;
-  for (size_t iroot=0ul; iroot<nroot; ++iroot) {
+  for (size_t iroot=0; iroot < nroot; ++iroot) {
     cout << "Eigen value (root "<< iroot <<"): " << setprecision(16) << eigenvalues[iroot] << endl;
     cout << "Eigen vector (root "<< iroot <<"): ";
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; ++i) {
       cout << eigenvectors[iroot][i] << " ";
     }
     cout << endl;
