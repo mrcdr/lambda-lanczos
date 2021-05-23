@@ -1,2 +1,8 @@
-ignore:
-  - "src"    # Ignore the "src" directory. (Only measure coverage in "include")
+coverage:
+  status:
+    project:
+      default:
+        target: 95%
+        threshold: 5%
+  ignore:
+    - "src"    # Ignore the "src" directory. (Only measure coverage in "include")
