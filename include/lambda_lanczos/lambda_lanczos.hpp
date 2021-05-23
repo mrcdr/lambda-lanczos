@@ -239,12 +239,12 @@ public:
        */
       bool break_cond = true;
       for (size_t iroot=0ul; iroot<nroot; ++iroot) {
-          const auto& ev = evs[iroot];
-          const auto& pev = pevs[iroot];
-          if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
-              break_cond = false;
-              break;
-          }
+        const auto& ev = evs[iroot];
+        const auto& pev = pevs[iroot];
+        if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
+          break_cond = false;
+          break;
+        }
       }
       if (break_cond) break;
       else pevs = evs;
@@ -262,25 +262,25 @@ public:
     beta[m-1] = 0.0;
 
     for(size_t iroot=0ul; iroot<nroot; ++iroot) {
-        auto& eigvec = eigvecs[iroot];
-        auto& ev = evs[iroot];
+      auto& eigvec = eigvecs[iroot];
+      auto& ev = evs[iroot];
 
-        if (eigvec.size() < n) {
-            eigvec.resize(n);
-        }
+      if (eigvec.size() < n) {
+        eigvec.resize(n);
+      }
+
+      for (size_t i = 0; i < n; i++) {
+        eigvec[i] = cv[m - 1] * u[m - 1][i];
+      }
+
+      for (size_t k = m - 2; k >= 1; k--) {
+        cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
 
         for (size_t i = 0; i < n; i++) {
-            eigvec[i] = cv[m - 1] * u[m - 1][i];
+          eigvec[i] += cv[k] * u[k][i];
         }
-
-        for (size_t k = m - 2; k >= 1; k--) {
-            cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
-
-            for (size_t i = 0; i < n; i++) {
-                eigvec[i] += cv[k] * u[k][i];
-            }
-        }
-        util::normalize(eigvec);
+      }
+      util::normalize(eigvec);
     }
 
     return itern;
@@ -304,12 +304,12 @@ public:
   }
 
   int run(real_t<T>& eigvalue, std::vector<T>& eigvec) const{
-      std::vector<real_t<T>> eigvalues(1);
-      std::vector<std::vector<T>> eigvecs(1);
-      auto retval = run(eigvalues, eigvecs);
-      eigvalue = eigvalues[0];
-      eigvec = std::move(eigvecs[0]);
-      return retval;
+    std::vector<real_t<T>> eigvalues(1);
+    std::vector<std::vector<T>> eigvecs(1);
+    auto retval = run(eigvalues, eigvecs);
+    eigvalue = eigvalues[0];
+    eigvec = std::move(eigvecs[0]);
+    return retval;
   }
 
 private:
