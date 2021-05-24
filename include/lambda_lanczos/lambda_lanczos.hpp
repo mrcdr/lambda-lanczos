@@ -201,7 +201,9 @@ public:
       beta.push_back(util::norm(u[k]));
 
       for (size_t iroot = 0; iroot < nroot; ++iroot) {
-        evs[iroot] = find_mth_eigenvalue(alpha, beta, this->find_maximum ? alpha.size()-1-iroot : iroot);
+        evs[iroot] = find_mth_eigenvalue(alpha, beta,
+                                         this->find_maximum ? alpha.size()-1-iroot : iroot,
+                                         this->eps * this->tridiag_eps_ratio);
       }
 
       const real_t<T> zero_threshold = util::minimum_effective_decimal<real_t<T>>()*1e-1;
@@ -272,14 +274,14 @@ public:
     return retval;
   }
 
-private:
+
   /**
    * @brief Finds the `m`th smaller eigenvalue of given tridiagonal matrix.
    */
-  util::real_t<T> find_mth_eigenvalue(const std::vector<util::real_t<T>>& alpha,
-                                      const std::vector<util::real_t<T>>& beta,
-                                      const size_t m) const {
-    real_t<T> eps = this->eps * this->tridiag_eps_ratio;
+  static util::real_t<T> find_mth_eigenvalue(const std::vector<util::real_t<T>>& alpha,
+                                             const std::vector<util::real_t<T>>& beta,
+                                             const size_t m,
+                                             const real_t<T> eps) {
     real_t<T> mid;
     real_t<T> pmid = std::numeric_limits<real_t<T>>::max();
     real_t<T> r = tridiagonal_eigen_limit(alpha, beta);
