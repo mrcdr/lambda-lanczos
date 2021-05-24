@@ -241,7 +241,7 @@ public:
       auto& eigvec = eigvecs[iroot];
       auto& ev = eigvalues[iroot];
 
-      eigvec = eigenvector(ev, alpha, beta, u);
+      eigvec = eigenvector(alpha, beta, u, ev);
       ev -= this->eigenvalue_offset;
     }
 
@@ -359,9 +359,9 @@ public:
   /**
    * @brief Computes an eigenvector corresponding to given eigenvalue for given tri-diagonal matrix.
    */
-  static std::vector<T> tridiagonal_eigenvector(real_t<T> ev,
-                                                const std::vector<real_t<T>>& alpha,
-                                                const std::vector<real_t<T>>& beta) {
+  static std::vector<T> tridiagonal_eigenvector(const std::vector<real_t<T>>& alpha,
+                                                const std::vector<real_t<T>>& beta,
+                                                real_t<T> ev) {
     const auto m = alpha.size();
     std::vector<T> cv(m+1);
     cv[m] = 0.0;
@@ -371,6 +371,8 @@ public:
       cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
     }
 
+    util::normalize(cv);
+
     return cv;
   }
 
@@ -378,16 +380,16 @@ public:
   /**
    * @brief Computes an eigenvector corresponding to given eigenvalue for the original matrix.
    */
-  static std::vector<T> eigenvector(real_t<T> ev,
-                                    const std::vector<real_t<T>>& alpha,
+  static std::vector<T> eigenvector(const std::vector<real_t<T>>& alpha,
                                     const std::vector<real_t<T>>& beta,
-                                    const std::vector<std::vector<T>> u) {
+                                    const std::vector<std::vector<T>> u,
+                                    real_t<T> ev) {
     const auto m = alpha.size();
     const auto n = u[0].size();
 
     std::vector<T> eigvec(n, 0.0);
 
-    auto cv = tridiagonal_eigenvector(ev, alpha, beta);
+    auto cv = tridiagonal_eigenvector(alpha, beta, ev);
 
     for (size_t k = m; k-- > 0;) {
       for (size_t i = 0; i < n; ++i) {
