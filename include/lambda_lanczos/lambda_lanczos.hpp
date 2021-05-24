@@ -152,7 +152,7 @@ public:
    * @brief Executes Lanczos algorithm and stores the result into reference variables passed as arguments.
    * @return Lanczos-iteration count
    */
-  int run(std::vector<real_t<T>>& eigvalues, std::vector<std::vector<T>>& eigvecs) const {
+  size_t run(std::vector<real_t<T>>& eigvalues, std::vector<std::vector<T>>& eigvecs) const {
     const size_t nroot = eigvecs.size();
     assert(eigvalues.size()==nroot);
     assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
@@ -176,7 +176,7 @@ public:
     std::vector<real_t<T>> evs(nroot); // Calculated eigenvalue
     std::vector<real_t<T>> pevs(nroot, std::numeric_limits<real_t<T>>::max()); // Previous eigenvalue
 
-    int itern = this->max_iteration;
+    size_t itern = this->max_iteration;
     for(size_t k = 1; k <= this->max_iteration; ++k) {
       /* au = (A + offset*E)uk, here E is the identity matrix */
       std::fill(au.begin(), au.end(), 0.0);
@@ -255,15 +255,15 @@ public:
    * @return Eigenvector
    * @return Lanczos-iteration count
    */
-  std::tuple<real_t<T>, std::vector<T>, int> run() const {
+  std::tuple<real_t<T>, std::vector<T>, size_t> run() const {
     real_t<T> eigvalue;
     std::vector<T> eigvec(this->matrix_size);
-    int itern = this->run(eigvalue, eigvec);
+    size_t itern = this->run(eigvalue, eigvec);
 
     return {eigvalue, eigvec, itern};
   }
 
-  int run(real_t<T>& eigvalue, std::vector<T>& eigvec) const{
+  size_t run(real_t<T>& eigvalue, std::vector<T>& eigvec) const{
     std::vector<real_t<T>> eigvalues(1);
     std::vector<std::vector<T>> eigvecs(1);
     auto retval = run(eigvalues, eigvecs);
