@@ -41,29 +41,38 @@ using real_t = typename realTypeMap<T>::type;
 
 
 /**
- * @brief Template class to implement positive-definite product
+ * @brief Complex conjugate template.
  *
- * ConjugateProduct::prod(a,b) is a function which returns a*b by default.
- * However if the arguments are complex numbers, it returns conj(a)*b instead.
  * This structure is required because partial specialization of
  * function template is not allowed in C++.
+ *
+ * Use #typed_conj in practice.
  */
 template <typename T>
-struct ConjugateProduct {
-public:
-  /**
-   * @brief Returns a*b for real-type arguments, conj(a)*b for complex-type arguments.
-   */
-  static T prod(T a, T b) { return a*b; }
+struct TypedConjugate {
+  static T invoke(const T& val) {
+    return val;
+  }
 };
 
 template <typename T>
-struct ConjugateProduct<std::complex<T>> {
-public:
-  static std::complex<T> prod(std::complex<T> a, std::complex<T> b) {
-    return std::conj(a)*b;
+struct TypedConjugate<std::complex<T>> {
+  static std::complex<T> invoke(const std::complex<T> val) {
+    return std::conj(val);
   }
 };
+
+
+/**
+ * @brief Complex conjugate with type.
+ * This function returns the argument itself for real type,
+ * and returns its complex conjugate for complex type.
+ */
+template <typename T>
+inline T typed_conj(const T& val) {
+  return TypedConjugate<T>::invoke(val);
+}
+
 
 /**
  * @brief Returns "mathematical" inner product of v1 and v2.
@@ -77,8 +86,8 @@ inline T inner_prod(const std::vector<T>& v1, const std::vector<T>& v2) {
   assert(v1.size() == v2.size());
   return std::inner_product(std::begin(v1), std::end(v1),
                             std::begin(v2), T(),
-                            [](T a, T b) -> T { return a+b; },
-                            ConjugateProduct<T>::prod);
+                            [](const T& v, const T& u) -> T { return v+u; },
+                            [](const T& a, const T& b) -> T { return typed_conj(a)*b; });
   // T() means zero value of type T
 }
 
