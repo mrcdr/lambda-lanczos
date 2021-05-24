@@ -313,8 +313,8 @@ private:
    * but it is sufficient because the bisection routine using
    * the upper bound converges exponentially.
    */
-  util::real_t<T> tridiagonal_eigen_limit(const std::vector<real_t<T>>& alpha,
-                                          const std::vector<real_t<T>>& beta) const {
+  static util::real_t<T> tridiagonal_eigen_limit(const std::vector<real_t<T>>& alpha,
+                                                 const std::vector<real_t<T>>& beta)  {
     real_t<T> r = util::l1_norm(alpha);
     r += 2*util::l1_norm(beta);
 
@@ -329,9 +329,9 @@ private:
    * Peter Arbenz et al. / "High Performance Algorithms for Structured Matrix Problems" /
    * Nova Science Publishers, Inc.
    */
-  size_t num_of_eigs_smaller_than(real_t<T> c,
-                                  const std::vector<real_t<T>>& alpha,
-                                  const std::vector<real_t<T>>& beta) const {
+  static size_t num_of_eigs_smaller_than(real_t<T> c,
+                                         const std::vector<real_t<T>>& alpha,
+                                         const std::vector<real_t<T>>& beta)  {
     real_t<T> q_i = alpha[0] - c;
     size_t count = 0;
     size_t m = alpha.size();
