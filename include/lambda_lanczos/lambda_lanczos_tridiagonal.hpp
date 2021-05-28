@@ -62,7 +62,7 @@ inline T tridiagonal_eigen_limit(const std::vector<T>& alpha,
  */
 template <typename T>
 inline T find_mth_eigenvalue(const std::vector<T>& alpha,
-                             const std::vector<util::real_t<T>>& beta,
+                             const std::vector<T>& beta,
                              const size_t m,
                              const T eps) {
   T mid;
