@@ -11,6 +11,7 @@
 #include <numeric>
 #include <random>
 #include <algorithm>
+#include <utility>
 #include "lambda_lanczos_util.hpp"
 #include "lambda_lanczos_tridiagonal.hpp"
 
@@ -194,8 +195,6 @@ public:
 
     const auto n = this->matrix_size;
 
-    std::vector<T> au(n, 0.0); // Temporal storage to store matrix-vector multiplication result
-
     u.emplace_back(n);
     this->init_vector(u[0]);
     util::normalize(u[0]);
@@ -206,7 +205,7 @@ public:
     size_t itern = this->max_iteration;
     for(size_t k = 1; k <= this->max_iteration; ++k) {
       /* au = (A + offset*E)uk, here E is the identity matrix */
-      std::fill(au.begin(), au.end(), 0.0);
+      std::vector<T> au(n, 0.0); // Temporal storage to store matrix-vector multiplication result
       this->mv_mul(u[k-1], au);
       for(size_t i = 0; i < n; ++i) {
         au[i] += u[k-1][i]*this->eigenvalue_offset;
@@ -214,12 +213,12 @@ public:
 
       alpha.push_back(std::real(util::inner_prod(u[k-1], au)));
 
-      u.emplace_back(n);
+      u.push_back(std::move(au));
       for(size_t i = 0; i < n; ++i) {
         if(k == 1) {
-          u[k][i] = au[i] - alpha[k-1]*u[k-1][i];
+          u[k][i] = u[k][i] - alpha[k-1]*u[k-1][i];
         } else {
-          u[k][i] = au[i] - beta[k-1]*u[k-2][i] - alpha[k-1]*u[k-1][i];
+          u[k][i] = u[k][i] - beta[k-1]*u[k-2][i] - alpha[k-1]*u[k-1][i];
         }
       }
 
