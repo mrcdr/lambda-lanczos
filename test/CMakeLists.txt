@@ -1,6 +1,6 @@
 find_package(GTest)
 include(GoogleTest)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-add_executable(lambda_lanczos_test lambda_lanczos_test.cpp)
+add_executable(lambda_lanczos_test lambda_lanczos_test.cpp exponentiator_test.cpp)
 target_link_libraries(lambda_lanczos_test GTest::GTest GTest::Main)
 add_test(NAME FullTest COMMAND lambda_lanczos_test)
