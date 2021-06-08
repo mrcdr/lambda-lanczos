@@ -169,7 +169,7 @@ public:
     }
 
     const T norm = util::norm(input);
-    output.resize(n, 0.0);
+    output = std::vector<T>(n, 0.0);
     for(size_t k = 0;k < alpha.size(); ++k) {
       for(size_t i = 0;i < n; ++i) {
         output[i] += norm*coeff[k]*u[k][i];
