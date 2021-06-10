@@ -255,6 +255,7 @@ public:
       }
 
       if (break_cond) {
+        itern = k;
         break;
       } else {
         pevs = evs;
