@@ -218,7 +218,7 @@ public:
         if(k == 1) {
           u[k][i] = u[k][i] - alpha[k-1]*u[k-1][i];
         } else {
-          u[k][i] = u[k][i] - beta[k-1]*u[k-2][i] - alpha[k-1]*u[k-1][i];
+          u[k][i] = u[k][i] - beta[k-2]*u[k-2][i] - alpha[k-1]*u[k-1][i];
         }
       }
 
