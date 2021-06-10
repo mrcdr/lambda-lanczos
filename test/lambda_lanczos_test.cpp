@@ -513,7 +513,7 @@ void generate_random_symmetric_matrix(T** a, vector<T>& eigvec, T& eigvalue,
 }
 
 TEST(DIAGONALIZE_TEST, RANDOM_SYMMETRIC_MATRIX) {
-  const size_t n = 10;
+  const size_t n = 50;
 
   double** matrix = new double*[n];
   matrix[0] = new double[n*n];
@@ -537,15 +537,14 @@ TEST(DIAGONALIZE_TEST, RANDOM_SYMMETRIC_MATRIX) {
 
   LambdaLanczos<double> engine(matmul, n, true);
   engine.init_vector = vector_initializer<double>;
-  engine.eps = 1e-14;
   double eigvalue;
   vector<double> eigvec(n);
   engine.run(eigvalue, eigvec);
 
   EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
-  auto sign = eigvec[0]/std::abs(eigvec[0]);
+  auto sign = (eigvec[0] * correct_eigvec[0] > 0) ? 1 : -1;
   for(size_t i = 0; i < n; ++i) {
-    EXPECT_NEAR(correct_eigvec[i]*sign, eigvec[i], std::abs(correct_eigvalue*engine.eps*10));
+    EXPECT_NEAR(correct_eigvec[i]*sign, eigvec[i], std::abs(correct_eigvalue*engine.eps*n*n));
   }
 
   delete[] matrix[0];
