@@ -112,7 +112,7 @@ public:
     std::vector<T> coeff;
 
     size_t itern = this->max_iteration;
-    for(size_t k = 1; /*k <= this->max_iteration*/; ++k) {
+    for(size_t k = 1; k <= this->max_iteration; ++k) {
       std::fill(au.begin(), au.end(), 0.0);
       this->mv_mul(u[k-1], au);
 
@@ -124,7 +124,7 @@ public:
         if(k == 1) {
           u[k][i] = au[i] - alpha[k-1]*u[k-1][i];
         } else {
-          u[k][i] = au[i] - beta[k-1]*u[k-2][i] - alpha[k-1]*u[k-1][i];
+          u[k][i] = au[i] - beta[k-2]*u[k-2][i] - alpha[k-1]*u[k-1][i];
         }
       }
 
