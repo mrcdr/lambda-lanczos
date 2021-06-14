@@ -2,7 +2,7 @@
 #define _USE_MATH_DEFINES
 #endif
 
-#include <taylor_exponentiator.hpp>
+
 #include <exponentiator.hpp>
 #include <iostream>
 #include <cstdio>
