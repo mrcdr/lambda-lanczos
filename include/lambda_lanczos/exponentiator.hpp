@@ -179,6 +179,37 @@ public:
 
     return itern;
   }
+
+
+  size_t taylor_run(const T& a,
+                    const std::vector<T>& input,
+                    std::vector<T>& output) {
+    const size_t n = this->matrix_size;
+    assert(this->matrix_size == input.size());
+
+    output = input;
+    auto tmp_vec = input;
+
+    size_t k = 1;
+    T factor = 1.0;
+    while(true) {
+      factor *= a/(T)k;
+      std::vector<T> au(n, 0.0);
+      mv_mul(tmp_vec, au);
+      if(lambda_lanczos::util::norm(au)*std::abs(factor) < eps) {
+        break;
+      }
+
+      for(size_t i = 0; i < n; ++i) {
+        output[i] += au[i] * factor;
+      }
+
+      tmp_vec = std::move(au);
+      ++k;
+    }
+
+    return k;
+  }
 };
 
 

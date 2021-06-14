@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #endif
 
+#include <taylor_exponentiator.hpp>
 #include <exponentiator.hpp>
 #include <iostream>
 #include <cstdio>
@@ -70,11 +71,22 @@ TEST(EXPONENTIATOR_TEST, EXPONENTIATE_REAL) {
   tmp = apply_matrix(diag, tmp);
   tmp = apply_matrix(u, tmp);
 
+  double overlap = std::abs(util::inner_prod(tmp, output))/util::norm(tmp)/util::norm(output);
+
   cout << setprecision(16);
   cout << "itern: " << itern << endl;
-  cout << "overlap: " <<
-    std::abs(util::inner_prod(tmp, output))/util::norm(tmp)/util::norm(output) <<
-       endl;
+  cout << "overlap: " << overlap << endl;
+
+  EXPECT_NEAR(1.0, overlap, exponentiator.eps);
+
+
+  /* Check Taylor exponentiation */
+  itern = exponentiator.taylor_run(a, input, output);
+  overlap = std::abs(util::inner_prod(tmp, output))/util::norm(tmp)/util::norm(output);
+
+  cout << "itern (Taylor): " << itern << endl;
+  cout << "overlap (Taylor): " << overlap << endl;
+  EXPECT_NEAR(1.0, overlap, exponentiator.eps);
 }
 
 
@@ -149,7 +161,21 @@ TEST(EXPONENTIATOR_TEST, EXPONENTIATE_LARGE_MATRIX) {
   tmp = apply_matrix(diag, tmp);
   tmp = apply_matrix(u, tmp);
 
+  double overlap = std::abs(util::inner_prod(tmp, output))/util::norm(tmp)/util::norm(output);
+
   cout << setprecision(16);
   cout << "itern: " << itern << endl;
-  cout << "overlap: " << abs(lambda_lanczos::util::inner_prod(tmp, output)) << endl;
+  cout << "overlap: " << overlap << endl;
+
+  EXPECT_NEAR(1.0, overlap, exponentiator.eps);
+
+
+
+  /* Check Taylor exponentiation */
+  itern = exponentiator.taylor_run(a, input, output);
+  overlap = std::abs(util::inner_prod(tmp, output))/util::norm(tmp)/util::norm(output);
+
+  cout << "itern (Taylor): " << itern << endl;
+  cout << "overlap (Taylor): " << overlap << endl;
+  EXPECT_NEAR(1.0, overlap, exponentiator.eps);
 }
