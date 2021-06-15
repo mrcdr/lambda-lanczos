@@ -187,28 +187,39 @@ public:
     const size_t n = this->matrix_size;
     assert(this->matrix_size == input.size());
 
-    output = input;
-    auto tmp_vec = input;
 
-    size_t k = 1;
-    T factor = 1.0;
-    while(true) {
-      factor *= a/(T)k;
-      std::vector<T> au(n, 0.0);
-      mv_mul(tmp_vec, au);
-      if(lambda_lanczos::util::norm(au)*std::abs(factor) < eps) {
-        break;
-      }
-
-      for(size_t i = 0; i < n; ++i) {
-        output[i] += au[i] * factor;
-      }
-
-      tmp_vec = std::move(au);
-      ++k;
+    if(a == T()) { // Zero check
+      output = input;
+      return 1;
     }
 
-    return k;
+    std::vector<std::vector<T>> taylors;
+    taylors.push_back(input);
+
+    T factor = 1.0;
+    for(size_t k = 1; ; ++k) {
+      factor *= a/(T)k;
+      taylors.emplace_back(n, 0.0);
+      mv_mul(taylors[k-1], taylors[k]);
+
+      if(lambda_lanczos::util::norm(taylors[k]) * std::abs(factor) < eps) {
+        break;
+      }
+    }
+
+
+    /* Sum Taylor series backward */
+    output.resize(n);
+    std::fill(output.begin(), output.end(), 0.0);
+    for(size_t k = taylors.size(); k-- > 0; ) {
+      for(size_t i = 0; i < n; ++i) {
+        output[i] += taylors[k][i] * factor;
+      }
+
+      factor *= (T)k / a;
+    }
+
+    return taylors.size();
   }
 };
 
