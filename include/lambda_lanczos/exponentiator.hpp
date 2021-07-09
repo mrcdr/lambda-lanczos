@@ -111,6 +111,7 @@ public:
     util::normalize(u[0]);
 
     std::vector<T> coeff;
+    std::vector<T> coeff_prev;
 
     size_t itern = this->max_iteration;
     for(size_t k = 1; k <= this->max_iteration; ++k) {
@@ -160,20 +161,26 @@ public:
 
       beta.push_back(util::norm(u[k]));
 
-      const real_t<T> beta_threshold = util::minimum_effective_decimal<real_t<T>>()*1e1;
-      if(std::abs(coeff.back()) < eps || beta.back() < beta_threshold) {
+
+      T overlap = 0.0;
+      for(size_t i = 0; i < coeff.size()-1; ++i) {
+        overlap += util::typed_conj(coeff_prev[i])*coeff[i];
+      }
+
+      const real_t<T> beta_threshold = util::minimum_effective_decimal<real_t<T>>()*1e-1;
+      if(std::abs(1-std::abs(overlap)) < eps || beta.back() < beta_threshold) {
         itern = k;
         break;
       }
 
       util::normalize(u[k]);
+      coeff_prev = coeff;
     }
 
     const T norm = util::norm(input);
-    output = std::vector<T>(n, 0.0);
-    for(size_t k = 0;k < alpha.size(); ++k) {
+    for(size_t l = 0;l < coeff.size(); ++l) {
       for(size_t i = 0;i < n; ++i) {
-        output[i] += norm*coeff[k]*u[k][i];
+        output[i] += norm*coeff[l]*u[l][i];
       }
     }
 
