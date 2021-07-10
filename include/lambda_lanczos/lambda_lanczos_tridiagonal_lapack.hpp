@@ -19,10 +19,7 @@ namespace lambda_lanczos { namespace tridiagonal {
 template <typename T>
 inline T find_mth_eigenvalue(const std::vector<T>& alpha,
                              const std::vector<T>& beta,
-                             const size_t index,
-                             const T eps) {
-  (void)eps; // Unused declaration for compiler
-
+                             const size_t index) {
   const size_t n = alpha.size();
   auto a = alpha;
   auto b = beta;

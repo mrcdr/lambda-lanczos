@@ -32,7 +32,7 @@ inline size_t num_of_eigs_smaller_than(T c,
       ++count;
     }
     if(q_i == 0){
-      q_i = util::minimum_effective_decimal<T>();
+      q_i = std::numeric_limits<T>::epsilon();
     }
   }
 
@@ -63,15 +63,14 @@ inline T tridiagonal_eigen_limit(const std::vector<T>& alpha,
 template <typename T>
 inline T find_mth_eigenvalue(const std::vector<T>& alpha,
                              const std::vector<T>& beta,
-                             const size_t m,
-                             const T eps) {
+                             const size_t m) {
   T mid;
   T pmid = std::numeric_limits<T>::max();
   T r = tridiagonal_eigen_limit(alpha, beta);
   T lower = -r;
   T upper = r;
 
-  while(upper-lower > std::min(std::abs(lower), std::abs(upper))*eps) {
+  while(upper-lower > std::min(std::abs(lower), std::abs(upper))*std::numeric_limits<T>::epsilon()) {
     mid = (lower+upper)/2.0;
 
     if(num_of_eigs_smaller_than(mid, alpha, beta) >= m+1) {

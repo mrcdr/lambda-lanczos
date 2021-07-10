@@ -56,16 +56,7 @@ public:
    * | double                             | 8 bytes            | 1e-14   |
    * | long double                        | 16 bytes           | 1e-21   |
    */
-  real_t<T> eps = util::minimum_effective_decimal<real_t<T>>() * 1e1;
-
-  /** @brief (Not necessary to change)
-   *
-   * Description for those who know the Lanczos algorithm:
-   * This is the ratio between the convergence threshold of resulted eigenvalue and the that of
-   * tridiagonal eigenvalue. To convergent whole Lanczos algorithm,
-   * the convergence threshold for the tridiagonal eigenvalue should be smaller than `eps`.
-   */
-  real_t<T> tridiag_eps_ratio = 1e-1;
+  real_t<T> eps = std::numeric_limits<real_t<T>>::epsilon() * 1e2;
 
   /** @brief (Not necessary to change)
    *
@@ -92,7 +83,6 @@ public:
   size_t run(const T& a,
              const std::vector<T>& input,
              std::vector<T>& output) const {
-    assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
     assert(input.size() == this->matrix_size);
 
     std::vector<std::vector<T>> u; // Lanczos vectors
@@ -137,10 +127,8 @@ public:
       std::vector<real_t<T>> ev(alpha.size());
       std::vector<std::vector<real_t<T>>> p(alpha.size());
       for(size_t j = 0; j < alpha.size(); ++j) {
-        ev[j] = lambda_lanczos::tridiagonal::
-          find_mth_eigenvalue(alpha, beta, j, this->eps * this->tridiag_eps_ratio);
-        p[j] = lambda_lanczos::tridiagonal::
-          tridiagonal_eigenvector(alpha, beta, j, ev[j]);
+        ev[j] = lambda_lanczos::tridiagonal::find_mth_eigenvalue(alpha, beta, j);
+        p[j] = lambda_lanczos::tridiagonal::tridiagonal_eigenvector(alpha, beta, j, ev[j]);
       }
 
       for(size_t i = 0; i < alpha.size(); ++i) {
@@ -167,7 +155,7 @@ public:
         overlap += util::typed_conj(coeff_prev[i])*coeff[i];
       }
 
-      const real_t<T> beta_threshold = util::minimum_effective_decimal<real_t<T>>()*1e-1;
+      const real_t<T> beta_threshold = std::numeric_limits<real_t<T>>::epsilon();
       if(std::abs(1-std::abs(overlap)) < eps || beta.back() < beta_threshold) {
         itern = k;
         break;

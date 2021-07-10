@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <utility>
 #include "lambda_lanczos_util.hpp"
-#include "lambda_lanczos_tridiagonal_lapack.hpp"
+#include "lambda_lanczos_tridiagonal.hpp"
 
 
 namespace lambda_lanczos {
@@ -134,7 +134,7 @@ public:
    * | double                             | 8 bytes            | 1e-12   |
    * | long double                        | 16 bytes           | 1e-19   |
    */
-  real_t<T> eps = util::minimum_effective_decimal<real_t<T>>() * 1e3;
+  real_t<T> eps = std::numeric_limits<real_t<T>>::epsilon() * 1e3;
 
   /** @brief true to calculate maximum eigenvalue, false to calculate minimum one.*/
   bool find_maximum;
@@ -147,15 +147,6 @@ public:
    * so you don't have to "reshift" the result with `eigenvalue_offset`.
    **/
   real_t<T> eigenvalue_offset = 0.0;
-
-  /** @brief (Not necessary to change)
-   *
-   * Description for those who know the Lanczos algorithm:
-   * This is the ratio between the convergence threshold of resulted eigenvalue and the that of
-   * tridiagonal eigenvalue. To convergent whole Lanczos algorithm,
-   * the convergence threshold for the tridiagonal eigenvalue should be smaller than `eps`.
-   */
-  real_t<T> tridiag_eps_ratio = 1e-1;
 
   /** @brief (Not necessary to change)
    *
@@ -184,7 +175,6 @@ public:
   size_t run(std::vector<real_t<T>>& eigvalues, std::vector<std::vector<T>>& eigvecs) const {
     const size_t nroot = eigvecs.size();
     assert(eigvalues.size()==nroot);
-    assert(0 < this->tridiag_eps_ratio && this->tridiag_eps_ratio < 1);
 
     std::vector<std::vector<T>> u; // Lanczos vectors
     std::vector<real_t<T>> alpha;  // Diagonal elements of an approximated tridiagonal matrix
@@ -230,11 +220,10 @@ public:
       for (size_t iroot = 0; iroot < nroot; ++iroot) {
         evs[iroot] =
           tridiagonal::find_mth_eigenvalue(alpha, beta,
-                                           this->find_maximum ? alpha.size()-1-iroot : iroot,
-                                           this->eps * this->tridiag_eps_ratio);
+                                           this->find_maximum ? alpha.size()-1-iroot : iroot);
       }
 
-      const real_t<T> zero_threshold = util::minimum_effective_decimal<real_t<T>>()*1e-1;
+      const real_t<T> zero_threshold = std::numeric_limits<real_t<T>>::epsilon();
       if(beta.back() < zero_threshold) {
         itern = k;
         break;
