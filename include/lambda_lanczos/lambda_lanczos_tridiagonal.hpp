@@ -99,12 +99,15 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
                                               const std::vector<T>& beta,
                                               T ev) {
   const auto m = alpha.size();
-  std::vector<T> cv(m+1);
-  cv[m] = 0.0;
+  std::vector<T> cv(m);
+
   cv[m-1] = 1.0;
 
-  for (size_t k = m-1; k-- > 0;) {
-    cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
+  if(m >= 2) {
+    cv[m-2] = (ev - alpha[m-1]) * cv[m-1] / beta[m-2];
+    for (size_t k = m-2; k-- > 0;) {
+      cv[k] = ((ev - alpha[k + 1]) * cv[k + 1] - beta[k + 1] * cv[k + 2]) / beta[k];
+    }
   }
 
   util::normalize(cv);
