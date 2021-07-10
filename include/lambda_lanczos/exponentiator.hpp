@@ -140,7 +140,7 @@ public:
         ev[j] = lambda_lanczos::tridiagonal::
           find_mth_eigenvalue(alpha, beta, j, this->eps * this->tridiag_eps_ratio);
         p[j] = lambda_lanczos::tridiagonal::
-          tridiagonal_eigenvector(alpha, beta, ev[j]);
+          tridiagonal_eigenvector(alpha, beta, j, ev[j]);
       }
 
       for(size_t i = 0; i < alpha.size(); ++i) {

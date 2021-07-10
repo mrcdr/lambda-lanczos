@@ -97,7 +97,10 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
 template <typename T>
 inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
                                               const std::vector<T>& beta,
-                                              T ev) {
+                                              const size_t index,
+                                              const T ev) {
+  (void)index; // Unused declaration for compiler
+
   const auto m = alpha.size();
   std::vector<T> cv(m);
 

@@ -12,15 +12,17 @@
 #include "lambda_lanczos_util.hpp"
 
 
-namespace lambda_lanczos { namespace tridiagonal_lapack {
+namespace lambda_lanczos { namespace tridiagonal {
 /**
  * @brief Finds the `m`th smaller eigenvalue of given tridiagonal matrix.
  */
 template <typename T>
 inline T find_mth_eigenvalue(const std::vector<T>& alpha,
                              const std::vector<T>& beta,
-                             const size_t m,
+                             const size_t index,
                              const T eps) {
+  (void)eps; // Unused declaration for compiler
+
   const size_t n = alpha.size();
   auto a = alpha;
   auto b = beta;
@@ -29,7 +31,7 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
 
   int info = LAPACKE_dstev(LAPACK_COL_MAJOR, 'N', n, a.data(), b.data(), z.data(), 1);
 
-  return a[m];
+  return a[index];
 }
 
 
@@ -39,7 +41,10 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
 template <typename T>
 inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
                                               const std::vector<T>& beta,
-                                              const size_t m) {
+                                              const size_t index,
+                                              const T ev) {
+  (void)ev; // Unused declaration for compiler
+
   const size_t n = alpha.size();
   auto a = alpha;
   auto b = beta;
@@ -49,7 +54,7 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
 
   std::vector<T> cv(n);
   for(size_t i = 0; i < n; ++i) {
-    cv[i] = z[m*n + i];
+    cv[i] = z[index*n + i];
   }
 
   util::normalize(cv);

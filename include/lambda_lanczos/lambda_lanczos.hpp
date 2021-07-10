@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <utility>
 #include "lambda_lanczos_util.hpp"
-#include "lambda_lanczos_tridiagonal.hpp"
+#include "lambda_lanczos_tridiagonal_lapack.hpp"
 
 
 namespace lambda_lanczos {
@@ -24,13 +24,14 @@ template <typename T, typename LT>
 inline auto eigenvector(const std::vector<T>& alpha,
                         const std::vector<T>& beta,
                         const std::vector<std::vector<LT>> u,
+                        const size_t index,
                         T ev) -> std::vector<decltype(T()+LT())> {
   const auto m = alpha.size();
   const auto n = u[0].size();
 
   std::vector<LT> eigvec(n, 0.0);
 
-  auto cv = tridiagonal::tridiagonal_eigenvector(alpha, beta, ev);
+  auto cv = tridiagonal::tridiagonal_eigenvector(alpha, beta, index, ev);
 
   for (size_t k = m; k-- > 0;) {
     for (size_t i = 0; i < n; ++i) {
@@ -269,7 +270,9 @@ public:
       auto& eigvec = eigvecs[iroot];
       auto& ev = eigvalues[iroot];
 
-      eigvec = eigenvector(alpha, beta, u, ev);
+      eigvec = eigenvector(alpha, beta, u,
+                           this->find_maximum ? alpha.size()-1-iroot : iroot,
+                           ev);
       ev -= this->eigenvalue_offset;
     }
 
