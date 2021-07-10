@@ -145,7 +145,7 @@ TEST(EXPONENTIATOR_TEST, EXPONENTIATE_LARGE_MATRIX) {
   input[n-1] = complex<double>(1, 2);
   input[n/2] = complex<double>(8, 2);
   util::normalize(input);
-  vector<complex<double>> output(n);
+  vector<complex<double>> output; // leave uninitialized for testing
   size_t itern = exponentiator.run(a, input, output);
 
   vector<double> eigvals;

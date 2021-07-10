@@ -177,6 +177,8 @@ public:
       coeff_prev = coeff;
     }
 
+    output.resize(n);
+    std::fill(output.begin(), output.end(), T());
     const T norm = util::norm(input);
     for(size_t l = 0;l < coeff.size(); ++l) {
       for(size_t i = 0;i < n; ++i) {
