@@ -95,34 +95,27 @@ public:
 
     const auto n = this->matrix_size;
 
-    std::vector<T> au(n, 0.0); // Temporal storage to store matrix-vector multiplication result
-
     u.push_back(input);
     util::normalize(u[0]);
 
-    std::vector<T> coeff;
     std::vector<T> coeff_prev;
 
     size_t itern = this->max_iteration;
     for(size_t k = 1; k <= this->max_iteration; ++k) {
-      std::fill(au.begin(), au.end(), 0.0);
-      this->mv_mul(u[k-1], au);
+      u.emplace_back(n, 0.0);
+      this->mv_mul(u[k-1], u[k]);
 
-      alpha.push_back(std::real(util::inner_prod(u[k-1], au)));
+      alpha.push_back(std::real(util::inner_prod(u[k-1], u[k])));
 
-      u.emplace_back(n);
-      u[k] = au;
       for(size_t i = 0; i < n; ++i) {
         if(k == 1) {
-          u[k][i] = au[i] - alpha[k-1]*u[k-1][i];
+          u[k][i] = u[k][i] - alpha[k-1]*u[k-1][i];
         } else {
-          u[k][i] = au[i] - beta[k-2]*u[k-2][i] - alpha[k-1]*u[k-1][i];
+          u[k][i] = u[k][i] - beta[k-2]*u[k-2][i] - alpha[k-1]*u[k-1][i];
         }
       }
 
       util::schmidt_orth(u[k], u.begin(), u.end()-1);
-
-      coeff = std::vector<T>(alpha.size(), 0.0);
 
       std::vector<real_t<T>> ev(alpha.size());
       std::vector<std::vector<real_t<T>>> p(alpha.size());
@@ -131,6 +124,7 @@ public:
         p[j] = lambda_lanczos::tridiagonal::tridiagonal_eigenvector(alpha, beta, j, ev[j]);
       }
 
+      std::vector<T> coeff(alpha.size(), 0.0);
       for(size_t i = 0; i < alpha.size(); ++i) {
         for(size_t j = 0; j < alpha.size(); ++j) {
           coeff[i] += p[j][i] * std::exp(a*ev[j]) * p[j][0];
@@ -151,9 +145,11 @@ public:
 
 
       T overlap = 0.0;
-      for(size_t i = 0; i < coeff.size()-1; ++i) {
-        overlap += util::typed_conj(coeff_prev[i])*coeff[i];
+      for(size_t i = 0; i < coeff_prev.size(); ++i) {
+        overlap += util::typed_conj(coeff_prev[i])*coeff[i]; // Last element of coeff is not used here
       }
+
+      coeff_prev = std::move(coeff);
 
       const real_t<T> beta_threshold = std::numeric_limits<real_t<T>>::epsilon();
       if(std::abs(1-std::abs(overlap)) < eps || beta.back() < beta_threshold) {
@@ -162,15 +158,14 @@ public:
       }
 
       util::normalize(u[k]);
-      coeff_prev = coeff;
     }
 
     output.resize(n);
     std::fill(output.begin(), output.end(), T());
     const T norm = util::norm(input);
-    for(size_t l = 0;l < coeff.size(); ++l) {
+    for(size_t l = 0;l < coeff_prev.size(); ++l) {
       for(size_t i = 0;i < n; ++i) {
-        output[i] += norm*coeff[l]*u[l][i];
+        output[i] += norm*coeff_prev[l]*u[l][i];
       }
     }
 
