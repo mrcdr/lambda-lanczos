@@ -58,6 +58,11 @@ public:
    */
   real_t<T> eps = std::numeric_limits<real_t<T>>::epsilon() * 1e2;
 
+  /**
+   * @brief Flag to execute explicit Lanczos-vector orthogonalization.
+   */
+  bool full_orthogonalize = false;
+
   /** @brief (Not necessary to change)
    *
    * This variable specifies the initial reserved size of Lanczos vectors.
@@ -115,7 +120,9 @@ public:
         }
       }
 
-      util::schmidt_orth(u[k], u.begin(), u.end()-1);
+      if(this->full_orthogonalize) {
+        util::schmidt_orth(u[k], u.begin(), u.end()-1);
+      }
 
       std::vector<real_t<T>> ev(alpha.size());
       std::vector<std::vector<real_t<T>>> p(alpha.size());
