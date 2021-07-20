@@ -8,7 +8,13 @@
 
 #include <vector>
 #include <complex>
+
+#if defined(LAMBDA_LANCZOS_USE_LAPACK)
 #include <lapacke.h>
+#elif defined(LAMBDA_LANCZOS_USE_MKL)
+#include <mkl.h>
+#endif
+
 #include "lambda_lanczos_util.hpp"
 
 
@@ -26,7 +32,7 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
   auto z = std::vector<T>(1);
 
 
-  int info = LAPACKE_dstev(LAPACK_COL_MAJOR, 'N', n, a.data(), b.data(), z.data(), 1);
+  LAPACKE_dstev(LAPACK_COL_MAJOR, 'N', n, a.data(), b.data(), z.data(), 1);
 
   return a[index];
 }
@@ -47,7 +53,7 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
   auto b = beta;  // copy required because the contents will be destroyed
   auto z = std::vector<T>(n*n);
 
-  int info = LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
+  LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
 
   std::vector<T> cv(n);
   for(size_t i = 0; i < n; ++i) {
@@ -71,7 +77,7 @@ inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
   auto b = beta;
   auto z = std::vector<T>(n*n);
 
-  int info = LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
+  LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
 
 
   eigenvalues = std::move(a);
