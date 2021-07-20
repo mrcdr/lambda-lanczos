@@ -126,10 +126,7 @@ public:
 
       std::vector<real_t<T>> ev(alpha.size());
       std::vector<std::vector<real_t<T>>> p(alpha.size());
-      for(size_t j = 0; j < alpha.size(); ++j) {
-        ev[j] = lambda_lanczos::tridiagonal::find_mth_eigenvalue(alpha, beta, j);
-        p[j] = lambda_lanczos::tridiagonal::tridiagonal_eigenvector(alpha, beta, j, ev[j]);
-      }
+      lambda_lanczos::tridiagonal::tridiagonal_eigenpairs(alpha, beta, ev, p);
 
       std::vector<T> coeff(alpha.size(), 0.0);
       for(size_t i = 0; i < alpha.size(); ++i) {

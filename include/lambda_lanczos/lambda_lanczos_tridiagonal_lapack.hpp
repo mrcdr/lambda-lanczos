@@ -21,8 +21,8 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
                              const std::vector<T>& beta,
                              const size_t index) {
   const size_t n = alpha.size();
-  auto a = alpha;
-  auto b = beta;
+  auto a = alpha; // copy required because the contents will be destroyed
+  auto b = beta;  // copy required because the contents will be destroyed
   auto z = std::vector<T>(1);
 
 
@@ -43,8 +43,8 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
   (void)ev; // Unused declaration for compiler
 
   const size_t n = alpha.size();
-  auto a = alpha;
-  auto b = beta;
+  auto a = alpha; // copy required because the contents will be destroyed
+  auto b = beta;  // copy required because the contents will be destroyed
   auto z = std::vector<T>(n*n);
 
   int info = LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
@@ -54,11 +54,37 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
     cv[i] = z[index*n + i];
   }
 
-  util::normalize(cv);
-
   return cv;
 }
 
-}} // namespace lambda_lanczos::tridiagonal_lapack
+
+/**
+ * @brief Computes all eigenpairs (eigenvalues and eigenvectors) for given tri-diagonal matrix.
+ */
+template <typename T>
+inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
+                                   const std::vector<T>& beta,
+                                   std::vector<T>& eigenvalues,
+                                   std::vector<std::vector<T>>& eigenvectors) {
+  const size_t n = alpha.size();
+  auto a = alpha;
+  auto b = beta;
+  auto z = std::vector<T>(n*n);
+
+  int info = LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
+
+
+  eigenvalues = std::move(a);
+  eigenvectors.resize(n);
+  for(size_t k = 0; k < n; ++k) {  // k-th eigenvector
+    eigenvectors[k] = std::vector<T>(n);
+    for(size_t i = 0; i < n; ++i) {
+      eigenvectors[k][i] = z[k*n + i];
+    }
+  }
+}
+
+
+}} // namespace lambda_lanczos::tridiagonal
 
 #endif  /* LAMBDA_LANCZOS_TRIDIAGONAL_LAPACK_H_ */

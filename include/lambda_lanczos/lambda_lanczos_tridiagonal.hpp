@@ -117,6 +117,25 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
   return cv;
 }
 
+
+/**
+ * @brief Computes all eigenpairs (eigenvalues and eigenvectors) for given tri-diagonal matrix.
+ */
+template <typename T>
+inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
+                                   const std::vector<T>& beta,
+                                   std::vector<T>& eigenvalues,
+                                   std::vector<std::vector<T>>& eigenvectors) {
+  const size_t n = alpha.size();
+  eigenvalues.resize(n);
+  eigenvectors.resize(n);
+
+  for(size_t j = 0; j < n; ++j) {
+    eigenvalues[j] = lambda_lanczos::tridiagonal::find_mth_eigenvalue(alpha, beta, j);
+    eigenvectors[j] = lambda_lanczos::tridiagonal::tridiagonal_eigenvector(alpha, beta, j, eigenvalues[j]);
+  }
+}
+
 }} // namespace lambda_lanczos::tridiagonal
 
 #endif  /* LAMBDA_LANCZOS_TRIDIAGONAL_H_ */
