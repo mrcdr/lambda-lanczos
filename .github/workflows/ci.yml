@@ -5,8 +5,7 @@ on: [push]
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Debug
-  TARGET1: lambda_lanczos_test
-  TARGET2: lambda_lanczos_test_lapack
+  TARGET: lambda_lanczos_test
 
 jobs:
   build:
@@ -55,11 +54,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       # run: cmake --build . --target $TARGET --config $BUILD_TYPE
-      run: make $TARGET1 VERBOSE=1
-
-    - name: Build LAPACK version
-      working-directory: ${{github.workspace}}/build
-      run: make $TARGET2 VERBOSE=1
+      run: make $TARGET VERBOSE=1
 
     - name: Test
       working-directory: ${{github.workspace}}/build

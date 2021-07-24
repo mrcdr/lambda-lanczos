@@ -18,7 +18,7 @@
 #include "lambda_lanczos_util.hpp"
 
 
-namespace lambda_lanczos { namespace tridiagonal {
+namespace lambda_lanczos { namespace tridiagonal_lapack {
 /**
  * @brief Finds the `m`th smaller eigenvalue of given tridiagonal matrix.
  */
@@ -91,6 +91,6 @@ inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
 }
 
 
-}} // namespace lambda_lanczos::tridiagonal
+}} // namespace lambda_lanczos::tridiagonal_lapack
 
 #endif  /* LAMBDA_LANCZOS_TRIDIAGONAL_LAPACK_H_ */

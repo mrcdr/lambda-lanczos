@@ -179,3 +179,66 @@ TEST(EXPONENTIATOR_TEST, EXPONENTIATE_LARGE_MATRIX) {
   cout << "overlap (Taylor): " << overlap << endl;
   EXPECT_NEAR(1.0, overlap, exponentiator.eps);
 }
+
+
+TEST(EXPONENTIATOR_TEST, EXPONENTIATE_ZERO_DELTA) {
+  using namespace std;
+  using namespace lambda_lanczos;
+
+  const size_t n = 100;
+  const double t = -1.0;
+
+  auto mv_mul = [&](const vector<complex<double>>& in, vector<complex<double>>& out) {
+    for(size_t i = 0; i < n-1; ++i) {
+      out[i] += t*in[i+1];
+      out[i+1] += t*in[i];
+    }
+
+    out[0] += t*in[n-1];
+    out[n-1] += t*in[0];
+  };
+
+  complex<double> a(0.0, 0.0);
+
+  lambda_lanczos::Exponentiator<complex<double>> exponentiator(mv_mul, n);
+  exponentiator.full_orthogonalize = true;
+
+  vector<complex<double>> input(n);
+  input[0] = complex<double>(1, 2);
+  input[n-1] = complex<double>(1, 2);
+  input[n/2] = complex<double>(8, 2);
+  util::normalize(input);
+  vector<complex<double>> output; // leave uninitialized for testing
+  size_t itern = exponentiator.run(a, input, output);
+
+  vector<double> eigvals;
+  vector<vector<complex<double>>> u;
+  make_plane_wave(t, n, eigvals, u);
+  vector<vector<complex<double>>> diag(n, vector<complex<double>>(n, 0.0));
+  for(size_t i = 0; i < n; ++i) {
+    diag[i][i] = exp(a * eigvals[i]);
+  }
+
+  auto tmp = input;
+  tmp = apply_matrix(u, tmp, true);
+  tmp = apply_matrix(diag, tmp);
+  tmp = apply_matrix(u, tmp);
+
+  double overlap = std::abs(util::inner_prod(tmp, output))/util::norm(tmp)/util::norm(output);
+
+  cout << setprecision(16);
+  cout << "itern: " << itern << endl;
+  cout << "overlap: " << overlap << endl;
+
+  EXPECT_NEAR(1.0, overlap, exponentiator.eps);
+
+
+
+  /* Check Taylor exponentiation */
+  itern = exponentiator.taylor_run(a, input, output);
+  overlap = std::abs(util::inner_prod(tmp, output))/util::norm(tmp)/util::norm(output);
+
+  cout << "itern (Taylor): " << itern << endl;
+  cout << "overlap (Taylor): " << overlap << endl;
+  EXPECT_NEAR(1.0, overlap, exponentiator.eps);
+}

@@ -6,7 +6,7 @@
 #include "lambda_lanczos_util.hpp"
 
 
-namespace lambda_lanczos { namespace tridiagonal {
+namespace lambda_lanczos { namespace tridiagonal_impl {
 /**
  * @brief Finds the number of eigenvalues of given tridiagonal matrix smaller than `c`.
  *
@@ -131,11 +131,11 @@ inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
   eigenvectors.resize(n);
 
   for(size_t j = 0; j < n; ++j) {
-    eigenvalues[j] = lambda_lanczos::tridiagonal::find_mth_eigenvalue(alpha, beta, j);
-    eigenvectors[j] = lambda_lanczos::tridiagonal::tridiagonal_eigenvector(alpha, beta, j, eigenvalues[j]);
+    eigenvalues[j] = lambda_lanczos::tridiagonal_impl::find_mth_eigenvalue(alpha, beta, j);
+    eigenvectors[j] = lambda_lanczos::tridiagonal_impl::tridiagonal_eigenvector(alpha, beta, j, eigenvalues[j]);
   }
 }
 
-}} // namespace lambda_lanczos::tridiagonal
+}} // namespace lambda_lanczos::tridiagonal_impl
 
 #endif  /* LAMBDA_LANCZOS_TRIDIAGONAL_IMPL_H_ */
