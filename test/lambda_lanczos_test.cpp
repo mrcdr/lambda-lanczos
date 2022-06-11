@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #endif
 
+#include <lambda_lanczos_tridiagonal_impl.hpp>
 #include <lambda_lanczos.hpp>
 #include <iostream>
 #include <cstdio>
@@ -669,4 +670,39 @@ TEST(DIAGONALIZE_TEST, RANDOM_HERMITIAN_MATRIX) {
 
   delete[] matrix[0];
   delete[] matrix;
+}
+
+
+TEST(TRIDIAGONAL_TEST, IMPLICIT_SHIFT_QR) {
+  vector<double> alpha{1, 2, 3, 4};
+  vector<double> beta{1, 1, 0.01};
+  vector<double> v = alpha;
+  const auto n = alpha.size();
+
+  vector<vector<double>> q;
+
+  lambda_lanczos::tridiagonal_impl::tridiagonal_eigenpairs_isqr(alpha, beta, v, q);
+
+  for(size_t i = 0; i < n; ++i) {
+    std::cout << v[i] << " ";
+  }
+  std::cout << std::endl;
+}
+
+
+TEST(TRIDIAGONAL_TEST, NULL_EIGENVALUE) {
+  vector<double> alpha{6.82333617e-03, 3.09398208e+00, 1.89919458e+00, 1.28531906e-16};
+  vector<double> beta{1.19582528e-01, -1.37689656e+00, 6.16147405e-15};
+
+  vector<double> v = alpha;
+  const auto n = alpha.size();
+
+  vector<vector<double>> q;
+
+  lambda_lanczos::tridiagonal_impl::tridiagonal_eigenpairs_isqr(alpha, beta, v, q);
+
+  for(size_t i = 0; i < n; ++i) {
+    std::cout << v[i] << " ";
+  }
+  std::cout << std::endl;
 }

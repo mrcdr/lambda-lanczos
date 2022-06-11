@@ -172,6 +172,15 @@ inline constexpr T minimum_effective_decimal() {
   return pow(10, -sig_decimal_digit<T>());
 }
 
+
+/**
+ * @brief Return the sign of given value.
+ */
+template <typename T>
+int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
 }} /* namespace lambda_lanczos::util */
 
 #endif /* LAMBDA_LANCZOS_UTIL_H_ */
