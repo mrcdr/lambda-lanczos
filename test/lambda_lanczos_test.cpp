@@ -135,6 +135,41 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   }
 }
 
+TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_FLOAT) {
+  const size_t n = 3;
+  float matrix[n][n] = {{2.0f, 1.0f, 1.0f},
+                        {1.0f, 2.0f, 1.0f},
+                        {1.0f, 1.0f, 2.0f}};
+  /* Its eigenvalues are {4, 1, 1} */
+
+  auto matmul = [&](const vector<float>& in, vector<float>& out) {
+    for(size_t i = 0; i < n; ++i) {
+      for(size_t j = 0; j < n; ++j) {
+        out[i] += matrix[i][j]*in[j];
+      }
+    }
+  };
+
+  LambdaLanczos<float> engine(matmul, n, true);
+
+  float eigvalue;
+  vector<float> eigvec(1); // The size will be enlarged automatically
+  engine.run(eigvalue, eigvec);
+
+
+  auto sign = eigvec[0]/std::abs(eigvec[0]);
+  vector<float> correct_eigvec(n);
+  for(size_t i = 0; i < n; ++i) {
+    correct_eigvec[i] = sign*1.0f/std::sqrt(3.0f);
+  }
+  float correct_eigvalue = 4.0f;
+
+  EXPECT_NEAR(correct_eigvalue, eigvalue, std::abs(correct_eigvalue*engine.eps));
+  for(size_t i = 0; i < n; ++i) {
+    EXPECT_NEAR(correct_eigvec[i], eigvec[i], std::abs(correct_eigvalue*engine.eps*10));
+  }
+}
+
 TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_MULTIPLE_VALUE_RETURN_FEATURE) {
   const size_t n = 3;
   double matrix[n][n] = { {2.0, 1.0, 1.0},

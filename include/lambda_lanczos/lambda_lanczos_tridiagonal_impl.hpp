@@ -74,7 +74,7 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
   T upper = r;
 
   while(upper-lower > std::min(std::abs(lower), std::abs(upper))*std::numeric_limits<T>::epsilon()) {
-    mid = (lower+upper)/2.0;
+    mid = (lower+upper)*T(0.5);
 
     if(num_of_eigs_smaller_than(mid, alpha, beta) >= m+1) {
       upper = mid;
@@ -156,7 +156,7 @@ inline std::pair<T, T> calc_givens_cs(T a, T b) {
   T s = 0;
 
   if(b != 0) {
-    if(abs(b) > abs(a)) {
+    if(std::abs(b) > std::abs(a)) {
       auto r = -a/b;
       s = 1/sqrt(1+r*r);
       c = s*r;

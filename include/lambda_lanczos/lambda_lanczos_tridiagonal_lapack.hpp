@@ -19,6 +19,16 @@
 
 
 namespace lambda_lanczos { namespace tridiagonal_lapack {
+
+
+inline lapack_int stev(int matrix_layout, char jobz, lapack_int n, float* d, float* e, float* z, lapack_int ldz) {
+  return LAPACKE_sstev(matrix_layout, jobz, n, d, e, z, ldz);
+}
+
+inline lapack_int stev(int matrix_layout, char jobz, lapack_int n, double* d, double* e, double* z, lapack_int ldz) {
+  return LAPACKE_dstev(matrix_layout, jobz, n, d, e, z, ldz);
+}
+
 /**
  * @brief Finds the `m`th smaller eigenvalue of given tridiagonal matrix.
  */
@@ -32,7 +42,7 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
   auto z = std::vector<T>(1);
 
 
-  LAPACKE_dstev(LAPACK_COL_MAJOR, 'N', n, a.data(), b.data(), z.data(), 1);
+  stev(LAPACK_COL_MAJOR, 'N', n, a.data(), b.data(), z.data(), 1);
 
   return a[index];
 }
@@ -53,7 +63,7 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
   auto b = beta;  // copy required because the contents will be destroyed
   auto z = std::vector<T>(n*n);
 
-  LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
+  stev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
 
   std::vector<T> cv(n);
   for(size_t i = 0; i < n; ++i) {
@@ -77,7 +87,7 @@ inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
   auto b = beta;
   auto z = std::vector<T>(n*n);
 
-  LAPACKE_dstev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
+  stev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
 
 
   eigenvalues = std::move(a);

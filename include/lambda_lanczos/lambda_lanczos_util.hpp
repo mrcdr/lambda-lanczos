@@ -115,7 +115,7 @@ inline void scalar_mul(T1 a, std::vector<T2>& vec) {
  */
 template <typename T>
 inline void normalize(std::vector<T>& vec) {
-  scalar_mul(1.0/norm(vec), vec);
+  scalar_mul(T(1)/norm(vec), vec);
 }
 
 
