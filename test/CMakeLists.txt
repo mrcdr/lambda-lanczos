@@ -1,6 +1,6 @@
 find_package(GTest)
 include(GoogleTest)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -O0 -fsanitize=address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -O0 -Wall -Wextra -Wfloat-conversion -fsanitize=address")
 add_executable(lambda_lanczos_test_impl lambda_lanczos_test.cpp exponentiator_test.cpp)
 add_executable(lambda_lanczos_test_lapack lambda_lanczos_test.cpp exponentiator_test.cpp)
 
