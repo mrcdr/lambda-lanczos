@@ -215,6 +215,18 @@ inline T givens_rotation_tridiagonal(RandomIterator alpha,
 }
 
 
+/**
+ * @brief Performs an implicit shift QR step A = Z^T A Z on given sub tridiagonal matrix A.
+ * @param [in, out] alpha Diagonal elements of the full tridiagonal matrix.
+ * @param [in, out] beta Subdiagonal elements of the full tridiagonal matrix.
+ * @param [in, out] q A "matrix" Q that will be overwitten as Q = QZ. See note for details.
+ * @param offset The first index of the submatrix.
+ * @param nsub The size of the submatrix.
+ *
+ * @note A series of the QR steps produces an eigenvector "matrix" q
+ * that stores the k-th eigenvector as `q[k][:]`.
+ * This definition differs from a usual mathematical sense (i.e., Q_{:,k} specifies the k-th eigenvector).
+ */
 template <typename T>
 inline void isqr_step(std::vector<T>& alpha,
                       std::vector<T>& beta,
@@ -256,17 +268,21 @@ inline void isqr_step(std::vector<T>& alpha,
 /**
  * @brief Computes all eigenpairs (eigenvalues and eigenvectors) for given tri-diagonal matrix
  * using the Implicitly Shifted QR algorithm.
+ * @param [in] alpha Diagonal elements of the full tridiagonal matrix.
+ * @param [in] beta Subdiagonal elements of the full tridiagonal matrix.
+ * @param [out] eigenvalues Eigenvalues.
+ * @param [out] eigenvectors Eigenvectors. The k-th eigenvector will be stored in `eigenvectors[k]`.
  */
 template <typename T>
-inline void tridiagonal_eigenpairs(const std::vector<T>& alpha_org,
-                                        const std::vector<T>& beta_org,
-                                        std::vector<T>& eigenvalues,
-                                        std::vector<std::vector<T>>& eigenvectors) {
+inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
+                                   const std::vector<T>& beta,
+                                   std::vector<T>& eigenvalues,
+                                   std::vector<std::vector<T>>& eigenvectors) {
   const T eps = 1e-15;
-  const size_t n = alpha_org.size();
+  const size_t n = alpha.size();
 
-  auto alpha = alpha_org;
-  auto beta = beta_org;
+  auto alpha_work = alpha;
+  auto beta_work = beta;
 
   /* Prepare an identity matrix to be transformed into an eigenvector matrix */
   eigenvectors.resize(n);
@@ -278,24 +294,24 @@ inline void tridiagonal_eigenpairs(const std::vector<T>& alpha_org,
 
   while(true) {
     for(size_t i = 0; i < n-1; ++i) {
-      if(std::abs(beta[i]) < (std::abs(alpha[i]) + std::abs(alpha[i+1]))*eps) {
-        beta[i] = 0;
+      if(std::abs(beta_work[i]) < (std::abs(alpha_work[i]) + std::abs(alpha_work[i+1]))*eps) {
+        beta_work[i] = 0;
       }
     }
 
     size_t qidx = n - 1;
-    while(qidx > 0 && beta[qidx-1] == 0) {
+    while(qidx > 0 && beta_work[qidx-1] == 0) {
       qidx--;
     }
     size_t pidx = qidx;
-    while(pidx > 0 && beta[pidx-1] != 0) {
+    while(pidx > 0 && beta_work[pidx-1] != 0) {
       pidx--;
     }
     // Here index such that pidx <= index <= qidx specifies sub-tridiagonal matrix.
 
     if(qidx > 0) {
-      isqr_step(alpha,
-                beta,
+      isqr_step(alpha_work,
+                beta_work,
                 eigenvectors,
                 pidx,
                 qidx - pidx + 1);
@@ -304,7 +320,7 @@ inline void tridiagonal_eigenpairs(const std::vector<T>& alpha_org,
     }
   }
 
-  eigenvalues = alpha;
+  eigenvalues = alpha_work;
 
   lambda_lanczos::util::sort_eigenpairs(eigenvalues, eigenvectors);
 }
