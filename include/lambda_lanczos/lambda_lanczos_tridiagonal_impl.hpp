@@ -5,6 +5,7 @@
 #include <vector>
 #include <complex>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include "lambda_lanczos_util.hpp"
 
@@ -125,10 +126,10 @@ inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
  * @brief Computes all eigenpairs (eigenvalues and eigenvectors) for given tri-diagonal matrix.
  */
 template <typename T>
-inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
-                                   const std::vector<T>& beta,
-                                   std::vector<T>& eigenvalues,
-                                   std::vector<std::vector<T>>& eigenvectors) {
+inline void tridiagonal_eigenpairs_bisection(const std::vector<T>& alpha,
+                                             const std::vector<T>& beta,
+                                             std::vector<T>& eigenvalues,
+                                             std::vector<std::vector<T>>& eigenvectors) {
   const size_t n = alpha.size();
   eigenvalues.resize(n);
   eigenvectors.resize(n);
@@ -158,11 +159,11 @@ inline std::pair<T, T> calc_givens_cs(T a, T b) {
   if(b != 0) {
     if(std::abs(b) > std::abs(a)) {
       auto r = -a/b;
-      s = 1/sqrt(1+r*r);
+      s = 1/std::sqrt(1+r*r);
       c = s*r;
     } else {
       auto r = -b/a;
-      c = 1/sqrt(1+r*r);
+      c = 1/std::sqrt(1+r*r);
       s = c*r;
     }
   }
@@ -195,9 +196,9 @@ inline T givens_rotation_tridiagonal(RandomIterator alpha,
   auto a01 = c*beta[k] - s*alpha[k+1];
   auto a10 = s*alpha[k] + c*beta[k];
   auto a11 = s*beta[k] + c*alpha[k+1];
-  auto zp = -s*beta[k+1];
+  auto zp = k < n-2 ? -s*beta[k+1] : T();
 
-  if(k < n-1) {
+  if(k < n-2) {
     beta[k+1] = c*beta[k+1];
   }
 
@@ -214,35 +215,39 @@ inline T givens_rotation_tridiagonal(RandomIterator alpha,
 }
 
 
-template <typename RandomIterator, typename T>
-inline void isqr_step(RandomIterator alpha,
-                      RandomIterator beta,
+template <typename T>
+inline void isqr_step(std::vector<T>& alpha,
+                      std::vector<T>& beta,
                       std::vector<std::vector<T>>& q,
-                      size_t n) {
-  auto d = (alpha[n-2] - alpha[n-1])/2;
-  auto mu = alpha[n-1] - beta[n-2]*beta[n-2]/(d+lambda_lanczos::util::sgn(d)*std::sqrt(d*d+beta[n-2]*beta[n-2]));
-  auto x = alpha[0] - mu;
-  auto z = beta[0];
+                      size_t offset,
+                      size_t nsub) {
+  if(nsub == 1) {
+    return;
+  }
 
-  for(size_t k = 0; k < n-1; ++k) {
-    if(q.size() == n) { // If necessary, calculate the orthogonal matrix (eigenvectors)
-      auto cs = calc_givens_cs(x, z);
-      auto c = cs.first;
-      auto s = cs.second;
+  auto d = (alpha[offset+nsub-2] - alpha[offset+nsub-1])/2;
+  auto mu = alpha[offset+nsub-1] - beta[offset+nsub-2]*beta[offset+nsub-2] /
+      (d+lambda_lanczos::util::sgn(d)*std::sqrt(d*d+beta[offset+nsub-2]*beta[offset+nsub-2]));
+  auto x = alpha[offset+0] - mu;
+  auto z = beta[offset+0];
 
-      // Keep in mind that q[k][j] is the jth element of the kth eigenvector.
-      // This means an eigenvector is stored as a ROW of the matrix q
-      // in the sense of mathematical notation.
-      for(size_t j = 0; j < n; ++j) {
-        auto v0 = q[k][j];
-        auto v1 = q[k+1][j];
+  for(size_t k = 0; k < nsub - 1; ++k) {
+    auto cs = calc_givens_cs(x, z);
+    auto c = cs.first;
+    auto s = cs.second;
 
-        q[k][j] = c*v0 - s*v1;
-        q[k+1][j] = s*v0 + c*v1;
-      }
+    // Keep in mind that q[k][j] is the jth element of the kth eigenvector.
+    // This means an eigenvector is stored as a ROW of the matrix q
+    // in the sense of mathematical notation.
+    for(size_t j = 0; j < alpha.size(); ++j) {
+      auto v0 = q[offset+k][j];
+      auto v1 = q[offset+k+1][j];
+
+      q[offset+k][j] = c*v0 - s*v1;
+      q[offset+k+1][j] = s*v0 + c*v1;
     }
 
-    z = givens_rotation_tridiagonal(alpha, beta, n, k, x, z);
+    z = givens_rotation_tridiagonal(std::next(alpha.begin(), offset), std::next(beta.begin(), offset), nsub, k, x, z);
     x = beta[k];
   }
 }
@@ -253,7 +258,7 @@ inline void isqr_step(RandomIterator alpha,
  * using the Implicitly Shifted QR algorithm.
  */
 template <typename T>
-inline void tridiagonal_eigenpairs_isqr(const std::vector<T>& alpha_org,
+inline void tridiagonal_eigenpairs(const std::vector<T>& alpha_org,
                                         const std::vector<T>& beta_org,
                                         std::vector<T>& eigenvalues,
                                         std::vector<std::vector<T>>& eigenvectors) {
@@ -263,6 +268,7 @@ inline void tridiagonal_eigenpairs_isqr(const std::vector<T>& alpha_org,
   auto alpha = alpha_org;
   auto beta = beta_org;
 
+  /* Prepare an identity matrix to be transformed into an eigenvector matrix */
   eigenvectors.resize(n);
   for(size_t i = 0; i < n; ++i) {
     eigenvectors[i].resize(n);
@@ -277,7 +283,7 @@ inline void tridiagonal_eigenpairs_isqr(const std::vector<T>& alpha_org,
       }
     }
 
-    size_t qidx = n-1;
+    size_t qidx = n - 1;
     while(qidx > 0 && beta[qidx-1] == 0) {
       qidx--;
     }
@@ -285,15 +291,22 @@ inline void tridiagonal_eigenpairs_isqr(const std::vector<T>& alpha_org,
     while(pidx > 0 && beta[pidx-1] != 0) {
       pidx--;
     }
+    // Here index such that pidx <= index <= qidx specifies sub-tridiagonal matrix.
 
     if(qidx > 0) {
-      isqr_step(alpha.begin(), beta.begin(), eigenvectors, n);
+      isqr_step(alpha,
+                beta,
+                eigenvectors,
+                pidx,
+                qidx - pidx + 1);
     } else {
       break;
     }
   }
 
   eigenvalues = alpha;
+
+  lambda_lanczos::util::sort_eigenpairs(eigenvalues, eigenvectors);
 }
 
 }} // namespace lambda_lanczos::tridiagonal_impl

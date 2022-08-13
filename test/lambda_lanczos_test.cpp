@@ -5,7 +5,7 @@
 #include <lambda_lanczos_tridiagonal_impl.hpp>
 #include <lambda_lanczos.hpp>
 #include <iostream>
-#include <cstdio>
+#include <string>
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -96,6 +96,36 @@ TEST(UNIT_TEST, L1_NORM) {
   vector<complex<double>> v{c1, c2};
 
   EXPECT_DOUBLE_EQ(sqrt(10.0)+sqrt(2.0), lambda_lanczos::util::l1_norm(v));
+}
+
+TEST(UNIT_TEST, SORT_EIGENPAIRS) {
+  vector<double> eigvals{2, -1, 0};
+  vector<vector<complex<double>>> eigvecs{ {2, 2, 2},
+                                           {0, 0, 0},
+                                           {1, 1, 1} };
+  const size_t n = eigvals.size();
+
+  lambda_lanczos::util::sort_eigenpairs(eigvals, eigvecs);
+
+  const vector<double> expected_eigvals{-1, 0, 2};
+  const vector<vector<complex<double>>> expected_eigvecs{ {0, 0, 0},
+                                                          {1, 1, 1},
+                                                          {2, 2, 2} };
+
+  for(size_t i = 0; i < n; ++i) {
+    EXPECT_DOUBLE_EQ(expected_eigvals[i], eigvals[i]);
+    for(size_t j = 0; j < n; ++j) {
+      EXPECT_DOUBLE_EQ(std::real(expected_eigvecs[i][j]), std::real(eigvecs[i][j]));
+    }
+  }
+}
+
+TEST(UNIT_TEST, STRINGIFY) {
+  vector<double> v{1, 2, 3};
+  std::string str = lambda_lanczos::util::vectorToString(v);
+  std::cout << str << std::endl;
+
+  EXPECT_STREQ("1 2 3", str.c_str());
 }
 
 TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
@@ -709,23 +739,38 @@ TEST(DIAGONALIZE_TEST, RANDOM_HERMITIAN_MATRIX) {
 
 
 TEST(TRIDIAGONAL_TEST, IMPLICIT_SHIFT_QR) {
-  vector<double> alpha{1, 2, 3, 4};
-  vector<double> beta{1, 1, 0.01};
-  vector<double> v = alpha;
+  vector<double> alpha{1, 2, 3};
+  vector<double> beta{2, 2};
+
   const auto n = alpha.size();
+  vector<double> eigvals(n);
+  vector<vector<double>> eigvecs;
 
-  vector<vector<double>> q;
+  lambda_lanczos::tridiagonal_impl::tridiagonal_eigenpairs(alpha, beta, eigvals, eigvecs);
 
-  lambda_lanczos::tridiagonal_impl::tridiagonal_eigenpairs_isqr(alpha, beta, v, q);
+  vector<double> correct_eigvals {-1, 2, 5};
+  vector<vector<double>> correct_eigvecs { { 2, -2,  1},
+                                           { 2,  1, -2},
+                                           { 1,  2,  2} };
+  for(auto& v : correct_eigvecs) {
+    lambda_lanczos::util::normalize(v);
+  }
 
+  double eps = 1e-10;
   for(size_t i = 0; i < n; ++i) {
-    std::cout << v[i] << " ";
+    EXPECT_NEAR(correct_eigvals[i], eigvals[i], eps);
+
+    auto sign = eigvecs[i][0]/std::abs(eigvecs[i][0]);
+    std::cout << lambda_lanczos::util::vectorToString(eigvecs[i]) << std::endl;
+    for(size_t j = 0; j < n; ++j) {
+      EXPECT_NEAR(correct_eigvecs[i][j] * sign, eigvecs[i][j], eps);
+    }
   }
   std::cout << std::endl;
 }
 
 
-TEST(TRIDIAGONAL_TEST, NULL_EIGENVALUE) {
+TEST(TRIDIAGONAL_TEST, NULL_EIGENVALUE_NO_ASSERTS) {
   vector<double> alpha{6.82333617e-03, 3.09398208e+00, 1.89919458e+00, 1.28531906e-16};
   vector<double> beta{1.19582528e-01, -1.37689656e+00, 6.16147405e-15};
 
@@ -734,7 +779,7 @@ TEST(TRIDIAGONAL_TEST, NULL_EIGENVALUE) {
 
   vector<vector<double>> q;
 
-  lambda_lanczos::tridiagonal_impl::tridiagonal_eigenpairs_isqr(alpha, beta, v, q);
+  lambda_lanczos::tridiagonal_impl::tridiagonal_eigenpairs(alpha, beta, v, q);
 
   for(size_t i = 0; i < n; ++i) {
     std::cout << v[i] << " ";

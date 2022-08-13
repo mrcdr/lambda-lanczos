@@ -7,6 +7,7 @@
 #include <cmath>
 #include <numeric>
 #include <cassert>
+#include <sstream>
 
 namespace lambda_lanczos { namespace util {
 
@@ -157,6 +158,43 @@ inline void schmidt_orth(std::vector<T>& uorth,
 
 
 /**
+ * @brief Sorts eigenvalues and eigenvectors with respect to given predicate.
+ *
+ * @note This function changes the memory location of the eigenpairs.
+ */
+template <typename T>
+inline void sort_eigenpairs(std::vector<real_t<T>>& eigenvalues,
+                            std::vector<std::vector<T>>& eigenvectors,
+                            const std::function<bool (real_t<T>, real_t<T>)> predicate = std::less<real_t<T>>()) {
+  std::vector<std::pair<real_t<T>, size_t>> ev_index_pairs;
+  ev_index_pairs.reserve(eigenvalues.size());
+  for(size_t i = 0; i < eigenvalues.size(); ++i) {
+    ev_index_pairs.emplace_back(eigenvalues[i], i);
+  }
+
+  std::sort(ev_index_pairs.begin(),
+            ev_index_pairs.end(),
+            [&predicate](const auto& x, const auto& y ) {
+              return predicate(x.first, y.first);
+            });
+
+  std::vector<real_t<T>> eigenvalues_new;
+  std::vector<std::vector<T>> eigenvectors_new;
+  eigenvalues_new.reserve(eigenvalues.size());
+  eigenvectors_new.reserve(eigenvalues.size());
+
+  for(const auto& ev_index : ev_index_pairs) {
+    size_t k = ev_index.second;
+    eigenvalues_new.emplace_back(eigenvalues[k]);
+    eigenvectors_new.push_back(std::move(eigenvectors[k]));
+  }
+
+  eigenvalues = std::move(eigenvalues_new);
+  eigenvectors = std::move(eigenvectors_new);
+}
+
+
+/**
  * @brief Returns the significant decimal digits of type T.
  *
  */
@@ -179,6 +217,27 @@ inline constexpr T minimum_effective_decimal() {
 template <typename T>
 int sgn(T val) {
   return (T(0) < val) - (val < T(0));
+}
+
+
+/**
+ * @brief Returns string representation of given vector.
+ */
+template <typename T>
+std::string vectorToString(const std::vector<T>& vec, std::string delimiter = " ") {
+  std::stringstream ss;
+
+  for(const auto& elem : vec) {
+    ss << elem << delimiter;
+  }
+
+  /* Remove the last space */
+  std::string result = ss.str();
+  if(!result.empty()) {
+    result.pop_back();
+  }
+
+  return result;
 }
 
 }} /* namespace lambda_lanczos::util */
