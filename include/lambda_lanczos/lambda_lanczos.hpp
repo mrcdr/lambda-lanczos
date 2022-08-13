@@ -217,10 +217,13 @@ public:
 
       beta.push_back(util::norm(u[k]));
 
-      for (size_t iroot = 0; iroot < nroot; ++iroot) {
-        evs[iroot] =
-          tridiagonal::find_mth_eigenvalue(alpha, beta,
-                                           this->find_maximum ? alpha.size()-1-iroot : iroot);
+      size_t num_eigs = std::min(nroot, alpha.size());
+      if(num_eigs == nroot) { // Calculate eigenvalues if the tridiagonal matrix become large enough
+        for (size_t iroot = 0; iroot < nroot; ++iroot) {
+          evs[iroot] =
+            tridiagonal::find_mth_eigenvalue(alpha, beta,
+                                             this->find_maximum ? alpha.size()-1-iroot : iroot);
+        }
       }
 
       const real_t<T> zero_threshold = std::numeric_limits<real_t<T>>::epsilon();
@@ -232,15 +235,19 @@ public:
       util::normalize(u[k]);
 
       /*
-       * only break loop if convergence condition is met for all roots
+       * Only break loop if convergence condition is met for all requied roots
        */
       bool break_cond = true;
-      for(size_t iroot = 0; iroot < nroot; ++iroot) {
-        const auto& ev = evs[iroot];
-        const auto& pev = pevs[iroot];
-        if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
-          break_cond = false;
-          break;
+      if(num_eigs < nroot) {
+        break_cond = false;
+      }else {
+        for(size_t iroot = 0; iroot < nroot; ++iroot) {
+          const auto& ev = evs[iroot];
+          const auto& pev = pevs[iroot];
+          if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
+            break_cond = false;
+            break;
+          }
         }
       }
 
