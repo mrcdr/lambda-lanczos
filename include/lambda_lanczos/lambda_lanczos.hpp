@@ -14,6 +14,7 @@
 #include <utility>
 #include "lambda_lanczos_util.hpp"
 #include "lambda_lanczos_tridiagonal.hpp"
+#include "eigenpair_manager.hpp"
 
 
 namespace lambda_lanczos {
@@ -139,6 +140,9 @@ public:
   /** @brief true to calculate maximum eigenvalue, false to calculate minimum one.*/
   bool find_maximum;
 
+  /** @brief Number of eigenpairs to be calculated. */
+  size_t num_eigs = 1;
+
   /**
    * @brief Shifts the eigenvalues of the given matrix A.
    *
@@ -150,11 +154,28 @@ public:
 
   /** @brief (Not necessary to change)
    *
+   * This variable specifies the number of eigenpairs to be calculated per Lanczos iteration.
+   * For example, when `num_eigs == 20` and `num_eigs_per_iteration == 5`,
+   * `run()` will executes 4 Lanczos iterations.
+   */
+  size_t num_eigs_per_iteration = 5;
+
+  /** @brief (Not necessary to change)
+   *
    * This variable specifies the initial reserved size of Lanczos vectors.
    * Controlling this variable might affect reserving efficiency,
    * but that would be very small compared to matrix-vector-multiplication cost.
    */
   size_t initial_vector_size = 200;
+
+private:
+
+  /**
+   * @brief Iteration counts of the latest run.
+   */
+  std::vector<size_t> iter_counts;
+
+public:
 
   /**
     * @brief Constructs Lanczos calculation engine.
@@ -172,10 +193,11 @@ public:
    * @brief Executes Lanczos algorithm and stores the result into reference variables passed as arguments.
    * @return Lanczos-iteration count
    */
-  size_t run(std::vector<real_t<T>>& eigvalues, std::vector<std::vector<T>>& eigvecs) const {
-    const size_t nroot = eigvecs.size();
-    assert(eigvalues.size()==nroot);
-
+  template <typename Iterable>
+  size_t run_iteration(std::vector<real_t<T>>& eigvalues,
+                       std::vector<std::vector<T>>& eigvecs,
+                       size_t nroot,
+                       Iterable orthogonalizeTo) const {
     std::vector<std::vector<T>> u; // Lanczos vectors
     std::vector<real_t<T>> alpha;  // Diagonal elements of an approximated tridiagonal matrix
     std::vector<real_t<T>> beta;   // Subdiagonal elements of an approximated tridiagonal matrix
@@ -188,10 +210,11 @@ public:
 
     u.emplace_back(n);
     this->init_vector(u[0]);
+    util::schmidt_orth(u[0], orthogonalizeTo.cbegin(), orthogonalizeTo.cend());
     util::normalize(u[0]);
 
-    std::vector<real_t<T>> evs(nroot); // Calculated eigenvalue
-    std::vector<real_t<T>> pevs(nroot, std::numeric_limits<real_t<T>>::max()); // Previous eigenvalue
+    std::vector<real_t<T>> evs; // Calculated eigenvalue
+    std::vector<real_t<T>> pevs; // Previous eigenvalue
 
     size_t itern = this->max_iteration;
     for(size_t k = 1; k <= this->max_iteration; ++k) {
@@ -213,20 +236,19 @@ public:
         }
       }
 
+      util::schmidt_orth(u[k], orthogonalizeTo.cbegin(), orthogonalizeTo.cend());
       util::schmidt_orth(u[k], u.begin(), u.end()-1);
 
       beta.push_back(util::norm(u[k]));
 
-      size_t num_eigs = std::min(nroot, alpha.size());
-      if(num_eigs == nroot) { // Calculate eigenvalues if the tridiagonal matrix become large enough
-        for (size_t iroot = 0; iroot < nroot; ++iroot) {
-          evs[iroot] =
-            tridiagonal::find_mth_eigenvalue(alpha, beta,
-                                             this->find_maximum ? alpha.size()-1-iroot : iroot);
-        }
+      size_t num_eigs_to_calculate = std::min(nroot, alpha.size());
+      evs = std::vector<real_t<T>>();
+      for (size_t iroot = 0; iroot < num_eigs_to_calculate; ++iroot) {
+        evs.push_back(tridiagonal::find_mth_eigenvalue(alpha, beta,
+                                                       this->find_maximum ? alpha.size()-1-iroot : iroot));
       }
 
-      const real_t<T> zero_threshold = std::numeric_limits<real_t<T>>::epsilon();
+      const real_t<T> zero_threshold = std::numeric_limits<real_t<T>>::epsilon() * 1e1;
       if(beta.back() < zero_threshold) {
         itern = k;
         break;
@@ -238,9 +260,9 @@ public:
        * Only break loop if convergence condition is met for all requied roots
        */
       bool break_cond = true;
-      if(num_eigs < nroot) {
+      if(pevs.size() != evs.size()) {
         break_cond = false;
-      }else {
+      } else {
         for(size_t iroot = 0; iroot < nroot; ++iroot) {
           const auto& ev = evs[iroot];
           const auto& pev = pevs[iroot];
@@ -260,9 +282,10 @@ public:
     }
 
     eigvalues = evs;
+    eigvecs.resize(eigvalues.size());
     beta.back() = 0.0;
 
-    for(size_t iroot = 0; iroot < nroot; ++iroot) {
+    for(size_t iroot = 0; iroot < eigvalues.size(); ++iroot) {
       auto& eigvec = eigvecs[iroot];
       auto& ev = eigvalues[iroot];
 
@@ -276,29 +299,79 @@ public:
   }
 
   /**
+   * @brief Executes Lanczos algorithm and stores the result into reference variables passed as arguments.
+   */
+  void run(std::vector<real_t<T>>& eigenvalues, std::vector<std::vector<T>>& eigenvectors) {
+    this->iter_counts = std::vector<size_t>();
+    eigenpair_manager::EigenPairManager<T> ep_manager(find_maximum, num_eigs);
+
+    while(true) {
+      std::vector<real_t<T>> eigenvalues_current;
+      std::vector<std::vector<T>> eigenvectors_current;
+
+      size_t nroot = std::min(num_eigs_per_iteration, this->matrix_size - ep_manager.size());
+
+      size_t iter_count = this->run_iteration(eigenvalues_current,
+                                              eigenvectors_current,
+                                              nroot,
+                                              ep_manager.getEigenvectors());
+      this->iter_counts.push_back(iter_count);
+
+      bool nothing_added = ep_manager.insertEigenPairs(eigenvalues_current, eigenvectors_current);
+
+      if(nothing_added) {
+        break;
+      }
+    }
+
+    const auto& eigenpairs = ep_manager.getEigenpairs();
+    eigenvalues = std::vector<real_t<T>>();
+    eigenvalues.reserve(eigenpairs.size());
+    eigenvectors = std::vector<std::vector<T>>();
+    eigenvectors.reserve(eigenvectors.size());
+
+    for(auto& eigenpair : eigenpairs) {
+      eigenvalues.push_back(std::move(eigenpair.first));
+      eigenvectors.push_back(std::move(eigenpair.second));
+    }
+  }
+
+  /**
    * @brief Executes Lanczos algorithm and return result as a tuple.
    *
    * This function provides C++17 multiple-value-return interface.
    *
    * @return Eigenvalue
    * @return Eigenvector
-   * @return Lanczos-iteration count
    */
-  std::tuple<real_t<T>, std::vector<T>, size_t> run() const {
+  std::tuple<real_t<T>, std::vector<T>> run() {
     real_t<T> eigvalue;
     std::vector<T> eigvec(this->matrix_size);
-    size_t itern = this->run(eigvalue, eigvec);
+    this->run(eigvalue, eigvec);
 
-    return {eigvalue, eigvec, itern};
+    return {eigvalue, eigvec};
   }
 
-  size_t run(real_t<T>& eigvalue, std::vector<T>& eigvec) const{
+  void run(real_t<T>& eigvalue, std::vector<T>& eigvec) {
+    const size_t num_eigs_tmp = this->num_eigs;
+    this->num_eigs = 1;
+
     std::vector<real_t<T>> eigvalues(1);
     std::vector<std::vector<T>> eigvecs(1);
-    auto retval = run(eigvalues, eigvecs);
+
+    this->run(eigvalues, eigvecs);
+
+    this->num_eigs = num_eigs_tmp;
+
     eigvalue = eigvalues[0];
     eigvec = std::move(eigvecs[0]);
-    return retval;
+  }
+
+  /**
+   * @brief Returns the latest iteration counts.
+   */
+  const std::vector<size_t>& getIterationCounts() const {
+    return iter_counts;
   }
 };
 

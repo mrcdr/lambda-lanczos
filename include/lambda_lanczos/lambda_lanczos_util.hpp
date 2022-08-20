@@ -8,8 +8,68 @@
 #include <numeric>
 #include <cassert>
 #include <sstream>
+#include <map>
 
 namespace lambda_lanczos { namespace util {
+
+/**
+ * @brief Iterator for a container of tuples to iterate over the I-th tuple elements.
+ */
+template <size_t I, typename container_type>
+class TupleViewIterator {
+private:
+  typename container_type::const_iterator iter;
+
+public:
+  TupleViewIterator(const typename container_type::const_iterator& iter) : iter(iter) {}
+
+  const typename std::tuple_element<I, typename container_type::value_type>::type& operator*() const {
+    return std::get<I>(*iter);
+  }
+
+  bool operator==(const TupleViewIterator& obj) const {
+    return this->iter == obj.iter;
+  }
+
+  bool operator!=(const TupleViewIterator& obj) const {
+    return this->iter != obj.iter;
+  }
+
+  TupleViewIterator& operator++() {
+    this->iter++;
+    return *this;
+  }
+
+  TupleViewIterator operator++(int dummy) {
+    auto before = *this;
+    this->iter++;
+    return before;
+  }
+};
+
+/**
+ * @brief Iterator for a map to iterate over its values.
+ */
+template <typename map_type>
+using MapValueIterator = TupleViewIterator<1, map_type>;
+
+template <typename map_type>
+class MapValueIterable {
+private:
+  const typename map_type::const_iterator itr_cbegin;
+  const typename map_type::const_iterator itr_cend;
+
+public:
+  MapValueIterable(const map_type& map) : itr_cbegin(map.cbegin()), itr_cend(map.cend()) {}
+
+  MapValueIterator<map_type> cbegin() const {
+    return itr_cbegin;
+  }
+
+  MapValueIterator<map_type> cend() const {
+    return itr_cend;
+  }
+};
 
 
 /**

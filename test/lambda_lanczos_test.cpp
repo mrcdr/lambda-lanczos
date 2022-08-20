@@ -219,7 +219,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_MULTIPLE_VALUE_RETURN_FEATURE) {
   engine.init_vector = vector_initializer<double>;
   engine.eigenvalue_offset = 6.0;
 
-  auto [eigvalue, eigvec, itern] = engine.run(); // C++17 multiple value return
+  auto [eigvalue, eigvec] = engine.run(); // C++17 multiple value return
 
 
   auto sign = eigvec[0]/std::abs(eigvec[0]);
@@ -486,10 +486,11 @@ TEST(DIAGONALIZE_TEST, MULTIPLE_EIGENPAIRS) {
   };
 
   LambdaLanczos<double> engine(mv_mul, n, false); // false means to calculate the smallest eigenvalue.
+  engine.num_eigs = nroot;
   engine.eps = 1e-7;
 
-  vector<double> eigenvalues(nroot);
-  vector<vector<double>> eigenvectors(nroot, {n});
+  vector<double> eigenvalues;
+  vector<vector<double>> eigenvectors;
   engine.run(eigenvalues, eigenvectors);
 
 
