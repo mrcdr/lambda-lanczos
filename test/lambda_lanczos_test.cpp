@@ -514,6 +514,54 @@ TEST(DIAGONALIZE_TEST, MULTIPLE_EIGENPAIRS) {
 }
 
 
+TEST(DIAGONALIZE_TEST, MULTIPLE_DEGENERATE_EIGENPAIRS) {
+  const size_t n = 10;
+
+  auto matmul = [&](const vector<double>& in, vector<double>& out) {
+    for(size_t i = 0; i < n-1; ++i) {
+      out[i] += -1.0*in[i+1];
+      out[i+1] += -1.0*in[i];
+    }
+
+    out[0] += -1.0*in[n-1];
+    out[n-1] += -1.0*in[0];
+  };
+  /*
+    This lambda is equivalent to applying following n by n matrix
+
+      0  -1   0       ..     -1
+     -1   0  -1       ..      0
+      0  -1   0       ..      0
+      0     ..        ..      0
+      0     ..        0  -1   0
+      0     ..       -1   0  -1
+     -1     ..        0  -1   0
+
+      Its eigenvalues are -2*cos(2*pi*i/n), 0 <= i < n.
+   */
+
+  LambdaLanczos<double> engine(matmul, n);
+  engine.num_eigs = 6;
+  engine.eps = 1e-14;
+  vector<double> eigvals;
+  vector<std::vector<double>> eigvecs;
+  engine.run(eigvals, eigvecs);
+
+  vector<double> correct_eigvals = {0, -1, 1, -2, 2, 3};
+  std::transform(correct_eigvals.begin(),
+                 correct_eigvals.end(),
+                 correct_eigvals.begin(),
+                 [](double x) {
+                   return -2.0*cos(2.0*M_PI*x/n);
+                 });
+
+  EXPECT_EQ(correct_eigvals.size(), eigvals.size());
+  for(size_t i = 0; i < correct_eigvals.size(); ++i) {
+    EXPECT_NEAR(correct_eigvals[i], eigvals[i], engine.eps);
+  }
+}
+
+
 template <typename T, typename RE>
 void generate_random_symmetric_matrix(T** a, vector<T>& eigvec, T& eigvalue,
                                       size_t n, size_t rand_n, RE eng) {

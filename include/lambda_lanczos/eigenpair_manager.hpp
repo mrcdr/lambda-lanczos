@@ -60,8 +60,11 @@ public:
       auto inserted = eigenpairs.emplace(std::move(eigenvalues[i]), std::move(eigenvectors[i]));
       auto last = eigenpairs.end();
       last--;
-      if(eigenpairs.size() > num_eigs && inserted == last) { // If the element is added as the last element
-        eigenpairs.erase(last); // erase it
+      if(eigenpairs.size() > num_eigs) {
+        if(inserted != last) { // If the eigenpair is not inserted to the tail
+          nothing_added = false;
+        }
+        eigenpairs.erase(last);
       } else {
         nothing_added = false;
       }
