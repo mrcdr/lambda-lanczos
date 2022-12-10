@@ -2,3 +2,4 @@
 build/
 gtest_build/
 /docs/
+.vscode/
