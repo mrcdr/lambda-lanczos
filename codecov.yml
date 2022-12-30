@@ -4,5 +4,8 @@ coverage:
       default:
         target: 95%
         threshold: 5%
+    patch:
+      default:
+        target: 80%
   ignore:
     - "src"    # Ignore the "src" directory. (Only measure coverage in "include")
