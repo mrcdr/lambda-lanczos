@@ -49,45 +49,21 @@ inline T find_mth_eigenvalue(const std::vector<T>& alpha,
 
 
 /**
- * @brief Computes an eigenvector corresponding to given eigenvalue for given tri-diagonal matrix.
- */
-template <typename T>
-inline std::vector<T> tridiagonal_eigenvector(const std::vector<T>& alpha,
-                                              const std::vector<T>& beta,
-                                              const size_t index,
-                                              const T ev) {
-  (void)ev; // Unused declaration for compiler
-
-  const size_t n = alpha.size();
-  auto a = alpha; // copy required because the contents will be destroyed
-  auto b = beta;  // copy required because the contents will be destroyed
-  auto z = std::vector<T>(n*n);
-
-  stev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
-
-  std::vector<T> cv(n);
-  for(size_t i = 0; i < n; ++i) {
-    cv[i] = z[index*n + i];
-  }
-
-  return cv;
-}
-
-
-/**
  * @brief Computes all eigenpairs (eigenvalues and eigenvectors) for given tri-diagonal matrix.
  */
 template <typename T>
 inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
                                    const std::vector<T>& beta,
                                    std::vector<T>& eigenvalues,
-                                   std::vector<std::vector<T>>& eigenvectors) {
+                                   std::vector<std::vector<T>>& eigenvectors,
+                                   bool compute_eigenvector = true) {
   const size_t n = alpha.size();
   auto a = alpha;
   auto b = beta;
   auto z = std::vector<T>(n*n);
+  char jobz = compute_eigenvector ? 'V' : 'N';
 
-  stev(LAPACK_COL_MAJOR, 'V', n, a.data(), b.data(), z.data(), n);
+  stev(LAPACK_COL_MAJOR, jobz, n, a.data(), b.data(), z.data(), n);
 
 
   eigenvalues = std::move(a);
@@ -98,6 +74,25 @@ inline void tridiagonal_eigenpairs(const std::vector<T>& alpha,
       eigenvectors[k][i] = z[k*n + i];
     }
   }
+}
+
+
+/**
+ * @brief Computes all eigenvalues for given tri-diagonal matrix
+ * using the Implicitly Shifted QR algorithm.
+ *
+ * @param [in] alpha Diagonal elements of the full tridiagonal matrix.
+ * @param [in] beta Sub-diagonal elements of the full tridiagonal matrix.
+ * @param [out] eigenvalues Eigenvalues.
+ *
+ * @return Count of forced breaks due to unconvergence.
+ */
+template <typename T>
+inline void tridiagonal_eigenvalues(const std::vector<T>& alpha,
+                                    const std::vector<T>& beta,
+                                    std::vector<T>& eigenvalues) {
+  std::vector<std::vector<T>> dummy_eigenvectors;
+  return tridiagonal_eigenpairs(alpha, beta, eigenvalues, dummy_eigenvectors, false);
 }
 
 

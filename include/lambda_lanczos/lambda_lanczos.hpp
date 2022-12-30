@@ -19,30 +19,46 @@
 
 namespace lambda_lanczos {
 /**
- * @brief Computes an eigenvector corresponding to given eigenvalue for the original matrix.
+ * @brief Computes the eigenvectors from Krylov subspace information.
+ *
+ * @param [in] alpha Diagonal elements of the tridiagonal matrix.
+ * @param [in] beta Sub-diagonal elements of the tridiagonal matrix.
+ * @param [in] u Lanczos vectors.
+ * @param [in] find_maximum True to calculate maximum eigenvalues. False to calculate minimum eigenvalues.
+ * @param [in] num_of_eigenvalues Number of eigenvalues to be calculated.
+ *
+ * @return Calculated eigenvectors.
  */
 template <typename T, typename LT>
-inline auto eigenvector(const std::vector<T>& alpha,
-                        const std::vector<T>& beta,
-                        const std::vector<std::vector<LT>> u,
-                        const size_t index,
-                        T ev) -> std::vector<decltype(T()+LT())> {
+inline auto compute_eigenvectors(const std::vector<T>& alpha,
+                                 const std::vector<T>& beta,
+                                 const std::vector<std::vector<LT>>& u,
+                                 const bool find_maximum,
+                                 const size_t num_of_eigenvalues) -> std::vector<std::vector<decltype(T()+LT())>>{
   const auto m = alpha.size();
   const auto n = u[0].size();
 
-  std::vector<LT> eigvec(n, 0.0);
+  std::vector<T> tridiagonal_eigenvalues;
+  std::vector<std::vector<T>> tridiagonal_eigenvectors;
 
-  auto cv = tridiagonal::tridiagonal_eigenvector(alpha, beta, index, ev);
+  tridiagonal::tridiagonal_eigenpairs(alpha, beta, tridiagonal_eigenvalues, tridiagonal_eigenvectors);
 
-  for (size_t k = m; k-- > 0;) {
-    for (size_t i = 0; i < n; ++i) {
-      eigvec[i] += cv[k] * u[k][i];
-    }
+  std::vector<std::vector<LT>> eigenvectors;
+  for(size_t i = 0; i < num_of_eigenvalues; ++i) {
+    eigenvectors.emplace_back(n);
   }
 
-  util::normalize(eigvec);
+  for(size_t index = 0; index < num_of_eigenvalues; index++) {
+    size_t index_tri = find_maximum ? m - index - 1 : index;
+    for (size_t k = m; k-- > 0;) {
+      for (size_t i = 0; i < n; ++i) {
+        eigenvectors[index][i] += tridiagonal_eigenvectors[index_tri][k] * u[k][i];
+      }
+    }
+    util::normalize(eigenvectors[index]);
+  }
 
-  return eigvec;
+  return eigenvectors;
 }
 
 
@@ -243,9 +259,17 @@ public:
 
       size_t num_eigs_to_calculate = std::min(nroot, alpha.size());
       evs = std::vector<real_t<T>>();
-      for (size_t iroot = 0; iroot < num_eigs_to_calculate; ++iroot) {
-        evs.push_back(tridiagonal::find_mth_eigenvalue(alpha, beta,
-                                                       this->find_maximum ? alpha.size()-1-iroot : iroot));
+
+      std::vector<real_t<T>> eigvals_all(alpha.size());
+      tridiagonal::tridiagonal_eigenvalues(alpha, beta, eigvals_all);
+      if(this->find_maximum) {
+        for(size_t i = 0; i < num_eigs_to_calculate; ++i) {
+          evs.push_back(eigvals_all[eigvals_all.size()-i-1]);
+        }
+      } else {
+        for(size_t i = 0; i < num_eigs_to_calculate; ++i) {
+          evs.push_back(eigvals_all[i]);
+        }
       }
 
       const real_t<T> zero_threshold = std::numeric_limits<real_t<T>>::epsilon() * 1e1;
@@ -285,14 +309,9 @@ public:
     eigvecs.resize(eigvalues.size());
     beta.back() = 0.0;
 
-    for(size_t iroot = 0; iroot < eigvalues.size(); ++iroot) {
-      auto& eigvec = eigvecs[iroot];
-      auto& ev = eigvalues[iroot];
-
-      eigvec = eigenvector(alpha, beta, u,
-                           this->find_maximum ? alpha.size()-1-iroot : iroot,
-                           ev);
-      ev -= this->eigenvalue_offset;
+    eigvecs = compute_eigenvectors(alpha, beta, u, find_maximum, eigvalues.size());
+    for(size_t i = 0; i < eigvalues.size(); ++i) {
+      eigvalues[i] -= this->eigenvalue_offset;
     }
 
     return itern;

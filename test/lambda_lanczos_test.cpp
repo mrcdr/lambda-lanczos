@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <array>
 #include <gtest/gtest.h>
 
 using lambda_lanczos::LambdaLanczos;
@@ -105,7 +106,7 @@ TEST(UNIT_TEST, SORT_EIGENPAIRS) {
                                            {1, 1, 1} };
   const size_t n = eigvals.size();
 
-  lambda_lanczos::util::sort_eigenpairs(eigvals, eigvecs);
+  lambda_lanczos::util::sort_eigenpairs(eigvals, eigvecs, true);
 
   const vector<double> expected_eigvals{-1, 0, 2};
   const vector<vector<complex<double>>> expected_eigvecs{ {0, 0, 0},
@@ -515,7 +516,7 @@ TEST(DIAGONALIZE_TEST, MULTIPLE_EIGENPAIRS) {
 
 
 TEST(DIAGONALIZE_TEST, MULTIPLE_DEGENERATE_EIGENPAIRS) {
-  const size_t n = 10;
+  const size_t n = 50;
 
   auto matmul = [&](const vector<double>& in, vector<double>& out) {
     for(size_t i = 0; i < n-1; ++i) {
@@ -540,20 +541,24 @@ TEST(DIAGONALIZE_TEST, MULTIPLE_DEGENERATE_EIGENPAIRS) {
       Its eigenvalues are -2*cos(2*pi*i/n), 0 <= i < n.
    */
 
+  const int num_eigs = 26;
   LambdaLanczos<double> engine(matmul, n);
-  engine.num_eigs = 6;
+  engine.num_eigs = num_eigs;
   engine.eps = 1e-14;
   vector<double> eigvals;
   vector<std::vector<double>> eigvecs;
   engine.run(eigvals, eigvecs);
 
-  vector<double> correct_eigvals = {0, -1, 1, -2, 2, 3};
+  vector<double> correct_eigvals(engine.num_eigs);
+  std::iota(correct_eigvals.begin(), correct_eigvals.end(), -num_eigs/2);
+
   std::transform(correct_eigvals.begin(),
                  correct_eigvals.end(),
                  correct_eigvals.begin(),
                  [](double x) {
                    return -2.0*cos(2.0*M_PI*x/n);
                  });
+  std::sort(correct_eigvals.begin(), correct_eigvals.end());
 
   EXPECT_EQ(correct_eigvals.size(), eigvals.size());
   for(size_t i = 0; i < correct_eigvals.size(); ++i) {

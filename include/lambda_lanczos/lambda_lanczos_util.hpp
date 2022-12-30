@@ -9,6 +9,8 @@
 #include <cassert>
 #include <sstream>
 #include <map>
+#include <functional>
+
 
 namespace lambda_lanczos { namespace util {
 
@@ -218,6 +220,20 @@ inline void schmidt_orth(std::vector<T>& uorth,
 
 
 /**
+ * @brief Initializes the given matrix `a` to an n by n identity matrix.
+ */
+template <typename T>
+void initAsIdentity(std::vector<std::vector<T>>& a, size_t n) {
+  a.resize(n);
+  for(size_t i = 0; i < n; ++i) {
+    a[i].resize(n);
+    std::fill(a[i].begin(), a[i].end(), T());
+    a[i][i] = 1.0;
+  }
+}
+
+
+/**
  * @brief Sorts eigenvalues and eigenvectors with respect to given predicate.
  *
  * @note This function changes the memory location of the eigenpairs.
@@ -225,6 +241,7 @@ inline void schmidt_orth(std::vector<T>& uorth,
 template <typename T>
 inline void sort_eigenpairs(std::vector<real_t<T>>& eigenvalues,
                             std::vector<std::vector<T>>& eigenvectors,
+                            bool sort_eigenvector,
                             const std::function<bool (real_t<T>, real_t<T>)> predicate = std::less<real_t<T>>()) {
   std::vector<std::pair<real_t<T>, size_t>> ev_index_pairs;
   ev_index_pairs.reserve(eigenvalues.size());
@@ -239,18 +256,22 @@ inline void sort_eigenpairs(std::vector<real_t<T>>& eigenvalues,
             });
 
   std::vector<real_t<T>> eigenvalues_new;
-  std::vector<std::vector<T>> eigenvectors_new;
   eigenvalues_new.reserve(eigenvalues.size());
-  eigenvectors_new.reserve(eigenvalues.size());
-
   for(const auto& ev_index : ev_index_pairs) {
     size_t k = ev_index.second;
     eigenvalues_new.emplace_back(eigenvalues[k]);
-    eigenvectors_new.push_back(std::move(eigenvectors[k]));
   }
-
   eigenvalues = std::move(eigenvalues_new);
-  eigenvectors = std::move(eigenvectors_new);
+
+  if(sort_eigenvector) {
+    std::vector<std::vector<T>> eigenvectors_new;
+    eigenvectors_new.reserve(eigenvalues.size());
+    for(const auto& ev_index : ev_index_pairs) {
+      size_t k = ev_index.second;
+      eigenvectors_new.push_back(std::move(eigenvectors[k]));
+    }
+    eigenvectors = std::move(eigenvectors_new);
+  }
 }
 
 
@@ -273,10 +294,15 @@ inline constexpr T minimum_effective_decimal() {
 
 /**
  * @brief Return the sign of given value.
+ * @details If 0 is given, this function returns +1.
  */
 template <typename T>
-int sgn(T val) {
-  return (T(0) < val) - (val < T(0));
+T sgn(T val) {
+  if(val >= 0) {
+    return (T)1;
+  } else {
+    return (T)(-1);
+  }
 }
 
 
