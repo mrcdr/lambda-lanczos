@@ -51,7 +51,7 @@ public:
     return eigenpairs.size();
   }
 
-  bool insertEigenPairs(std::vector<real_t<T>>& eigenvalues,
+  bool insertEigenpairs(std::vector<real_t<T>>& eigenvalues,
                         std::vector<std::vector<T>>& eigenvectors) {
     assert(eigenvalues.size() == eigenvectors.size());
 

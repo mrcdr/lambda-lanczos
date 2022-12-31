@@ -336,7 +336,7 @@ public:
                                               ep_manager.getEigenvectors());
       this->iter_counts.push_back(iter_count);
 
-      bool nothing_added = ep_manager.insertEigenPairs(eigenvalues_current, eigenvectors_current);
+      bool nothing_added = ep_manager.insertEigenpairs(eigenvalues_current, eigenvectors_current);
 
       if(nothing_added) {
         break;
