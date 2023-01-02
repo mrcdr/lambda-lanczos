@@ -220,8 +220,9 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_MULTIPLE_VALUE_RETURN_FEATURE) {
   engine.init_vector = vector_initializer<double>;
   engine.eigenvalue_offset = 6.0;
 
-  auto [eigvalue, eigvec] = engine.run(); // C++17 multiple value return
-
+  auto [eigenvalues, eigenvectors] = engine.run(); // C++17 multiple value return
+  auto eigvalue = eigenvalues[0];
+  auto eigvec = eigenvectors[0];
 
   auto sign = eigvec[0]/std::abs(eigvec[0]);
   vector<double> correct_eigvec(n);

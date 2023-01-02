@@ -206,7 +206,9 @@ public:
     mv_mul(mv_mul), matrix_size(matrix_size), max_iteration(matrix_size), find_maximum(find_maximum) {}
 
   /**
-   * @brief Executes Lanczos algorithm and stores the result into reference variables passed as arguments.
+   * @brief Not documented (In most cases, `run()` is preferred).
+   *
+   * @details Lanczos algorithm and stores the result into reference variables passed as arguments.
    * @return Lanczos-iteration count
    */
   template <typename Iterable>
@@ -319,6 +321,9 @@ public:
 
   /**
    * @brief Executes Lanczos algorithm and stores the result into reference variables passed as arguments.
+   *
+   * @param [out] eigenvalues Eigenvalues. `eigenvalues[k]` stores the k-th eigenvalue.
+   * @param [out] eigenvectors Eigenvectors. `eigenvectors[k][:]` stores the k-th eigenvector.
    */
   void run(std::vector<real_t<T>>& eigenvalues, std::vector<std::vector<T>>& eigenvectors) {
     this->iter_counts = std::vector<size_t>();
@@ -360,30 +365,40 @@ public:
    *
    * This function provides C++17 multiple-value-return interface.
    *
-   * @return Eigenvalue
-   * @return Eigenvector
+   * @return Eigenvalues. `eigenvalues[k]` stores the k-th eigenvalue.
+   * @return Eigenvectors. `eigenvectors[k][:]` stores the k-th eigenvector.
    */
-  std::tuple<real_t<T>, std::vector<T>> run() {
-    real_t<T> eigvalue;
-    std::vector<T> eigvec(this->matrix_size);
-    this->run(eigvalue, eigvec);
+  std::tuple<std::vector<real_t<T>>, std::vector<std::vector<T>>> run() {
+    std::vector<real_t<T>> eigenvalues;
+    std::vector<std::vector<T>> eigenvectors;
+    for(size_t i = 0; i < this->num_eigs; ++i) {
+      eigenvectors.emplace_back(this->matrix_size);
+    }
 
-    return {eigvalue, eigvec};
+    this->run(eigenvalues, eigenvectors);
+
+    return {eigenvalues, eigenvectors};
   }
 
-  void run(real_t<T>& eigvalue, std::vector<T>& eigvec) {
+  /**
+   * @brief Executes Lanczos algorithm that calculate one eigenpair regardless of `num_eigs`.
+   *
+   * @param [out] eigenvalue Eigenvalue.
+   * @param [out] eigenvector Eigenvector.
+   */
+  void run(real_t<T>& eigenvalue, std::vector<T>& eigenvector) {
     const size_t num_eigs_tmp = this->num_eigs;
     this->num_eigs = 1;
 
-    std::vector<real_t<T>> eigvalues(1);
-    std::vector<std::vector<T>> eigvecs(1);
+    std::vector<real_t<T>> eigenvalues(1);
+    std::vector<std::vector<T>> eigenvectors(1);
 
-    this->run(eigvalues, eigvecs);
+    this->run(eigenvalues, eigenvectors);
 
     this->num_eigs = num_eigs_tmp;
 
-    eigvalue = eigvalues[0];
-    eigvec = std::move(eigvecs[0]);
+    eigenvalue = eigenvalues[0];
+    eigenvector = std::move(eigenvectors[0]);
   }
 
   /**
