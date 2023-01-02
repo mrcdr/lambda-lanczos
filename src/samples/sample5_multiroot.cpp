@@ -12,15 +12,6 @@ template<typename T>
 using vector = std::vector<T>;
 
 int main() {
-  /*
-   * ============================= IMPORTANT NOTE =============================
-   * Lambda Lanczos library does NOT support degenerated eigenvalues currently.
-   * If there are degenerated eigenvalues, only one basis of the corresponding
-   * eigenspace is obtained. When you use the multiple-eigenpair feature,
-   * keep in mind that your matrix may have degenerated eigenvalues.
-   * ==========================================================================
-   */
-
   const int n = 8;
   double matrix[n][n] = {
     { 6, -3, -3,  0, -1,  1, -1,  1},
