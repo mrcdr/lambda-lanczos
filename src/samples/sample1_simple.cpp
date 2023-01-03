@@ -27,16 +27,15 @@ int main() {
     }
   };
 
-  LambdaLanczos<double> engine(mv_mul, n, true); // true means to calculate the largest eigenvalue.
-  double eigenvalue;
-  vector<double> eigenvector(n);
-  int itern = engine.run(eigenvalue, eigenvector);
+  LambdaLanczos<double> engine(mv_mul, n, true, 1); // true means to calculate the largest eigenvalue.
+  vector<double> eigenvalues;
+  vector<vector<double>> eigenvectors;
+  engine.run(eigenvalues, eigenvectors);
 
-  cout << "Iteration count: " << itern << endl;
-  cout << "Eigen value: " << setprecision(16) << eigenvalue << endl;
-  cout << "Eigen vector: ";
+  cout << "Eigenvalue: " << setprecision(16) << eigenvalues[0] << endl;
+  cout << "Eigenvector: ";
   for(int i = 0; i < n; ++i) {
-    cout << eigenvector[i] << " ";
+    cout << eigenvectors[0][i] << " ";
   }
   cout << endl;
 

@@ -46,16 +46,15 @@ int main() {
     }
   };
 
-  LambdaLanczos<double> engine(mv_mul, n, false); // false means to calculate the smallest eigenvalue.
-  double eigenvalue;
-  vector<double> eigenvector(n);
-  int itern = engine.run(eigenvalue, eigenvector);
+  LambdaLanczos<double> engine(mv_mul, n, false, 1); // Find 1 minimum eigenvalue
+  vector<double> eigenvalues;
+  vector<vector<double>> eigenvectors;
+  engine.run(eigenvalues, eigenvectors);
 
-  cout << "Iteration count: " << itern << endl;
-  cout << "Eigen value: " << setprecision(16) << eigenvalue << endl;
-  cout << "Eigen vector: ";
+  cout << "Eigenvalue: " << setprecision(16) << eigenvalues[0] << endl;
+  cout << "Eigenvector: ";
   for(int i = 0; i < n; ++i) {
-    cout << eigenvector[i] << " ";
+    cout << eigenvectors[0][i] << " ";
   }
   cout << endl;
 

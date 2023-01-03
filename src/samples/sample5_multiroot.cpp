@@ -36,17 +36,17 @@ int main() {
     }
   };
 
-  LambdaLanczos<double> engine(mv_mul, n, false); // true means to calculate the largest eigenvalue.
-
   const size_t nroot = 2;
-  vector<double> eigenvalues(nroot);
-  vector<vector<double>> eigenvectors(nroot, {n});
-  int itern = engine.run(eigenvalues, eigenvectors);
 
-  cout << "Iteration count: " << itern << endl;
+  LambdaLanczos<double> engine(mv_mul, n, false, nroot); // Find 2 minimum eigenvalues
+
+  vector<double> eigenvalues;
+  vector<vector<double>> eigenvectors;
+  engine.run(eigenvalues, eigenvectors);
+
   for (size_t iroot=0; iroot < nroot; ++iroot) {
-    cout << "Eigen value (root "<< iroot <<"): " << setprecision(16) << eigenvalues[iroot] << endl;
-    cout << "Eigen vector (root "<< iroot <<"): ";
+    cout << "Eigenvalue (root "<< iroot <<"): " << setprecision(16) << eigenvalues[iroot] << endl;
+    cout << "Eigenvector (root "<< iroot <<"): ";
     for (int i = 0; i < n; ++i) {
       cout << eigenvectors[iroot][i] << " ";
     }

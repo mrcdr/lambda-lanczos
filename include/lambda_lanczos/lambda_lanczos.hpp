@@ -200,10 +200,12 @@ public:
     * @param matrix_size The size of your matrix, i.e. if your matrix is n by n,
     * `matrix_size` should be n.
     * @param find_maximum specifies which of the minimum or maximum eigenvalue to be calculated.
-    * By default, `find_maximum=false` so the library will calculates the minimum one.
+    * @param num_eigs specifies how many eigenpairs to be calculate, e.g.,
+    * if `find_maximum = true` and `num_eig = 3`, LambdaLanczos calculates 3 maximum eigenpairs.
     */
-  LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size, bool find_maximum = false) :
-    mv_mul(mv_mul), matrix_size(matrix_size), max_iteration(matrix_size), find_maximum(find_maximum) {}
+  LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size,
+                                   bool find_maximum, size_t num_eigs) :
+    mv_mul(mv_mul), matrix_size(matrix_size), max_iteration(matrix_size), find_maximum(find_maximum), num_eigs(num_eigs) {}
 
   /**
    * @brief Not documented (In most cases, `run()` is preferred).

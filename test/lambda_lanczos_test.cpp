@@ -144,7 +144,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
     }
   };
 
-  LambdaLanczos<double> engine(matmul, n, true);
+  LambdaLanczos<double> engine(matmul, n, true, 1);
   engine.init_vector = vector_initializer<double>;
   engine.eigenvalue_offset = 6.0;
 
@@ -181,7 +181,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_FLOAT) {
     }
   };
 
-  LambdaLanczos<float> engine(matmul, n, true);
+  LambdaLanczos<float> engine(matmul, n, true, 1);
 
   float eigvalue;
   vector<float> eigvec(1); // The size will be enlarged automatically
@@ -216,7 +216,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_MULTIPLE_VALUE_RETURN_FEATURE) {
     }
   };
 
-  LambdaLanczos<double> engine(matmul, n, true);
+  LambdaLanczos<double> engine(matmul, n, true, 1);
   engine.init_vector = vector_initializer<double>;
   engine.eigenvalue_offset = 6.0;
 
@@ -252,7 +252,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_NOT_FIX_RANDOM_SEED) {
     }
   };
 
-  LambdaLanczos<double> engine(matmul, n, true);
+  LambdaLanczos<double> engine(matmul, n, true, 1);
   engine.eigenvalue_offset = 6.0;
 
   double eigvalue;
@@ -299,7 +299,7 @@ TEST(DIAGONALIZE_TEST, DYNAMIC_MATRIX) {
       Its smallest eigenvalue is -2*cos(pi/(n+1)).
    */
 
-  LambdaLanczos<double> engine(matmul, n);
+  LambdaLanczos<double> engine(matmul, n, false, 1);
   engine.init_vector = vector_initializer<double>;
   engine.eps = 1e-14;
   engine.eigenvalue_offset = -10.0;
@@ -336,7 +336,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE) {
     }
   };
 
-  LambdaLanczos<complex<double>> engine(matmul, n, true);
+  LambdaLanczos<complex<double>> engine(matmul, n, true, 1);
   engine.init_vector = vector_initializer<complex<double>>;
   double eigvalue;
   vector<complex<double>> eigvec(n);
@@ -372,7 +372,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_USE_COMPLEX_TYPE_NOT_FIX_RANDOM_SEED) {
     }
   };
 
-  LambdaLanczos<complex<double>> engine(matmul, n, true);
+  LambdaLanczos<complex<double>> engine(matmul, n, true, 1);
   double eigvalue;
   vector<complex<double>> eigvec(n);
   engine.run(eigvalue, eigvec);
@@ -408,7 +408,7 @@ TEST(DIAGONALIZE_TEST, HERMITIAN_MATRIX) {
     }
   };
 
-  LambdaLanczos<complex<double>> engine(matmul, n);
+  LambdaLanczos<complex<double>> engine(matmul, n, false, 1);
   engine.init_vector = vector_initializer<complex<double>>;
   double eigvalue;
   vector<complex<double>> eigvec(n);
@@ -445,7 +445,7 @@ TEST(DIAGONALIZE_TEST, SINGLE_ELEMENT_MATRIX) {
     }
   };
 
-  LambdaLanczos<double> engine(matmul, n, true);
+  LambdaLanczos<double> engine(matmul, n, true, 1);
   engine.init_vector = vector_initializer<double>;
 
   double eigvalue;
@@ -487,7 +487,7 @@ TEST(DIAGONALIZE_TEST, MULTIPLE_EIGENPAIRS) {
     }
   };
 
-  LambdaLanczos<double> engine(mv_mul, n, false); // false means to calculate the smallest eigenvalue.
+  LambdaLanczos<double> engine(mv_mul, n, false, 1); // false means to calculate the smallest eigenvalue.
   engine.num_eigs = nroot;
   engine.eps = 1e-7;
 
@@ -543,7 +543,7 @@ TEST(DIAGONALIZE_TEST, MULTIPLE_DEGENERATE_EIGENPAIRS) {
    */
 
   const int num_eigs = 26;
-  LambdaLanczos<double> engine(matmul, n);
+  LambdaLanczos<double> engine(matmul, n, false, 1);
   engine.num_eigs = num_eigs;
   engine.eps = 1e-14;
   vector<double> eigvals;
@@ -656,7 +656,7 @@ TEST(DIAGONALIZE_TEST, RANDOM_SYMMETRIC_MATRIX) {
     }
   };
 
-  LambdaLanczos<double> engine(matmul, n, true);
+  LambdaLanczos<double> engine(matmul, n, true, 1);
   engine.init_vector = vector_initializer<double>;
   double eigvalue;
   vector<double> eigvec(n);
@@ -772,7 +772,7 @@ TEST(DIAGONALIZE_TEST, RANDOM_HERMITIAN_MATRIX) {
     }
   };
 
-  LambdaLanczos<complex<double>> engine(matmul, n, true);
+  LambdaLanczos<complex<double>> engine(matmul, n, true, 1);
   engine.init_vector = vector_initializer<complex<double>>;
   engine.eps = 1e-14;
   double eigvalue;
