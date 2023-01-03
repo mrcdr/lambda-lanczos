@@ -75,13 +75,17 @@ This class aims problems that require one or a few eigenpairs
 
 ### 2. Exponentiation
 `Exponentiator` class computes the following type of matrix-vector multiplication:
+
 $$\boldsymbol{v}'=e^{\delta A} \boldsymbol{v},$$
+
 where $A$ is a symmetric (Hermitian) matrix and $\delta$ is a scalar parameter.
 This class is based on the same theory of the Lanczos algorithm (Krylov subspace method).
 
 As an application, this class may be used for
 time evolution of a quantum many-body system:
+
 $$ \ket{\psi(t+\Delta t)} = e^{-iH\Delta t} \ket{\psi(t)},$$
+
 and more sophisticated algorithms, such as [TDVP](https://arxiv.org/abs/1408.5056) and other tensor networks.
 
 
