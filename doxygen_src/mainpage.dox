@@ -1,8 +1,12 @@
 /**
 \mainpage
 This document contains full specs of *lambda-lanczos*.
-What users should know is just #lambda_lanczos::LambdaLanczos class,
-but [sample codes](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples) may be more helpful.
+This library has two main interfaces:
+
+- Eigenvalue problem: #lambda_lanczos::LambdaLanczos
+- Exponentiation: #lambda_lanczos::Exponentiator
+
+[Sample codes](https://github.com/mrcdr/lambda-lanczos/tree/master/src/samples) may also be helpful.
 
 Github repository: https://github.com/mrcdr/lambda-lanczos/
 */
