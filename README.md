@@ -69,7 +69,7 @@ see a [sample code](https://github.com/mrcdr/lambda-lanczos/blob/master/src/samp
 Lambda Lanczos provides the following two interfaces:
 ### 1. Eigenvalue problem
 `LambdaLanczos` class computes maximum (minimum) eigenvalues and
-corresponding eigenvectors. Degenerate eigenvalues are took into account.
+corresponding eigenvectors. Degenerate eigenvalues are taken into account.
 This class aims problems that require one or a few eigenpairs
 (e.g. low-energy excitation of a quantum system).
 
