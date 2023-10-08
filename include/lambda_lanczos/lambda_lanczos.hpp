@@ -1,21 +1,21 @@
 #ifndef LAMBDA_LANCZOS_H_
 #define LAMBDA_LANCZOS_H_
 
-#include <iostream>
-#include <vector>
-#include <tuple>
-#include <functional>
+#include <algorithm>
 #include <cassert>
-#include <limits>
 #include <cmath>
+#include <functional>
+#include <iostream>
+#include <limits>
 #include <numeric>
 #include <random>
-#include <algorithm>
+#include <tuple>
 #include <utility>
-#include "lambda_lanczos_util.hpp"
-#include "lambda_lanczos_tridiagonal.hpp"
-#include "eigenpair_manager.hpp"
+#include <vector>
 
+#include "eigenpair_manager.hpp"
+#include "lambda_lanczos_tridiagonal.hpp"
+#include "lambda_lanczos_util.hpp"
 
 namespace lambda_lanczos {
 /**
@@ -34,7 +34,7 @@ inline auto compute_eigenvectors(const std::vector<T>& alpha,
                                  const std::vector<T>& beta,
                                  const std::vector<std::vector<LT>>& u,
                                  const bool find_maximum,
-                                 const size_t num_of_eigenvalues) -> std::vector<std::vector<decltype(T()+LT())>>{
+                                 const size_t num_of_eigenvalues) -> std::vector<std::vector<decltype(T() + LT())>> {
   const auto m = alpha.size();
   const auto n = u[0].size();
 
@@ -44,11 +44,11 @@ inline auto compute_eigenvectors(const std::vector<T>& alpha,
   tridiagonal::tridiagonal_eigenpairs(alpha, beta, tridiagonal_eigenvalues, tridiagonal_eigenvectors);
 
   std::vector<std::vector<LT>> eigenvectors;
-  for(size_t i = 0; i < num_of_eigenvalues; ++i) {
+  for (size_t i = 0; i < num_of_eigenvalues; ++i) {
     eigenvectors.emplace_back(n);
   }
 
-  for(size_t index = 0; index < num_of_eigenvalues; index++) {
+  for (size_t index = 0; index < num_of_eigenvalues; index++) {
     size_t index_tri = find_maximum ? m - index - 1 : index;
     for (size_t k = m; k-- > 0;) {
       for (size_t i = 0; i < n; ++i) {
@@ -61,8 +61,6 @@ inline auto compute_eigenvectors(const std::vector<T>& alpha,
   return eigenvectors;
 }
 
-
-
 /**
  * @brief Template class to implement random vector initializer.
  *
@@ -71,7 +69,7 @@ inline auto compute_eigenvectors(const std::vector<T>& alpha,
  */
 template <typename T>
 struct VectorRandomInitializer {
-public:
+ public:
   /**
    * @brief Initialize given vector randomly in the range of [-1, 1].
    *
@@ -84,42 +82,40 @@ public:
     std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
     size_t n = v.size();
-    for(size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
       v[i] = rand(mt);
     }
   }
 };
 
-
 template <typename T>
 struct VectorRandomInitializer<std::complex<T>> {
-public:
+ public:
   static void init(std::vector<std::complex<T>>& v) {
     std::random_device dev;
     std::mt19937 mt(dev());
     std::uniform_real_distribution<T> rand((T)(-1.0), (T)(1.0));
 
     size_t n = v.size();
-    for(size_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
       v[i] = std::complex<T>(rand(mt), rand(mt));
     }
   }
 };
-
 
 /**
  * @brief Calculation engine for Lanczos algorithm
  */
 template <typename T>
 class LambdaLanczos {
-private:
+ private:
   /**
    * @brief See #util::real_t for details.
    */
   template <typename n_type>
   using real_t = util::real_t<n_type>;
 
-public:
+ public:
   /**
    * @brief Matrix-vector multiplication routine.
    *
@@ -184,28 +180,32 @@ public:
    */
   size_t initial_vector_size = 200;
 
-private:
-
+ private:
   /**
    * @brief Iteration counts of the latest run.
    */
   std::vector<size_t> iter_counts;
 
-public:
-
+ public:
   /**
-    * @brief Constructs Lanczos calculation engine.
-    *
-    * @param mv_mul Matrix-vector multiplication routine. See #mv_mul for details.
-    * @param matrix_size The size of your matrix, i.e. if your matrix is n by n,
-    * `matrix_size` should be n.
-    * @param find_maximum specifies which of the minimum or maximum eigenvalue to be calculated.
-    * @param num_eigs specifies how many eigenpairs to be calculate, e.g.,
-    * if `find_maximum = true` and `num_eig = 3`, LambdaLanczos calculates 3 maximum eigenpairs.
-    */
-  LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul, size_t matrix_size,
-                                   bool find_maximum, size_t num_eigs) :
-    mv_mul(mv_mul), matrix_size(matrix_size), max_iteration(matrix_size), find_maximum(find_maximum), num_eigs(num_eigs) {}
+   * @brief Constructs Lanczos calculation engine.
+   *
+   * @param mv_mul Matrix-vector multiplication routine. See #mv_mul for details.
+   * @param matrix_size The size of your matrix, i.e. if your matrix is n by n,
+   * `matrix_size` should be n.
+   * @param find_maximum specifies which of the minimum or maximum eigenvalue to be calculated.
+   * @param num_eigs specifies how many eigenpairs to be calculate, e.g.,
+   * if `find_maximum = true` and `num_eig = 3`, LambdaLanczos calculates 3 maximum eigenpairs.
+   */
+  LambdaLanczos(std::function<void(const std::vector<T>&, std::vector<T>&)> mv_mul,
+                size_t matrix_size,
+                bool find_maximum,
+                size_t num_eigs)
+      : mv_mul(mv_mul),
+        matrix_size(matrix_size),
+        max_iteration(matrix_size),
+        find_maximum(find_maximum),
+        num_eigs(num_eigs) {}
 
   /**
    * @brief Not documented (In most cases, `run()` is preferred).
@@ -218,9 +218,9 @@ public:
                        std::vector<std::vector<T>>& eigvecs,
                        size_t nroot,
                        Iterable orthogonalizeTo) const {
-    std::vector<std::vector<T>> u; // Lanczos vectors
-    std::vector<real_t<T>> alpha;  // Diagonal elements of an approximated tridiagonal matrix
-    std::vector<real_t<T>> beta;   // Subdiagonal elements of an approximated tridiagonal matrix
+    std::vector<std::vector<T>> u;  // Lanczos vectors
+    std::vector<real_t<T>> alpha;   // Diagonal elements of an approximated tridiagonal matrix
+    std::vector<real_t<T>> beta;    // Subdiagonal elements of an approximated tridiagonal matrix
 
     u.reserve(this->initial_vector_size);
     alpha.reserve(this->initial_vector_size);
@@ -233,31 +233,31 @@ public:
     util::schmidt_orth(u[0], orthogonalizeTo.cbegin(), orthogonalizeTo.cend());
     util::normalize(u[0]);
 
-    std::vector<real_t<T>> evs; // Calculated eigenvalue
-    std::vector<real_t<T>> pevs; // Previous eigenvalue
+    std::vector<real_t<T>> evs;   // Calculated eigenvalue
+    std::vector<real_t<T>> pevs;  // Previous eigenvalue
 
     size_t itern = this->max_iteration;
-    for(size_t k = 1; k <= this->max_iteration; ++k) {
+    for (size_t k = 1; k <= this->max_iteration; ++k) {
       /* au = (A + offset*E)uk, here E is the identity matrix */
-      std::vector<T> au(n, 0.0); // Temporal storage to store matrix-vector multiplication result
-      this->mv_mul(u[k-1], au);
-      for(size_t i = 0; i < n; ++i) {
-        au[i] += u[k-1][i]*this->eigenvalue_offset;
+      std::vector<T> au(n, 0.0);  // Temporal storage to store matrix-vector multiplication result
+      this->mv_mul(u[k - 1], au);
+      for (size_t i = 0; i < n; ++i) {
+        au[i] += u[k - 1][i] * this->eigenvalue_offset;
       }
 
-      alpha.push_back(std::real(util::inner_prod(u[k-1], au)));
+      alpha.push_back(std::real(util::inner_prod(u[k - 1], au)));
 
       u.push_back(std::move(au));
-      for(size_t i = 0; i < n; ++i) {
-        if(k == 1) {
-          u[k][i] = u[k][i] - alpha[k-1]*u[k-1][i];
+      for (size_t i = 0; i < n; ++i) {
+        if (k == 1) {
+          u[k][i] = u[k][i] - alpha[k - 1] * u[k - 1][i];
         } else {
-          u[k][i] = u[k][i] - beta[k-2]*u[k-2][i] - alpha[k-1]*u[k-1][i];
+          u[k][i] = u[k][i] - beta[k - 2] * u[k - 2][i] - alpha[k - 1] * u[k - 1][i];
         }
       }
 
       util::schmidt_orth(u[k], orthogonalizeTo.cbegin(), orthogonalizeTo.cend());
-      util::schmidt_orth(u[k], u.begin(), u.end()-1);
+      util::schmidt_orth(u[k], u.begin(), u.end() - 1);
 
       beta.push_back(util::norm(u[k]));
 
@@ -266,18 +266,18 @@ public:
 
       std::vector<real_t<T>> eigvals_all(alpha.size());
       tridiagonal::tridiagonal_eigenvalues(alpha, beta, eigvals_all);
-      if(this->find_maximum) {
-        for(size_t i = 0; i < num_eigs_to_calculate; ++i) {
-          evs.push_back(eigvals_all[eigvals_all.size()-i-1]);
+      if (this->find_maximum) {
+        for (size_t i = 0; i < num_eigs_to_calculate; ++i) {
+          evs.push_back(eigvals_all[eigvals_all.size() - i - 1]);
         }
       } else {
-        for(size_t i = 0; i < num_eigs_to_calculate; ++i) {
+        for (size_t i = 0; i < num_eigs_to_calculate; ++i) {
           evs.push_back(eigvals_all[i]);
         }
       }
 
       const real_t<T> zero_threshold = std::numeric_limits<real_t<T>>::epsilon() * 1e1;
-      if(beta.back() < zero_threshold) {
+      if (beta.back() < zero_threshold) {
         itern = k;
         break;
       }
@@ -288,13 +288,13 @@ public:
        * Only break loop if convergence condition is met for all requied roots
        */
       bool break_cond = true;
-      if(pevs.size() != evs.size()) {
+      if (pevs.size() != evs.size()) {
         break_cond = false;
       } else {
-        for(size_t iroot = 0; iroot < nroot; ++iroot) {
+        for (size_t iroot = 0; iroot < nroot; ++iroot) {
           const auto& ev = evs[iroot];
           const auto& pev = pevs[iroot];
-          if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps){
+          if (std::abs(ev - pev) >= std::min(std::abs(ev), std::abs(pev)) * this->eps) {
             break_cond = false;
             break;
           }
@@ -314,7 +314,7 @@ public:
     beta.back() = 0.0;
 
     eigvecs = compute_eigenvectors(alpha, beta, u, find_maximum, eigvalues.size());
-    for(size_t i = 0; i < eigvalues.size(); ++i) {
+    for (size_t i = 0; i < eigvalues.size(); ++i) {
       eigvalues[i] -= this->eigenvalue_offset;
     }
 
@@ -331,21 +331,19 @@ public:
     this->iter_counts = std::vector<size_t>();
     eigenpair_manager::EigenPairManager<T> ep_manager(find_maximum, num_eigs);
 
-    while(true) {
+    while (true) {
       std::vector<real_t<T>> eigenvalues_current;
       std::vector<std::vector<T>> eigenvectors_current;
 
       size_t nroot = std::min(num_eigs_per_iteration, this->matrix_size - ep_manager.size());
 
-      size_t iter_count = this->run_iteration(eigenvalues_current,
-                                              eigenvectors_current,
-                                              nroot,
-                                              ep_manager.getEigenvectors());
+      size_t iter_count =
+          this->run_iteration(eigenvalues_current, eigenvectors_current, nroot, ep_manager.getEigenvectors());
       this->iter_counts.push_back(iter_count);
 
       bool nothing_added = ep_manager.insertEigenpairs(eigenvalues_current, eigenvectors_current);
 
-      if(nothing_added) {
+      if (nothing_added) {
         break;
       }
     }
@@ -356,7 +354,7 @@ public:
     eigenvectors = std::vector<std::vector<T>>();
     eigenvectors.reserve(eigenvectors.size());
 
-    for(auto& eigenpair : eigenpairs) {
+    for (auto& eigenpair : eigenpairs) {
       eigenvalues.push_back(std::move(eigenpair.first));
       eigenvectors.push_back(std::move(eigenpair.second));
     }
@@ -373,7 +371,7 @@ public:
   std::tuple<std::vector<real_t<T>>, std::vector<std::vector<T>>> run() {
     std::vector<real_t<T>> eigenvalues;
     std::vector<std::vector<T>> eigenvectors;
-    for(size_t i = 0; i < this->num_eigs; ++i) {
+    for (size_t i = 0; i < this->num_eigs; ++i) {
       eigenvectors.emplace_back(this->matrix_size);
     }
 
@@ -410,7 +408,6 @@ public:
     return iter_counts;
   }
 };
-
 
 } /* namespace lambda_lanczos */
 
