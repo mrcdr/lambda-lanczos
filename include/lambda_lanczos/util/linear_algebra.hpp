@@ -95,6 +95,19 @@ inline void schmidt_orth(std::vector<T>& uorth, ForwardIterator first, ForwardIt
   }
 }
 
+/**
+ * @brief Initializes the given matrix `a` to an n by n identity matrix.
+ */
+template <typename T>
+void initAsIdentity(std::vector<std::vector<T>>& a, size_t n) {
+  a.resize(n);
+  for (size_t i = 0; i < n; ++i) {
+    a[i].resize(n);
+    std::fill(a[i].begin(), a[i].end(), T());
+    a[i][i] = 1.0;
+  }
+}
+
 } /* namespace util */
 } /* namespace lambda_lanczos */
 
