@@ -62,18 +62,43 @@ inline void normalize(std::vector<T>& vec) {
   scalar_mul(T(1) / norm(vec), vec);
 }
 
+template <typename T>
+struct ManhattanNorm {
+  static T invoke(const std::vector<T>& vec) {
+    T norm = T();  // Zero initialization
+
+    for (const auto& element : vec) {
+      norm += std::abs(element);
+    }
+
+    return norm;
+  }
+};
+
+template <typename T>
+struct ManhattanNorm<std::complex<T>> {
+  static T invoke(const std::vector<std::complex<T>>& vec) {
+    T norm = T();  // Zero initialization
+
+    for (const auto& element : vec) {
+      norm += std::abs(std::real(element)) + std::abs(std::imag(element));
+    }
+
+    return norm;
+  }
+};
+
 /**
- * @brief Returns 1-norm of given vector.
+ * @brief Returns Manhattan-like norm of given vector.
+ *
+ * @note For a real vector {r_i}, returned value is sum_i |r_i|, i.e. the L1 norm in mathematical definition.
+ * For a complex vector {c_i}, returned value is sum_i |Re(c_i)| + |Im(c_i)|,
+ * instead of sum_i sqrt(Re(c_i)^2 + Im(c_i)^2) in mathematical definition.
+ * This definition can avoid sqrt calculations and is also implemented as _ASUM routines in BLAS.
  */
 template <typename T>
-inline real_t<T> l1_norm(const std::vector<T>& vec) {
-  real_t<T> norm = real_t<T>();  // Zero initialization
-
-  for (const T& element : vec) {
-    norm += std::abs(element);
-  }
-
-  return norm;
+inline real_t<T> m_norm(const std::vector<T>& vec) {
+  return ManhattanNorm<T>::invoke(vec);
 }
 
 /**

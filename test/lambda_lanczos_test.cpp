@@ -90,13 +90,13 @@ TEST(UNIT_TEST, SCHMIDT_ORTHOGONALIZATION) {
   }
 }
 
-TEST(UNIT_TEST, L1_NORM) {
+TEST(UNIT_TEST, MANHATTAN_NORM) {
   complex<double> c1(1.0, 3.0);
   complex<double> c2(-1.0, -1.0);
 
   vector<complex<double>> v{c1, c2};
 
-  EXPECT_DOUBLE_EQ(sqrt(10.0) + sqrt(2.0), lambda_lanczos::util::l1_norm(v));
+  EXPECT_DOUBLE_EQ(1.0 + 3.0 + 1.0 + 1.0, lambda_lanczos::util::m_norm(v));
 }
 
 TEST(UNIT_TEST, SORT_EIGENPAIRS) {

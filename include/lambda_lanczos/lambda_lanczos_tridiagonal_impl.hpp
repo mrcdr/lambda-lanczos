@@ -51,8 +51,8 @@ inline size_t num_of_eigs_smaller_than(T c, const std::vector<T>& alpha, const s
  */
 template <typename T>
 inline T tridiagonal_eigen_limit(const std::vector<T>& alpha, const std::vector<T>& beta) {
-  T r = util::l1_norm(alpha);
-  r += 2 * util::l1_norm(beta);
+  T r = util::m_norm(alpha);
+  r += 2 * util::m_norm(beta);
 
   return r;
 }
