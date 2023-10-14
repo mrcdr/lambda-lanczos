@@ -13,11 +13,18 @@ target_compile_options(lambda_lanczos_test_lapack PRIVATE "-DLAMBDA_LANCZOS_USE_
 # target_link_directories(lambda_lanczos_test_mkl PRIVATE ${MKLROOT}/lib)
 
 target_link_libraries(lambda_lanczos_test_impl GTest::GTest GTest::Main)
-target_link_libraries(lambda_lanczos_test_lapack GTest::GTest GTest::Main blas cblas lapacke)
-# blas is used in Debian (Ubuntu) for cblas functions.
+target_link_libraries(lambda_lanczos_test_lapack GTest::GTest GTest::Main lapacke)
+
+file(READ "/etc/issue" ETC_ISSUE)
+string(REGEX MATCH "Ubuntu|Debian" DIST ${ETC_ISSUE})
+if(DIST STREQUAL "")
+  target_link_libraries(lambda_lanczos_test_lapack cblas)
+else()
+  message(STATUS "Ubuntu or Debian detected. blas will be linked for cblas functions.")
+  target_link_libraries(lambda_lanczos_test_lapack blas)
+endif()
+
 # target_link_libraries(lambda_lanczos_test_mkl GTest::GTest GTest::Main -Wl,--start-group libmkl_intel_lp64.a libmkl_sequential.a libmkl_core.a -Wl,--end-group)
-
-
 
 add_custom_target(lambda_lanczos_test
                     DEPENDS lambda_lanczos_test_impl
