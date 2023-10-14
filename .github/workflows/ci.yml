@@ -22,7 +22,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install valgrind
-        sudo apt-get install libatlas3-base libatlas-base-dev liblapacke-dev
+        sudo apt-get install libopenblas-dev liblapacke-dev
 
 
     - name: Prepare Google Test
