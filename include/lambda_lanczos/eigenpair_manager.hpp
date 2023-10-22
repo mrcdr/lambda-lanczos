@@ -71,7 +71,7 @@ class EigenPairManager {
   }
 
   lambda_lanczos::util::MapValueIterable<decltype(eigenpairs)> getEigenvectors() const {
-    return lambda_lanczos::util::MapValueIterable(eigenpairs);
+    return lambda_lanczos::util::MapValueIterable<decltype(eigenpairs)>(eigenpairs);
   }
 
   decltype(eigenpairs)& getEigenpairs() {

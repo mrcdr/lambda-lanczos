@@ -143,13 +143,14 @@ inline void sort_eigenpairs(std::vector<real_t<T>>& eigenvalues,
                             std::vector<std::vector<T>>& eigenvectors,
                             bool sort_eigenvector,
                             const std::function<bool(real_t<T>, real_t<T>)> predicate = std::less<real_t<T>>()) {
-  std::vector<std::pair<real_t<T>, size_t>> ev_index_pairs;
+  using ev_index_t = std::pair<real_t<T>, size_t>;
+  std::vector<ev_index_t> ev_index_pairs;
   ev_index_pairs.reserve(eigenvalues.size());
   for (size_t i = 0; i < eigenvalues.size(); ++i) {
     ev_index_pairs.emplace_back(eigenvalues[i], i);
   }
 
-  std::sort(ev_index_pairs.begin(), ev_index_pairs.end(), [&predicate](const auto& x, const auto& y) {
+  std::sort(ev_index_pairs.begin(), ev_index_pairs.end(), [&predicate](const ev_index_t& x, const ev_index_t& y) {
     return predicate(x.first, y.first);
   });
 
