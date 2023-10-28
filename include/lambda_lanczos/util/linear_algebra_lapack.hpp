@@ -1,6 +1,10 @@
 #ifndef LAMBDA_LANCZOS_UTIL_LINEAR_ALGEBRA_LAPACK_H_
 #define LAMBDA_LANCZOS_UTIL_LINEAR_ALGEBRA_LAPACK_H_
 
+// clang-format off
+#include "macro.hpp" // This processes and defines certain macros
+// clang-format on
+
 #include <cassert>
 #include <cmath>
 #include <complex>
@@ -9,6 +13,10 @@
 #include <map>
 #include <numeric>
 #include <vector>
+
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+#include <execution>
+#endif
 
 #if defined(LAMBDA_LANCZOS_USE_LAPACK)
 #include <cblas.h>
@@ -168,7 +176,13 @@ void initAsIdentity(std::vector<std::vector<T>>& a, size_t n) {
   a.resize(n);
   for (size_t i = 0; i < n; ++i) {
     a[i].resize(n);
+
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+    std::fill(LAMBDA_LANCZOS_STDPAR_POLICY, a[i].begin(), a[i].end(), T());
+#else
     std::fill(a[i].begin(), a[i].end(), T());
+#endif
+
     a[i][i] = 1.0;
   }
 }

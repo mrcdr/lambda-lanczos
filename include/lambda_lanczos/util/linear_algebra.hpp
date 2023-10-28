@@ -10,6 +10,10 @@
 #include <numeric>
 #include <vector>
 
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+#include <execution>
+#endif
+
 #include "common.hpp"
 
 namespace lambda_lanczos {
@@ -25,14 +29,25 @@ namespace util {
 template <typename T>
 inline T inner_prod(const std::vector<T>& v1, const std::vector<T>& v2) {
   assert(v1.size() == v2.size());
+
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+  return std::transform_reduce(
+      LAMBDA_LANCZOS_STDPAR_POLICY,
+      std::begin(v1),
+      std::end(v1),
+      std::begin(v2),
+      T(),
+      [](const T& u, const T& v) -> T { return u + v; },
+      [](const T& a, const T& b) -> T { return typed_conj(a) * b; });
+#else
   return std::inner_product(
       std::begin(v1),
       std::end(v1),
       std::begin(v2),
       T(),
-      [](const T& v, const T& u) -> T { return v + u; },
+      [](const T& u, const T& v) -> T { return u + v; },
       [](const T& a, const T& b) -> T { return typed_conj(a) * b; });
-  // T() means zero value of type T
+#endif
 }
 
 /**
@@ -49,9 +64,11 @@ inline real_t<T> norm(const std::vector<T>& vec) {
  */
 template <typename T1, typename T2>
 inline void scalar_mul(T1 a, std::vector<T2>& vec) {
-  for (auto& elem : vec) {
-    elem *= a;
-  }
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+  std::for_each(LAMBDA_LANCZOS_STDPAR_POLICY, vec.begin(), vec.end(), [&a](T2& elem) { elem *= a; });
+#else
+  std::for_each(vec.begin(), vec.end(), [&a](T2& elem) { elem *= a; });
+#endif
 }
 
 /**
@@ -65,26 +82,32 @@ inline void normalize(std::vector<T>& vec) {
 template <typename T>
 struct ManhattanNorm {
   static T invoke(const std::vector<T>& vec) {
-    T norm = T();  // Zero initialization
-
-    for (const auto& element : vec) {
-      norm += std::abs(element);
-    }
-
-    return norm;
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+    return std::transform_reduce(
+        LAMBDA_LANCZOS_STDPAR_POLICY, std::begin(vec), std::end(vec), T(), std::plus<T>(), std::abs);
+#else
+    return std::accumulate(
+        std::begin(vec), std::end(vec), T(), [](const T& acc, const T& elem) -> T { return acc + std::abs(elem); });
+#endif
   }
 };
 
 template <typename T>
 struct ManhattanNorm<std::complex<T>> {
   static T invoke(const std::vector<std::complex<T>>& vec) {
-    T norm = T();  // Zero initialization
-
-    for (const auto& element : vec) {
-      norm += std::abs(std::real(element)) + std::abs(std::imag(element));
-    }
-
-    return norm;
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+    return std::transform_reduce(
+        LAMBDA_LANCZOS_STDPAR_POLICY,
+        std::begin(vec),
+        std::end(vec),
+        T(),
+        std::plus<T>(),
+        [](const std::complex<T>& elem) -> T { return std::abs(std::real(elem)) + std::abs(std::imag(elem)); });
+#else
+    return std::accumulate(std::begin(vec), std::end(vec), T(), [](const T& acc, const std::complex<T>& elem) -> T {
+      return acc + std::abs(std::real(elem)) + std::abs(std::imag(elem));
+    });
+#endif
   }
 };
 
@@ -128,7 +151,13 @@ void initAsIdentity(std::vector<std::vector<T>>& a, size_t n) {
   a.resize(n);
   for (size_t i = 0; i < n; ++i) {
     a[i].resize(n);
+
+#ifdef LAMBDA_LANCZOS_STDPAR_POLICY
+    std::fill(LAMBDA_LANCZOS_STDPAR_POLICY, a[i].begin(), a[i].end(), T());
+#else
     std::fill(a[i].begin(), a[i].end(), T());
+#endif
+
     a[i][i] = 1.0;
   }
 }
