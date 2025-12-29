@@ -157,6 +157,7 @@ TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX) {
   for (size_t i = 0; i < n; ++i) {
     EXPECT_NEAR(correct_eigvec[i], eigvec[i], std::abs(correct_eigvalue * engine.eps * 10));
   }
+  EXPECT_EQ(engine.getIterationCounts().size(), 1);
 }
 
 TEST(DIAGONALIZE_TEST, SIMPLE_MATRIX_FLOAT) {

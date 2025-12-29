@@ -346,6 +346,11 @@ class LambdaLanczos {
       if (nothing_added) {
         break;
       }
+
+      if (this->num_eigs == 1) {
+        // If only one eigenpair is required, iteration can be stopped
+        break;
+      }
     }
 
     const auto& eigenpairs = ep_manager.getEigenpairs();
